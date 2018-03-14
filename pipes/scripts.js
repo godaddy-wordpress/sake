@@ -4,18 +4,7 @@ const path = require('path')
 module.exports = (config, plugins, options) => {
   const pipes = {}
 
-  let coffeeLintFile = options['coffeelint-file'] ? path.join(process.cwd(), options['coffeelint-file']) : null
-
-  pipes.coffeelint = lazypipe()
-    .pipe(plugins.coffeelint, coffeeLintFile)
-    .pipe(plugins.coffeelint.reporter)
-    .pipe(plugins.coffeelint.reporter, 'fail') // fail task when there are coffee errors
-
-  pipes.eslint = lazypipe()
-    .pipe(plugins.eslint, { configFile: options['eslint-configFile'] })
-    .pipe(plugins.eslint.format)
-    .pipe(plugins.eslint.failAfterError) // fail task on errors
-
+  // transpile, minify and write sourcemaps
   pipes.minify = lazypipe()
       // 1. Because CoffeeScript 2 will compile to ES6, we need to use babel to transpile it to ES2015,
       // note that this will also enable us to use ES6 in our plain JS.

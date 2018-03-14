@@ -64,7 +64,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   // creates a release for the plugin, attaching the build zip to it
   gulp.task('github:create_release', (done) => {
     let owner = options.owner || 'skyverge'
-    let repo = options.repor || config.plugin.slug
+    let repo = options.repo || config.plugin.slug
     let version = util.getPluginVersion()
     let zipPath = path.join(process.cwd(), config.paths.build, `${config.plugin.slug}.${version}.zip`)
     let tasks = []

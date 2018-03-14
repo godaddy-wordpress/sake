@@ -30,9 +30,11 @@ module.exports = (gulp, config, plugins) => {
     config.isWatching = true
 
     // kick off the watchers
+    // TODO: consider breaking the pipes apart, so that we can only lint and compile the
+    // files that were actually changed (ie not all coffee files when only a single one was changed)
+    gulp.watch(config.paths.assetPaths.javascriptSources, gulp.parallel('scripts:js'))
     gulp.watch(`${config.paths.assetPaths.js}/**/*.coffee`, gulp.parallel('scripts:coffee'))
     gulp.watch(`${config.paths.assetPaths.css}/**/*.scss`, gulp.parallel('styles'))
-    gulp.watch(config.paths.assetPaths.javascriptSources, gulp.parallel('scripts:js'))
     // watching images will result in an endless loop, because imagemin changes the original files - a possible
     // workaround would be to place all original images in a separate directory
     // gulp.watch(`${config.paths.assetPaths.images}/**.*{png,jpg,gif,svg}`, gulp.parallel('imagemin'))

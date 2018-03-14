@@ -87,3 +87,21 @@ require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
 })
 
 gulp.task('default', gulp.series('compile'))
+
+// show notification on task errors
+const notifier = require('node-notifier')
+const stripAnsi = require('strip-ansi')
+let loggedErrors = []
+
+gulp.on('error', (event) => {
+  if (loggedErrors.indexOf(event.error) === -1) {
+    notifier.notify({
+      title: `Error running task ${event.name}`,
+      message: stripAnsi(event.error.toString()),
+      sound: 'Frog'
+    })
+
+    // ensure the same error is only displayed once
+    loggedErrors.push(event.error)
+  }
+})
