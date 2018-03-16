@@ -3,5 +3,5 @@ module.exports = (gulp) => {
   // - cleans the build directory
   // - compiles the plugin assets
   // - copies plugin files to the build directory
-  return gulp.task('build', gulp.series('clean:build', 'compile', 'copy:build'))
+  return gulp.task('build', gulp.series('clean:build', 'shell:composer_install', 'compile', 'copy:build'))
 }

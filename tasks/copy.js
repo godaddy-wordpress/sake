@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
 
@@ -86,6 +89,31 @@ module.exports = (gulp, config, plugins, options) => {
 
       if (!util.isFrameworkedPaymentGateway()) {
         paths.push(`!${config.paths.src}/${config.paths.framework.base}/woocommerce/payment-gateway{,/**}`)
+      }
+    }
+
+    // skip copying composer dev packages
+    let composerFilePath = path.join(process.cwd(), 'composer.json')
+    if (fs.existsSync(composerFilePath)) {
+      let composerFile = require(composerFilePath)
+
+      if (composerFile['require-dev']) {
+        let vendorDir = composerFile.config && composerFile.config['vendor-dir'] ? composerFile.config['vendor-dir'] : 'vendor'
+
+        Object.keys(composerFile['require-dev']).forEach((package) => {
+          // skip the package directory
+          let packagePath = path.join( vendorDir, package )
+
+          // if there are no non-dev packages from the same vendor, skip the folder for the vendor itself as well
+          let vendor = package.split('/')[0]
+          let skipVendorDir = !composerFile.require || !Object.keys(composerFile.require).some((package) => {package.indexOf(vendor) > -1})
+
+          if (skipVendorDir) {
+            packagePath = path.join( vendorDir, vendor )
+          }
+
+          paths.push(`!${packagePath}{,/**}`)
+        })
       }
     }
 
