@@ -1,5 +1,5 @@
-const fs = require('fs')
 const path = require('path')
+const dottie = require('dottie')
 
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
@@ -50,32 +50,18 @@ module.exports = (gulp, config, plugins, options) => {
     ]
 
     if (config.framework) {
-      if (config.framework === 'v4') {
-        paths = paths.concat([
-          // skip common framework v4 files
-          `!${config.paths.src}/${config.paths.framework.base}/*`,
-          `!${config.paths.src}/${config.paths.framework.base}/grunt{,/**}`,
-          `${config.paths.src}/${config.paths.framework.base}/license.txt`,
-          `!${config.paths.src}/${config.paths.framework.base}/woocommerce/payment-gateway/templates{,/**}`
-        ])
-      }
+      // skip common framework files
+      paths = paths.concat([
+        `!${config.paths.src}/${config.paths.framework.base}/*`,
+        `!${config.paths.src}/${config.paths.framework.base}/grunt{,/**}`,
+        `${config.paths.src}/${config.paths.framework.base}/license.txt`,
+        `!${config.paths.src}/${config.paths.framework.base}/woocommerce/payment-gateway/templates{,/**}`
+      ])
 
-      // TODO: properly implement this
-      // if (config.framework === 'v5') {
-      //   // TODO: read vendor dir from composer.json
-      //   paths = paths.concat([
-      //     // remove common framework v5 files
-      //     // - we have to do a little dance here to make sure the woocommerce folder isn't deleted
-      //     `${config.paths.src}/*/vendor/composer/**`,
-      //     `${config.paths.build}/*/vendor/autoload.php`,
-      //     `${config.paths.build}/${config.paths.framework.base}/**`,
-      //     `!${config.paths.build}/${config.paths.framework.base}/woocommerce/**`,
-      //     `!${config.paths.build}/${config.paths.framework.base}/license.txt`,
-      //
-      //     // delete v5 sample loader file
-      //     `${config.paths.build}/${config.paths.framework.base}/woocommerce/woocommerce-framework-plugin-loader-sample.php`
-      //   ])
-      // }
+      if (config.framework === 'v5') {
+        // skip sample loader file
+        paths.push(`!${config.paths.src}/${config.paths.framework.base}/woocommerce/woocommerce-framework-plugin-loader-sample.php`)
+      }
 
       paths = paths.concat([
         // skip framework coffee files
@@ -93,27 +79,31 @@ module.exports = (gulp, config, plugins, options) => {
     }
 
     // skip copying composer dev packages
-    let composerFilePath = path.join(process.cwd(), 'composer.json')
-    if (fs.existsSync(composerFilePath)) {
-      let composerFile = require(composerFilePath)
+    if (config.composer) {
+      if (config.composer['require-dev']) {
+        let vendorPath = dottie.get(config.composer, 'config.vendor-dir') || 'vendor'
 
-      if (composerFile['require-dev']) {
-        let vendorDir = composerFile.config && composerFile.config['vendor-dir'] ? composerFile.config['vendor-dir'] : 'vendor'
+        Object.keys(config.composer['require-dev']).forEach((pkg) => {
+          // skip copying the dev package directory
+          let packagePath = path.join(vendorPath, pkg)
 
-        Object.keys(composerFile['require-dev']).forEach((pkg) => {
-          // skip the package directory
-          let packagePath = path.join(vendorDir, pkg)
-
-          // if there are no non-dev packages from the same vendor, skip the folder for the vendor itself as well
+          // if there are no other non-dev packages from the same vendor, skip the folder for the vendor itself as well
           let vendor = pkg.split('/')[0]
-          let skipVendorDir = !composerFile.require || !Object.keys(composerFile.require).some((pkg) => pkg.indexOf(vendor) > -1)
 
-          if (skipVendorDir) {
-            packagePath = path.join(vendorDir, vendor)
+          if (!(config.composer.require && Object.keys(config.composer.require).some((pkg) => pkg.indexOf(vendor) > -1))) {
+            packagePath = path.join(vendorPath, vendor)
           }
 
           paths.push(`!${packagePath}{,/**}`)
         })
+      }
+
+      // remove composer autoloader, unless required
+      if (!config.autoload && config.paths.vendor) {
+        paths = paths.concat([
+          `!${config.paths.src}/${config.paths.vendor}/composer{,/**}`,
+          `!${config.paths.src}/${config.paths.vendor}/autoload.php`
+        ])
       }
     }
 

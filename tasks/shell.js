@@ -154,7 +154,8 @@ module.exports = (gulp, config, plugins, options) => {
 
   gulp.task('shell:composer_install', (done) => {
     if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
-      exec('composer install --no-dev', done)
+      // unfortunately, adding --no-dev flag here will wipe out any existing dev packages :'(
+      exec('composer install', done)
     } else {
       log.info('No composer.json found, skipping composer install')
       done()
