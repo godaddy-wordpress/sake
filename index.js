@@ -12,7 +12,21 @@ const ForwardReference = require('undertaker-forward-reference')
 if (fs.existsSync('.env')) {
   let result = require('dotenv').config()
 
-  for (var k in result.parsed) {
+  log.warn('Loading ENV variables from .env file')
+
+  for (let k in result.parsed) {
+    process.env[k] = result.parsed[k]
+  }
+}
+
+// development .env file, overriding any global env variables, or repo/plugin specific variables
+let devEnv = path.join(__dirname, '.env')
+if (fs.existsSync(devEnv)) {
+  let result = require('dotenv').config({path: devEnv})
+
+  log.warn('LOADING DEVELOPMENT ENV VARIABLES FROM ' + devEnv)
+
+  for (let k in result.parsed) {
     process.env[k] = result.parsed[k]
   }
 }
@@ -24,8 +38,8 @@ gulp.registry(ForwardReference())
 let defaults = {
   // all the paths
   paths: {
+    src: '.',
     // this feels wrong, as the assets are actually based on src
-    src: 'src',
     assets: 'assets',
     css: 'assets/css',
     js: 'assets/js',
