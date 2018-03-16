@@ -53,6 +53,8 @@
     "minimist": "^1.2.0",
     "node-notifier": "^5.2.1",
     "node-wp-i18n": "^1.0.5",
+    "parse-git-config": "^2.0.0",
+    "parse-github-url": "^1.0.2",
     "semver": "^5.5.0",
     "strip-ansi": "^4.0.0",
     "through2": "^2.0.3",
