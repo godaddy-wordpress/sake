@@ -27,7 +27,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
     let labels = ['release']
 
-    if (config.deploys.github.internal.multiPluginRepo) {
+    if (config.multiPluginRepo) {
       labels.push(config.plugin.id.replace('woocommerce-', ''))
     }
 

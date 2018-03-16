@@ -31,7 +31,7 @@ let defaults = {
     js: 'assets/js',
     images: 'assets/img',
     fonts: 'assets/fonts',
-    build: 'build',
+    build: 'build'
   },
   // task-specific configuration
   tasks: {
@@ -52,9 +52,25 @@ let defaults = {
 // TODO: allow passing in config file path or config as string (for multi-plugin repos?)
 let localConfig = {}
 
-try {
-  localConfig = require(path.join(process.cwd(), 'sake.config.js'))
-} catch (e) {
+// support supplying a single / parent config file in multi-plugin repos
+let parentConfigPath = path.join(process.cwd(), '../sake.config.js')
+let found = false
+
+if (fs.existsSync(parentConfigPath)) {
+  log.warn('Found config file in parent folder')
+  localConfig = require(parentConfigPath)
+  found = true
+}
+
+// load local, plugin-specific config file
+let configFilePath = path.join(process.cwd(), 'sake.config.js')
+
+if (fs.existsSync(configFilePath)) {
+  localConfig = _.merge(localConfig, require(configFilePath))
+  found = true
+}
+
+if (!found) {
   log.warn('Could not find local config file, using default config values.')
 }
 
