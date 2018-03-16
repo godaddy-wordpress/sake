@@ -1,7 +1,7 @@
 module.exports = (gulp, config, plugins, options, pipes) => {
   // reload the framework version after updating the framework
   gulp.task('set_framework_version', (done) => {
-    config.plugin.frameworkVersion = require('../lib/util')(config, options).getFrameworkVersion()
+    config.plugin.frameworkVersion = require('../lib/utilities')(config, options).getFrameworkVersion()
     done()
   })
 

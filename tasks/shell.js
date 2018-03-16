@@ -16,18 +16,29 @@ module.exports = (gulp, config, plugins, options) => {
 
   // update framework subtree
   gulp.task('shell:update_framework', (done) => {
+    if (!config.framework) {
+      return done('Not a frameworked plugin, aborting')
+    }
+
     let frameworkPath = path.join(process.cwd(), config.paths.src, config.paths.framework.base)
     let command = ''
 
     if (fs.existsSync(frameworkPath)) {
-      let branch = options.branch || 'master'
+      let branch = options.branch || (config.framework === 'v4' ? 'legacy-v4' : 'master')
+      let prefix = path.join((config.multiPluginRepo ? config.plugin.id : '.'), config.paths.framework.base)
 
       command = [
         'git fetch wc-plugin-framework ' + branch,
         'git status',
-        // 'git subtree pull --prefix ' + 'lib/skyverge wc-plugin-framework ' + branch + ' --squash',
+        'git subtree pull --prefix ' + prefix + ' wc-plugin-framework ' + branch + ' --squash',
         'echo subtree up to date!'
-      ].join(' && ')
+      ]
+
+      if (config.multiPluginRepo) {
+        command.unshift('cd ../')
+      }
+
+      command = command.join(' && ')
     } else {
       command = 'echo no subtree to update'
     }
@@ -46,29 +57,10 @@ module.exports = (gulp, config, plugins, options) => {
         'git diff-index --quiet --cached HEAD || git commit -m "' + config.plugin.name + ': Update framework to v' + config.plugin.frameworkVersion + '"'
       ].join(' && ')
     } else {
+      // TODO: is this still necessary?
       command = [
         'git add -A',
-        'git diff-index --quiet --cached HEAD || git commit -m "' + config.pluginname + ': Update readme.txt"'
-      ]
-    }
-
-    exec(command, done)
-  })
-
-  // commit framework update
-  gulp.task('shell:update_framework_commit', (done) => {
-    let frameworkPath = path.join(process.cwd(), config.paths.src, config.paths.framework.base)
-    let command = ''
-
-    if (fs.existsSync(frameworkPath)) {
-      command = [
-        'git add -A',
-        'git diff-index --quiet --cached HEAD || git commit -m "' + config.plugin.name + ': Update framework to v' + config.plugin.frameworkVersion + '"'
-      ].join(' && ')
-    } else {
-      command = [
-        'git add -A',
-        'git diff-index --quiet --cached HEAD || git commit -m "' + config.pluginname + ': Update readme.txt"'
+        'git diff-index --quiet --cached HEAD || git commit -m "' + config.plugin.name + ': Update readme.txt"'
       ]
     }
 
