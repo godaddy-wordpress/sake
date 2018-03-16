@@ -160,12 +160,13 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       `!${config.paths.src}/*.json`,
       `!${config.paths.src}/*.xml`,
       `!${config.paths.src}/*.yml`
-    ], { base: './' })
+    ], { base: './', allowEmpty: true })
       // unlike gulp-replace, gulp-replace-task supports multiple replacements
       .pipe(plugins.replaceTask({ patterns: replacements, usePrefix: false }))
       .pipe(filter)
       .pipe(plugins.replace('XXXX.XX.XX', date))
       .pipe(plugins.replace(/[0-9]+\.nn\.nn/, date))
+      .pipe(plugins.replace(/[0-9]+-nn-nn/, date))
       .pipe(filter.restore)
       .pipe(gulp.dest('./'))
   })

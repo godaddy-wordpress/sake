@@ -22,7 +22,7 @@ module.exports = (gulp, config, plugins, options) => {
       `!${config.paths.src}/${config.paths.css}/**/*.scss`,
       `!${config.paths.src}/${config.paths.css}/**/*(!.min).css`,
 
-      // skip unit test files
+      // skip test files
       `!${config.paths.src}/**/tests{,/**}`,
       `!${config.paths.src}/**/.travis.yml`,
       `!${config.paths.src}/**/phpunit.xml`,

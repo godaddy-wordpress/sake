@@ -154,7 +154,7 @@ module.exports = (gulp, config, plugins, options) => {
 
   gulp.task('shell:composer_install', (done) => {
     if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
-      exec('composer install', done)
+      exec('composer install --no-dev', done)
     } else {
       log.info('No composer.json found, skipping composer install')
       done()
