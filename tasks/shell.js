@@ -22,9 +22,10 @@ module.exports = (gulp, config, plugins, options) => {
       throw err
     }
 
+    let command = ''
+
     if (config.framework === 'v4') {
       let frameworkPath = path.join(process.cwd(), config.paths.src, config.paths.framework.base)
-      let command = ''
 
       if (fs.existsSync(frameworkPath)) {
         let branch = options.branch || 'legacy-v4'

@@ -18,31 +18,31 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       'shell:update_framework_commit'
     ]
 
-    if (config.framework === 'v4') {
+    if (config.framework === 'v4' && !dottie.get(config.composer, 'require.skyverge/wc-plugin-framework')) {
       tasks.unshift('shell:update_framework')
     }
 
     if (config.framework === 'v5') {
       tasks.unshift('bump:framework_version')
+    }
 
-      // update composer
-      if (!options['skip-composer-update']) {
-        // ensure FW version to update to is specified
-        if (!options.framework_version) {
-          let err = new Error('Framework version not specified')
-          err.showStack = false
-          throw err
-        }
-
-        dottie.set(config.composer, 'require.skyverge/wc-plugin-framework', options.framework_version)
-
-        // update composer.json
-        fs.writeFileSync(path.join(process.cwd(), 'composer.json'), JSON.stringify(config.composer, null, '  '))
-
-        tasks.unshift('shell:composer_update')
-      } else {
-        options.framework_version = config.plugin.frameworkVersion
+    // update composer
+    if (!options['skip-composer-update']) {
+      // ensure FW version to update to is specified
+      if (!options.framework_version) {
+        let err = new Error('Framework version not specified')
+        err.showStack = false
+        throw err
       }
+
+      dottie.set(config.composer, 'require.skyverge/wc-plugin-framework', options.framework_version)
+
+      // update composer.json
+      fs.writeFileSync(path.join(process.cwd(), 'composer.json'), JSON.stringify(config.composer, null, '  '))
+
+      tasks.unshift('shell:composer_update')
+    } else {
+      options.framework_version = config.plugin.frameworkVersion
     }
 
     gulp.series(tasks)(done)

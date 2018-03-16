@@ -29,8 +29,8 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       .pipe(plugins.if(Boolean(options.tested_up_to_wp_version), pipes.replace.tested_up_to_wp_version()))
       .pipe(plugins.if(Boolean(options.minimum_wc_version), pipes.replace.minimum_wc_version()))
       .pipe(plugins.if(Boolean(options.tested_up_to_wc_version), pipes.replace.tested_up_to_wc_version()))
-      .pipe(plugins.if(Boolean(options.framework_version && config.framework_version === 'v4'), pipes.replace.framework_version_v4()))
-      .pipe(plugins.if(Boolean(options.backwards_compatible && config.framework_version === 'v4'), pipes.replace.backwards_compatible()))
+      .pipe(plugins.if(Boolean(options.framework_version && config.framework === 'v4'), pipes.replace.framework_version_v4()))
+      .pipe(plugins.if(Boolean(options.backwards_compatible && config.framework === 'v4'), pipes.replace.backwards_compatible()))
       .pipe(gulp.dest(config.paths.src))
   })
 
