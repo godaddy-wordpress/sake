@@ -100,16 +100,16 @@ module.exports = (gulp, config, plugins, options) => {
       if (composerFile['require-dev']) {
         let vendorDir = composerFile.config && composerFile.config['vendor-dir'] ? composerFile.config['vendor-dir'] : 'vendor'
 
-        Object.keys(composerFile['require-dev']).forEach((package) => {
+        Object.keys(composerFile['require-dev']).forEach((pkg) => {
           // skip the package directory
-          let packagePath = path.join( vendorDir, package )
+          let packagePath = path.join(vendorDir, pkg)
 
           // if there are no non-dev packages from the same vendor, skip the folder for the vendor itself as well
-          let vendor = package.split('/')[0]
-          let skipVendorDir = !composerFile.require || !Object.keys(composerFile.require).some((package) => {package.indexOf(vendor) > -1})
+          let vendor = pkg.split('/')[0]
+          let skipVendorDir = !composerFile.require || !Object.keys(composerFile.require).some((pkg) => pkg.indexOf(vendor) > -1)
 
           if (skipVendorDir) {
-            packagePath = path.join( vendorDir, vendor )
+            packagePath = path.join(vendorDir, vendor)
           }
 
           paths.push(`!${packagePath}{,/**}`)

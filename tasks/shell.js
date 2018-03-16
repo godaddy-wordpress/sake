@@ -78,7 +78,7 @@ module.exports = (gulp, config, plugins, options) => {
   // ensure the working copy (git tree) has no uncommited changes
   gulp.task('shell:git_ensure_clean_working_copy', (done) => {
     let command = [
-      'git diff-index --quiet HEAD --',
+      'git diff-index --quiet HEAD --'
     ].join(' && ')
 
     spawn(command, { stdio: 'inherit', shell: true }).on('exit', (code) => {
@@ -96,7 +96,7 @@ module.exports = (gulp, config, plugins, options) => {
   gulp.task('shell:git_push_update', (done) => {
     let command = [
       'git add -A',
-      'git commit -m "' + config.plugin.name + ': ' + util.getVersionBump() + ' Versioning"' + (options.release_issue_to_close ? ' -m "Closes #' + options.release_issue_to_close + '"' : '' ),
+      'git commit -m "' + config.plugin.name + ': ' + util.getVersionBump() + ' Versioning"' + (options.release_issue_to_close ? ' -m "Closes #' + options.release_issue_to_close + '"' : ''),
       'git push',
       'echo git up to date!'
     ].join(' && ')
