@@ -17,30 +17,34 @@ module.exports = (gulp, config, plugins, options) => {
   // update framework subtree
   gulp.task('shell:update_framework', (done) => {
     if (!config.framework) {
-      return done('Not a frameworked plugin, aborting')
+      let err = new Error('Not a frameworked plugin, aborting')
+      err.showStack = false
+      throw err
     }
 
-    let frameworkPath = path.join(process.cwd(), config.paths.src, config.paths.framework.base)
-    let command = ''
+    if (config.framework === 'v4') {
+      let frameworkPath = path.join(process.cwd(), config.paths.src, config.paths.framework.base)
+      let command = ''
 
-    if (fs.existsSync(frameworkPath)) {
-      let branch = options.branch || (config.framework === 'v4' ? 'legacy-v4' : 'master')
-      let prefix = path.join((config.multiPluginRepo ? config.plugin.id : '.'), config.paths.framework.base)
+      if (fs.existsSync(frameworkPath)) {
+        let branch = options.branch || 'legacy-v4'
+        let prefix = path.join((config.multiPluginRepo ? config.plugin.id : '.'), config.paths.framework.base)
 
-      command = [
-        'git fetch wc-plugin-framework ' + branch,
-        'git status',
-        'git subtree pull --prefix ' + prefix + ' wc-plugin-framework ' + branch + ' --squash',
-        'echo subtree up to date!'
-      ]
+        command = [
+          'git fetch wc-plugin-framework ' + branch,
+          'git status',
+          'git subtree pull --prefix ' + prefix + ' wc-plugin-framework ' + branch + ' --squash',
+          'echo subtree up to date!'
+        ]
 
-      if (config.multiPluginRepo) {
-        command.unshift('cd ../')
+        if (config.multiPluginRepo) {
+          command.unshift('cd ../')
+        }
+
+        command = command.join(' && ')
+      } else {
+        command = 'echo no subtree to update'
       }
-
-      command = command.join(' && ')
-    } else {
-      command = 'echo no subtree to update'
     }
 
     exec(command, done)
@@ -150,6 +154,16 @@ module.exports = (gulp, config, plugins, options) => {
       exec('composer install', done)
     } else {
       log.info('No composer.json found, skipping composer install')
+      done()
+    }
+  })
+
+  gulp.task('shell:composer_update', (done) => {
+    if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
+      // unfortunately, adding --no-dev flag here will wipe out any existing dev packages :'(
+      exec('composer update', done)
+    } else {
+      log.info('No composer.json found, skipping composer update')
       done()
     }
   })

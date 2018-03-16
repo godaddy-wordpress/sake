@@ -27,9 +27,13 @@ module.exports = (config, plugins, options) => {
   pipes.tested_up_to_wc_version = lazypipe()
     .pipe(plugins.replace, /WC tested up to: .*\n/, 'WC tested up to: ' + options.tested_up_to_wc_version + '\n')
 
-  // TODO: add support for FW v5
   // replace FW version
   pipes.framework_version = lazypipe()
+    .pipe(plugins.replace, /SkyVerge\\WooCommerce\\PluginFramework\\v[0-9]+_[0-9]+_[0-9]+/g, (match) => 'SkyVerge\\WooCommerce\\PluginFramework\\v' + options.framework_version.replace(/\./g, '_'))
+    .pipe(plugins.replace, /SkyVerge\\\\WooCommerce\\\\PluginFramework\\\\v[0-9]+_[0-9]+_[0-9]+/g, (match) => 'SkyVerge\\\\WooCommerce\\\\PluginFramework\\\\v' + options.framework_version.replace(/\./g, '_'))
+
+  // replace FW version v4
+  pipes.framework_version_v4 = lazypipe()
     .pipe(plugins.replace, /SV_WC_Framework_Bootstrap::instance\(\)->register_plugin\( '([^']*)'/, () => "SV_WC_Framework_Bootstrap::instance()->register_plugin( '" + options.framework_version + "'")
 
   // replace FW backwards comaptibility

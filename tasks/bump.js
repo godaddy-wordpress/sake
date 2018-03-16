@@ -29,8 +29,15 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       .pipe(plugins.if(Boolean(options.tested_up_to_wp_version), pipes.replace.tested_up_to_wp_version()))
       .pipe(plugins.if(Boolean(options.minimum_wc_version), pipes.replace.minimum_wc_version()))
       .pipe(plugins.if(Boolean(options.tested_up_to_wc_version), pipes.replace.tested_up_to_wc_version()))
+      .pipe(plugins.if(Boolean(options.framework_version && config.framework_version === 'v4'), pipes.replace.framework_version_v4()))
+      .pipe(plugins.if(Boolean(options.backwards_compatible && config.framework_version === 'v4'), pipes.replace.backwards_compatible()))
+      .pipe(gulp.dest(config.paths.src))
+  })
+
+  // bumps the v5 framework version in plugin files
+  gulp.task('bump:framework_version', () => {
+    return gulp.src([`${config.paths.src}/**/*.php`, `!${config.paths.src}/${config.paths.framework.base}`])
       .pipe(plugins.if(Boolean(options.framework_version), pipes.replace.framework_version()))
-      .pipe(plugins.if(Boolean(options.backwards_compatible), pipes.replace.backwards_compatible()))
       .pipe(gulp.dest(config.paths.src))
   })
 }
