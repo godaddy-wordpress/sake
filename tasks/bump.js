@@ -9,8 +9,19 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
   // bumps the minimum requirements for the plugin
   gulp.task('bump:minreqs', () => {
+    // helper to determine if a number is an integer
+    let isInt = (n) => {
+      return n % 1 === 0
+    }
+
+    // semver-ify versions passed in as integers
+    ['minimum_wp_version', 'tested_up_to_wp_version', 'minimum_wc_version', 'tested_up_to_wc_version', 'framework_version', 'backwards_compatible'].forEach((option) => {
+      if (options[option] && isInt(options[option])) {
+        options[option] = parseFloat(options[option]).toFixed(1)
+      }
+    })
+
     return gulp.src([`${config.paths.src}/${config.plugin.mainFile}`, `${config.paths.src}/readme.txt`])
-      .pipe(plugins.debug())
       // note the need to cast the version optiosn to boolean, as passing a string version,
       // such as '4.4.0' will not evaluate to true in gulp-if
       .pipe(plugins.if(Boolean(options.minimum_wp_version), pipes.replace.minimum_wp_version()))

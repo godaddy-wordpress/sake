@@ -1,6 +1,21 @@
-module.exports = (gulp, config, plugins, options, pipes) => {
+module.exports = (gulp, config, plugins, options) => {
+  // main task for (optionally) linting and compiling styles
+  gulp.task('styles', (done) => {
+    let tasks = ['styles:lint', 'styles:compile']
+
+    // don't lint styles if they have already been linted, unless we're watching
+    if (!config.isWatching && gulp.lastRun('styles:lint')) {
+      tasks.shift()
+    }
+
+    gulp.series(tasks)(done)
+  })
+
   // main task for compiling styles
-  gulp.task('styles', gulp.series('styles:lint_scss', 'styles:compile_scss'))
+  gulp.task('styles:compile', gulp.parallel('styles:compile_scss'))
+
+  // main task for linting styles
+  gulp.task('styles:lint', gulp.parallel('styles:lint_scss'))
 
   // lint SCSS
   gulp.task('styles:lint_scss', (done) => {
@@ -16,7 +31,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   gulp.task('styles:compile_scss', () => {
     let cssPlugins = [require('autoprefixer')()]
 
-    if (config.minify) {
+    if (options.minify) {
       cssPlugins.push(require('cssnano')())
     }
 
@@ -26,7 +41,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       .pipe(plugins.postcss(cssPlugins))
       .pipe(plugins.rename({ suffix: '.min' }))
       .pipe(plugins.sourcemaps.write('.', { mapFile: (mapFilePath) => mapFilePath.replace('.css.map', '.map') })) // source map files are named *.map instead of *.js.map
-      .pipe(gulp.dest(`./${config.paths.src}/${config.paths.css}`))
+      .pipe(gulp.dest(`${config.paths.src}/${config.paths.css}`))
       .pipe(plugins.if(() => config.isWatching && config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
   })
 }

@@ -1,20 +1,39 @@
 const fs = require('fs')
-const log = require('fancy-log')
 
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
 
+  // validate env variables before deploying a prerelease
+  function validateEnvVariables () {
+    let errors = []
+
+    if (!process.env.DROPBOX_PATH) {
+      errors.push('DROPBOX_PATH not set')
+    }
+
+    let dropboxPath = util.resolvePath(process.env.DROPBOX_PATH)
+
+    if (!fs.existsSync(dropboxPath)) {
+      errors.push(`DROPBOX_PATH is invalid - the path '${dropboxPath}' does not exist`)
+    }
+
+    if (errors.length) {
+      let err = new Error('Environment variables missing or invalid: \n * ' + errors.join('\n * '))
+      err.showStack = false
+      throw err
+    }
+  }
+
   // bumps the version in the main plugin file to match changelog.txt
   gulp.task('prerelease', (done) => {
-    // check for required environment vaiables and that DROPBOX_PATH actually exists
-    if (!process.env.DROPBOX_PATH && !fs.existsSync(util.resolvePath(process.env.DROPBOX_PATH))) {
-      throw new Error('Prerelease failed :( Please check your environment vaiables')
-    }
+    validateEnvVariables()
 
     if (!util.isDeployable()) {
-      log.warn('Plugin cannot be deployed')
+      let err = new Error('Plugin is not deployable: \n * ' + util.getChangelogErrors().join('\n * '))
+      err.showStack = false
+      throw err
     }
 
-    return gulp.series('bump', 'zip', 'clean:prerelease', 'copy:prerelease')(done)
+    gulp.series('bump', 'zip', 'clean:prerelease', 'copy:prerelease', 'clean:build')(done)
   })
 }

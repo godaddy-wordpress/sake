@@ -2,18 +2,27 @@
 
 const gulp = require('gulp')
 const path = require('path')
+const fs = require('fs')
 const minimist = require('minimist')
 const log = require('fancy-log')
 const _ = require('lodash')
 const ForwardReference = require('undertaker-forward-reference')
+
+// local .env file, overriding any global env variables
+if (fs.existsSync('.env')) {
+  let result = require('dotenv').config()
+
+  for (var k in result.parsed) {
+    process.env[k] = result.parsed[k]
+  }
+}
 
 // enable forward-referencing tasks, see https://github.com/gulpjs/gulp/issues/1028
 gulp.registry(ForwardReference())
 
 // define default config
 let defaults = {
-  // whether to minify JS and CSS or not
-  minify: false, // TODO: set based on env variable or task (deploy)
+  // all the paths
   paths: {
     // this feels wrong, as the assets are actually based on src
     src: 'src',
@@ -22,8 +31,9 @@ let defaults = {
     js: 'assets/js',
     images: 'assets/img',
     fonts: 'assets/fonts',
-    build: 'build'
+    build: 'build',
   },
+  // task-specific configuration
   tasks: {
     makepot: {
       reportBugsTo: ''
@@ -32,6 +42,8 @@ let defaults = {
       useBrowserSync: false
     }
   },
+  // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc'
+  deployType: 'wc',
   // which framework version this plugin uses - valid values: 'v5', 'v4', or pass boolean `false` to indicate a non-frameworked plugin
   framework: 'v5'
 }
@@ -47,13 +59,18 @@ try {
 }
 
 let config = _.merge(defaults, localConfig)
-let options = minimist(process.argv.slice(2), {})
+
+// parse CLI options
+let options = minimist(process.argv.slice(2), {
+  boolean: ['minify'],
+  default: {
+    minify: false
+  }
+})
 
 const util = require('./lib/utilities')(config, options)
 
-util.parseOptions()
-util.buildPluginConfig()
-util.loadConfig()
+util.parseConfig()
 util.buildDeployOptions()
 
 let plugins = require('gulp-load-plugins')()
@@ -85,6 +102,8 @@ const pipes = util.loadPipes(plugins) // load reusable pipes
 require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
   require(path.join(__dirname, 'tasks', file))(gulp, config, plugins, options, pipes)
 })
+
+console.log(config)
 
 gulp.task('default', gulp.series('compile'))
 

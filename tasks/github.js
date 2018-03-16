@@ -36,7 +36,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
         name: 'Yes -- create a docs issue'
       }, {
         value: 0,
-        name: 'No -- don\'t create a docs issue!'
+        name: "No -- don't create a docs issue!"
       }]
     } ]).then(function (answers) {
       if (answers.create_docs_issue) {
@@ -44,9 +44,9 @@ module.exports = (gulp, config, plugins, options, pipes) => {
           owner: owner,
           repo: repo,
           title: util.getPluginName() + ': Updated to ' + util.getPluginVersion(),
-          body: util.getPluginChanges() + (options.release_issue_to_close ? '\r\n\r\nSee skyverge/' + config.plugin.slug + '#' + options.release_issue_to_close : ''),
+          body: util.getPluginChanges() + (options.release_issue_to_close ? '\r\n\r\nSee skyverge/' + config.plugin.id + '#' + options.release_issue_to_close : ''),
           assignee: assignee,
-          labels: [ config.plugin.slug.replace('woocommerce-', ''), 'docs', 'sales' ]
+          labels: [ config.plugin.id.replace('woocommerce-', ''), 'docs', 'sales' ]
         }, function (err, result) {
           if (!err) {
             log(result)
@@ -64,14 +64,15 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   // creates a release for the plugin, attaching the build zip to it
   gulp.task('github:create_release', (done) => {
     let owner = options.owner || 'skyverge'
-    let repo = options.repo || config.plugin.slug
+    let repo = options.repo || config.plugin.id
     let version = util.getPluginVersion()
-    let zipPath = path.join(process.cwd(), config.paths.build, `${config.plugin.slug}.${version}.zip`)
+    let zipName = `${config.plugin.id}.${version}.zip`
+    let zipPath = path.join(process.cwd(), config.paths.build, zipName)
     let tasks = []
 
     // prepare a zip if it doesn't already exist
     if (!fs.existsSync(zipPath)) {
-      tasks.push('zip')
+      tasks.push(options.deploy ? 'compress' : 'zip')
     }
 
     let github = new GitHub({
@@ -81,9 +82,12 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
     github.authenticate({
       type: 'basic',
+      // TODO: consider moving these to config instead
       username: process.env.GITHUB_USERNAME,
       password: process.env.GITHUB_API_KEY
     })
+
+    log(`Creating GH release ${version} for ${owner}/${repo}`)
 
     tasks.push(function (cb) {
       github.repos.createRelease({
@@ -94,19 +98,23 @@ module.exports = (gulp, config, plugins, options, pipes) => {
         body: util.getPluginChanges()
       }, function (err, result) {
         if (err) {
-          cb(err)
+          cb(new Error('Creating GH release failed: ' + err.toString()))
         } else {
+          log('GH release created')
+
           github.repos.uploadAsset({
-            owner: owner,
-            repo: repo,
-            id: '' + result.id,
-            name: config.plugin.slug + '.' + version + '.zip',
-            filePath: process.cwd() + '/build/' + config.plugin.slug + '.' + version + '.zip'
+            url: result.data.upload_url,
+            name: zipName,
+            file: fs.readFileSync(zipPath),
+            contentType: 'application/zip',
+            contentLength: fs.statSync(zipPath).size
           }, function (err) {
-            if (!err) {
-              log('Plugin zip uploaded')
+            if (err) {
+              return cb(new Error('Uploading release ZIP failed: ' + err.toString()))
             }
-            cb(err)
+
+            log('Plugin zip uploaded')
+            cb()
           })
         }
       })
@@ -168,7 +176,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   // create a milestone for each date passed in
   const createMilestones = (dates, done) => {
     let owner = options.owner || 'skyverge'
-    let repo = options.repo || config.plugin.slug
+    let repo = options.repo || config.plugin.id
 
     let github = new GitHub({
       protocol: 'https',
