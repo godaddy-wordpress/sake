@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "skybuilder": "bin/sake.js"
+    "sake": "bin/sake.js"
   },
   "dependencies": {
     "@octokit/rest": "^15.1.9",
