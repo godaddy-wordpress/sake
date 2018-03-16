@@ -103,8 +103,6 @@ require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
   require(path.join(__dirname, 'tasks', file))(gulp, config, plugins, options, pipes)
 })
 
-console.log(config)
-
 gulp.task('default', gulp.series('compile'))
 
 // show notification on task errors

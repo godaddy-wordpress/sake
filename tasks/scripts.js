@@ -48,8 +48,6 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   // stream/task, but unfortunately it looks like this is not possible, ast least not when reporting the
   // lint errors - it results in no more files being passed down the stream, even if there were no lint errors. {IT 2018-03-14}
 
-  console.log(config.paths.assetPaths.js)
-
   // internal task to compile, transpile and minify coffee files
   gulp.task('scripts:compile_coffee', () => {
     return gulp.src(`${config.paths.assetPaths.js}/**/*.coffee`)

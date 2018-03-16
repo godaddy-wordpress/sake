@@ -78,6 +78,8 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       'clean:prerelease',
       // build the plugin - compiles and copies to build dir
       'build',
+      // grab issue to close with commit
+      'github:get_rissue',
       // git commit & push
       'shell:git_push_update',
       // deploy to 3rd party repo
@@ -211,7 +213,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     } else if (config.deployType === 'wp') {
       tasks.push('deploy_to_wp_repo')
     } else {
-      console.log('No deploy type set, skipping deploy to remote repo')
+      log.warn('No deploy type set, skipping deploy to remote repo')
     }
 
     gulp.series(tasks)(done)
@@ -274,7 +276,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   /** WP.org deploy related tasks ****************************************/
 
   gulp.task('deploy_to_wp_repo', (done) => {
-    console.log('__NOT IMPLEMENTED__')
+    log.warn('__NOT IMPLEMENTED__')
     done()
   })
 }

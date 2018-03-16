@@ -10,6 +10,71 @@ const log = require('fancy-log')
 module.exports = (gulp, config, plugins, options, pipes) => {
   const util = require('../lib/utilities')(config, options)
 
+  gulp.task('github:get_rissue', (done) => {
+    let owner = config.deploys.github.internal.owner
+    let repo = config.deploys.github.internal.repo
+
+    let github = new GitHub({
+      protocol: 'https',
+      debug: false
+    })
+
+    github.authenticate({
+      type: 'basic',
+      username: process.env.GITHUB_USERNAME,
+      password: process.env.GITHUB_API_KEY
+    })
+
+    let labels = ['release']
+
+    if (config.deploys.github.internal.multiPluginRepo) {
+      labels.push(config.plugin.id.replace('woocommerce-', ''))
+    }
+
+    github.issues.getForRepo({
+      owner: owner,
+      repo: repo,
+      state: 'open',
+      labels: labels.join(',')
+    }, function (err, result) {
+      if (err) {
+        log.error('Could not get release issue: ' + err.toString())
+      } else {
+        if (!result.data.length) {
+          done()
+        } else {
+          inquirer.prompt([ {
+            type: 'list',
+            name: 'issues_to_close',
+            message: 'Release issues exist for ' + util.getPluginName() + '. Select an issue this release should close.',
+            choices: function () {
+              let choices = result.data.map((result) => {
+                return {
+                  value: result.number,
+                  name: 'Close issue #' + result.number + ': ' + result.html_url
+                }
+              })
+
+              choices.push({
+                value: 'none',
+                name: 'None'.red
+              })
+
+              return choices
+            }
+          } ]).then(function (answers) {
+            if (answers.issues_to_close === 'none') {
+              log.warn('No issues will be closed for release of ' + util.getPluginName())
+            } else {
+              options.release_issue_to_close = answers.issues_to_close
+            }
+            done()
+          })
+        }
+      }
+    })
+  })
+
   // creates a docs issue for the plugin
   gulp.task('github:docs_issue', (done) => {
     let owner = 'skyverge'

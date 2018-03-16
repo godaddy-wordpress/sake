@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const log = require('fancy-log')
 const { spawn } = require('child_process')
 
 // TODO: add support for FW v5
@@ -9,7 +10,7 @@ module.exports = (gulp, config, plugins, options) => {
 
   // run a shell command, preserving output and failing the task on errors
   const exec = (command, done) => {
-    console.log(command)
+    log.info(command)
     spawn(command, { stdio: 'inherit', shell: true }).on('exit', (code) => done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null))
   }
 
