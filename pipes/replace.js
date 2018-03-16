@@ -3,10 +3,15 @@ const lazypipe = require('lazypipe')
 module.exports = (config, plugins, options) => {
   const pipes = {}
 
+  // replace minimum PHP version
+  pipes.minimum_php_version = lazypipe()
+    .pipe(plugins.replace, /MINIMUM_PHP_VERSION = .*\n/, `MINIMUM_PHP_VERSION = '${options.minimum_php_version}';\n`)
+
   // replace minimum WP version
   pipes.minimum_wp_version = lazypipe()
     .pipe(plugins.replace, /('minimum_wp_version'[\s]*=>[\s]*)'([^']*)'/, "$1'" + options.minimum_wp_version + "'")
     .pipe(plugins.replace, /Requires at least: .*\n/, 'Requires at least: ' + options.minimum_wp_version + '\n')
+    .pipe(plugins.replace, /MINIMUM_WP_VERSION = .*\n/, `MINIMUM_WP_VERSION = '${options.minimum_wp_version}';\n`)
 
   // replace tested up to WP version
   pipes.tested_up_to_wp_version = lazypipe()
@@ -16,6 +21,7 @@ module.exports = (config, plugins, options) => {
   pipes.minimum_wc_version = lazypipe()
     .pipe(plugins.replace, /('minimum_wc_version'[\s]*=>[\s]*)'([^']*)'/, "$1'" + options.minimum_wc_version + "'")
     .pipe(plugins.replace, /WC requires at least: .*\n/, 'WC requires at least: ' + options.minimum_wc_version + '\n')
+    .pipe(plugins.replace, /MINIMUM_WC_VERSION = .*\n/, `MINIMUM_WC_VERSION = '${options.minimum_wc_version}';\n`)
 
   // replace tested up to WC version
   pipes.tested_up_to_wc_version = lazypipe()

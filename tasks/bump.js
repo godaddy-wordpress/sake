@@ -24,6 +24,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     return gulp.src([`${config.paths.src}/${config.plugin.mainFile}`, `${config.paths.src}/readme.txt`])
       // note the need to cast the version optiosn to boolean, as passing a string version,
       // such as '4.4.0' will not evaluate to true in gulp-if
+      .pipe(plugins.if(Boolean(options.minimum_php_version), pipes.replace.minimum_php_version()))
       .pipe(plugins.if(Boolean(options.minimum_wp_version), pipes.replace.minimum_wp_version()))
       .pipe(plugins.if(Boolean(options.tested_up_to_wp_version), pipes.replace.tested_up_to_wp_version()))
       .pipe(plugins.if(Boolean(options.minimum_wc_version), pipes.replace.minimum_wc_version()))
