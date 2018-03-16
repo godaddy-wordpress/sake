@@ -117,7 +117,7 @@ module.exports = (gulp, config, plugins, options) => {
       }
     }
 
-    return gulp.src(paths, { base: './' })
+    return gulp.src(paths, { base: config.paths.src })
       .pipe(filter)
       .pipe(plugins.replace(/^.*sourceMappingURL=.*$/mg, '')) // remove source mapping references - TODO: consider skipping sourcemaps in compilers instead when running build/deploy tasks
       .pipe(plugins.replace('\n', '')) // remove an extra line added by libsass/node-sass
