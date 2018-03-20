@@ -132,4 +132,19 @@ module.exports = (gulp, config, plugins, options) => {
   gulp.task('copy:wc_repo', () => {
     return gulp.src(`${config.paths.build}/**/*`).pipe(gulp.dest(util.getWCRepoPath()))
   })
+
+  // copy files from build to WP trunk folder
+  gulp.task('copy:wp_trunk', () => {
+    return gulp.src(`${config.paths.build}/**/*`).pipe(gulp.dest(path.join(util.getWPRepoPath(), 'trunk')))
+  })
+
+  // copy files from build to WP assets folder
+  gulp.task('copy:wp_assets', () => {
+    return gulp.src(`${config.paths.wpAssets}/**/*`).pipe(gulp.dest(path.join(util.getWPRepoPath(), 'assets')))
+  })
+
+  // copy files from WP trunk to tag
+  gulp.task('copy:wp_tag', () => {
+    return gulp.src(path.join(util.getWPRepoPath(), 'trunk/**/*')).pipe(gulp.dest(path.join(util.getWPRepoPath(), 'tags', util.getPluginVersion())))
+  })
 }

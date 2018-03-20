@@ -1,6 +1,7 @@
 const fs = require('fs')
 const log = require('fancy-log')
 const dateFormat = require('dateformat')
+const _ = require('lodash')
 
 module.exports = (gulp, config, plugins, options, pipes) => {
   const util = require('../lib/utilities')(config, options)
@@ -22,7 +23,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       errors.push('GITHUB_API_KEY not set')
     }
 
-    if (config.deployType === 'wc') {
+    if (config.deploy.type === 'wc') {
       if (!process.env.WT_REPOS_PATH) {
         errors.push('WT_REPOS_PATH not set')
       }
@@ -66,7 +67,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       // prompt for the version to deploy as
       'prompt:deploy',
       function (cb) {
-        if (config.deploys.version === 'skip') {
+        if (config.deploy.version === 'skip') {
           log.warn('Deploy skipped!')
           return done()
         }
@@ -106,7 +107,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       'styles:lint'
     ]
 
-    if (config.deployType === 'wc') {
+    if (config.deploy.type === 'wc') {
       tasks.unshift('search:wt_update_key')
     }
 
@@ -132,7 +133,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
   // internal task for replacing version and date when deploying
   gulp.task('replace:version', () => {
-    if (!config.deploys || !config.deploys.version) {
+    if (!config.deploy || !config.deploy.version) {
       throw new Error('No version specified')
     }
 
@@ -182,18 +183,18 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
     let tasks = [
       function (cb) {
-        options.owner = config.deploys.github.internal.owner
-        options.repo = config.deploys.github.internal.repo
+        options.owner = config.deploy.github.dev.owner
+        options.repo = config.deploy.github.dev.repo
         cb()
       },
       'github:create_release'
     ]
 
-    if (config.deployType === 'wc' && config.deploys.github.external) {
+    if (config.deploy.type === 'wc' && config.deploy.github.production) {
       tasks = tasks.concat([
         function (cb) {
-          options.owner = config.deploys.github.external.owner
-          options.repo = config.deploys.github.external.repo
+          options.owner = config.deploy.github.production.owner
+          options.repo = config.deploy.github.production.repo
           cb()
         },
         'github:create_release'
@@ -209,9 +210,9 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
     // TODO: add a sanity check here to verify that the build dir is not empty
 
-    if (config.deployType === 'wc') {
+    if (config.deploy.type === 'wc') {
       tasks.push('deploy_to_wc_repo')
-    } else if (config.deployType === 'wp') {
+    } else if (config.deploy.type === 'wp') {
       tasks.push('deploy_to_wp_repo')
     } else {
       log.warn('No deploy type set, skipping deploy to remote repo')
@@ -277,7 +278,44 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   /** WP.org deploy related tasks ****************************************/
 
   gulp.task('deploy_to_wp_repo', (done) => {
-    log.warn('__NOT IMPLEMENTED__')
-    done()
+    let tasks = ['copy_to_wp_repo', 'shell:svn_commit_trunk']
+
+    options = _.merge({
+      deployTag: true,
+      deployAssets: true
+    }, options)
+
+    if (options.deployTag) {
+      tasks.push('copy:wp_tag')
+      tasks.push('shell:svn_commit_tag')
+    }
+
+    if (options.deployAssets) {
+      tasks.push('clean:wp_assets')
+      tasks.push('copy:wp_assets')
+      tasks.push('shell:svn_commit_assets')
+    }
+
+    gulp.series(tasks)(done)
+  })
+
+  gulp.task('copy_to_wp_repo', (done) => {
+    let tasks = [
+      // copy files to build directory
+      'build',
+      // ensure WC repo is up to date
+      'shell:svn_checkout',
+      // clean the WC plugin dir
+      'clean:wp_trunk',
+      // copy files from build to WP repo directory
+      'copy:wp_trunk'
+    ]
+
+    // no need to build when part of deploy process
+    if (!options.deploy) {
+      tasks.shift()
+    }
+
+    gulp.series(tasks)(done)
   })
 }

@@ -45,21 +45,27 @@ let defaults = {
     js: 'assets/js',
     images: 'assets/img',
     fonts: 'assets/fonts',
-    build: 'build'
+    build: 'build',
+    tmp: '/tmp'
   },
   // task-specific configuration
   tasks: {
     makepot: {
-      reportBugsTo: ''
+      reportBugsTo: 'https://woocommerce.com/my-account/marketplace-ticket-form/'
     },
     watch: {
-      useBrowserSync: false
+      useBrowserSync: process.env.USE_BROWSERSYNC || false
+    },
+    browserSync: {
+      url: process.env.BROWSERSYNC_URL || 'plugins-skyverge.test'
     }
   },
-  // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc'
-  deployType: 'wc',
   // which framework version this plugin uses - valid values: 'v5', 'v4', or pass boolean `false` to indicate a non-frameworked plugin
-  framework: 'v5'
+  framework: 'v5',
+  deploy: {
+    // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc', specify `null` for no automated deploy
+    type: 'wc'
+  }
 }
 
 // load local configuration

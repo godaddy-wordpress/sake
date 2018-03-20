@@ -1,17 +1,28 @@
 const fs = require('fs')
 const path = require('path')
 const log = require('fancy-log')
+const _ = require('lodash')
 const { spawn } = require('child_process')
 
 // TODO: add support for FW v5
 
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
+  const awk = process.platform === 'win32' ? 'gawk' : 'awk'
+  const noRunIfEmpty = process.platform !== 'darwin' ? '--no-run-if-empty ' : ''
 
   // run a shell command, preserving output and failing the task on errors
-  const exec = (command, done) => {
+  const exec = (command, opts, done) => {
     log.info('$ ' + command)
-    spawn(command, { stdio: 'inherit', shell: true }).on('exit', (code) => done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null))
+
+    if (typeof opts === 'function') {
+      done = opts
+      opts = {}
+    }
+
+    opts = _.extend({ stdio: 'inherit', shell: true }, opts)
+
+    spawn(command, opts).on('exit', (code) => done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null))
   }
 
   // update framework subtree
@@ -167,5 +178,48 @@ module.exports = (gulp, config, plugins, options) => {
       log.info('No composer.json found, skipping composer update')
       done()
     }
+  })
+
+  gulp.task('shell:svn_checkout', (done) => {
+    let command = 'svn co --force-interactive ' + config.deploy.repo + ' ' + util.getWPRepoPath()
+
+    exec(command, done)
+  })
+
+  gulp.task('shell:svn_commit_trunk', (done) => {
+    const commitMsg = 'Committing ' + util.getPluginVersion() + ' to trunk'
+
+    let command = [
+      'cd ' + path.join(util.getWPRepoPath(), 'trunk'),
+      'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
+      'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
+      'svn commit --force-interactive --username="' + config.deploy.user + '" -m "' + commitMsg + '"'
+    ].join(' && ')
+
+    exec(command, done)
+  })
+
+  gulp.task('shell:svn_commit_tag', (done) => {
+    const commitMsg = 'Tagging ' + util.getPluginVersion()
+
+    let command = [
+      'cd ' + path.join(util.getWPRepoPath(), 'tags', util.getPluginVersion()),
+      'svn commit --force-interactive --username="' + config.deploy.user + '" -m "' + commitMsg + '"'
+    ].join(' && ')
+
+    exec(command, done)
+  })
+
+  gulp.task('shell:svn_commit_assets', (done) => {
+    const commitMsg = 'Committing assets for ' + util.getPluginVersion()
+
+    let command = [
+      'cd ' + path.join(util.getWPRepoPath(), 'assets'),
+      'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
+      'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
+      'svn commit --force-interactive --username="' + config.deploy.user + '" -m "' + commitMsg + '"'
+    ].join(' && ')
+
+    exec(command, done)
   })
 }

@@ -62,7 +62,7 @@ module.exports = (gulp, config, plugins, options) => {
         }
       } // jshint ignore:line
     ]).then(function (answers) {
-      config.deploys = _.merge(config.deploys, answers)
+      config.deploy = _.merge(config.deploy, answers)
       done()
     })
   })

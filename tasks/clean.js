@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
 
@@ -27,5 +29,15 @@ module.exports = (gulp, config, plugins, options) => {
       util.getPrereleasesPath() + config.plugin.id + '*.zip',
       util.getPrereleasesPath() + config.plugin.id + '*.txt'
     ], defaultOptions).pipe(plugins.clean({ force: true }))
+  })
+
+  // clear wp repo trunk
+  gulp.task('clean:wp_trunk', () => {
+    return gulp.src(path.join(util.getWPRepoPath(), 'trunk'), defaultOptions).pipe(plugins.clean({ force: true }))
+  })
+
+  // clear wp repo trunk
+  gulp.task('clean:wp_assets', () => {
+    return gulp.src(path.join(util.getWPRepoPath(), 'assets'), defaultOptions).pipe(plugins.clean({ force: true }))
   })
 }
