@@ -1,7 +1,7 @@
 const inquirer = require('inquirer')
 const semver = require('semver')
 const _ = require('lodash')
-require('colors')
+const chalk = require('chalk')
 
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
@@ -14,36 +14,36 @@ module.exports = (gulp, config, plugins, options) => {
       {
         name: 'version',
         type: 'list',
-        message: 'Plugin Changelog: \n' + util.readChangelog() + '\n\nBump version from ' + currentVersion.cyan + ' to:',
+        message: 'Plugin Changelog: \n' + util.readChangelog() + '\n\nBump version from ' + chalk.cyan(currentVersion) + ' to:',
         'default': getDefault(),
         choices: [
           {
             value: [ currentVersion, 'prerelease' ],
-            name: 'Build:  '.yellow + util.getPluginVersion('prerelease').yellow +
+            name: chalk.yellow('Build:  ' + util.getPluginVersion('prerelease')) +
             ' Unstable, betas, and release candidates.'
           },
           {
             value: [ currentVersion, 'patch' ],
-            name: 'Patch:  '.yellow + util.getPluginVersion('patch').yellow +
+            name: chalk.yellow('Patch:  ' + util.getPluginVersion('patch')) +
             '   Backwards-compatible bug fixes.'
           },
           {
             value: [ currentVersion, 'minor' ],
-            name: 'Minor:  '.yellow + util.getPluginVersion('minor').yellow +
+            name: chalk.yellow('Minor:  ' + util.getPluginVersion('minor')) +
             '   Add functionality in a backwards-compatible manner.'
           },
           {
             value: [ currentVersion, 'major' ],
-            name: 'Major:  '.yellow + util.getPluginVersion('major').yellow +
+            name: chalk.yellow('Major:  ' + util.getPluginVersion('major')) +
             '   Incompatible API changes.'
           },
           {
             value: [ currentVersion, 'custom' ],
-            name: 'Custom: ?.?.?'.yellow + '   Specify version...'
+            name: chalk.yellow('Custom: ?.?.?') + '   Specify version...'
           },
           {
             value: [ currentVersion, 'skip' ],
-            name: 'Skip this plugin'.red + '   This plugin will not be deployed'
+            name: chalk.red('Skip this plugin') + '   This plugin will not be deployed'
           }
         ],
         filter: filterIncrement
@@ -57,8 +57,7 @@ module.exports = (gulp, config, plugins, options) => {
         }, // jshint ignore:line
         validate: function (value) {
           var valid = semver.valid(value) && true
-          return valid || 'Must be a valid semver, such as 1.2.3-rc1. See ' +
-            'http://semver.org/'.blue.underline + ' for more details.'
+          return valid || 'Must be a valid semver, such as 1.2.3-rc1. See ' + chalk.underline.blue('http://semver.org/') + ' for more details.'
         }
       } // jshint ignore:line
     ]).then(function (answers) {
