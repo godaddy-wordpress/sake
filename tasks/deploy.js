@@ -183,18 +183,18 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
     let tasks = [
       function (cb) {
-        options.owner = config.deploy.github.dev.owner
-        options.repo = config.deploy.github.dev.repo
+        options.owner = config.deploy.dev.owner
+        options.repo = config.deploy.dev.repo
         cb()
       },
       'github:create_release'
     ]
 
-    if (config.deploy.type === 'wc' && config.deploy.github.production) {
+    if (config.deploy.type === 'wc' && config.deploy.production) {
       tasks = tasks.concat([
         function (cb) {
-          options.owner = config.deploy.github.production.owner
-          options.repo = config.deploy.github.production.repo
+          options.owner = config.deploy.production.owner
+          options.repo = config.deploy.production.repo
           cb()
         },
         'github:create_release'

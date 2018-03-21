@@ -106,7 +106,7 @@ let options = minimist(process.argv.slice(2), {
 
 const util = require('./lib/utilities')(config, options)
 
-util.parseConfig()
+util.initConfig()
 util.buildDeployOptions()
 
 let plugins = require('gulp-load-plugins')()
