@@ -19,7 +19,6 @@ module.exports = (config, plugins, options) => {
 
   // replace minimum WC version
   pipes.minimum_wc_version = lazypipe()
-    .pipe(plugins.debug)
     .pipe(plugins.replace, /('minimum_wc_version'[\s]*=>[\s]*)'([^']*)'/, (match, m) => `${m}'${options.minimum_wc_version}'`)
     .pipe(plugins.replace, /WC requires at least: .*\n/, () => `WC requires at least: ${options.minimum_wc_version}\n`)
     .pipe(plugins.replace, /MINIMUM_WC_VERSION = .*\n/, () => `MINIMUM_WC_VERSION = '${options.minimum_wc_version}';\n`)
