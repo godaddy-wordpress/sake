@@ -57,6 +57,7 @@
     "parse-git-config": "^2.0.0",
     "parse-github-url": "^1.0.2",
     "semver": "^5.5.0",
+    "shelljs": "^0.8.1",
     "strip-ansi": "^4.0.0",
     "through2": "^2.0.3",
     "underscore.string": "^3.3.4",

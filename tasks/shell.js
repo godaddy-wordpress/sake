@@ -1,10 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const log = require('fancy-log')
-const _ = require('lodash')
-const { spawn } = require('child_process')
-
-// TODO: add support for FW v5
+const shell = require('shelljs')
 
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
@@ -20,9 +17,7 @@ module.exports = (gulp, config, plugins, options) => {
       opts = {}
     }
 
-    opts = _.extend({ stdio: 'inherit', shell: true }, opts)
-
-    spawn(command, opts).on('exit', (code) => done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null))
+    shell.exec(command, opts, (code) => done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null))
   }
 
   // update framework subtree
@@ -73,7 +68,7 @@ module.exports = (gulp, config, plugins, options) => {
         'git diff-index --quiet --cached HEAD || git commit -m "' + config.plugin.name + ': Update framework to v' + config.plugin.frameworkVersion + '"'
       ].join(' && ')
     } else {
-      // TODO: is this still necessary?
+      // TODO: is this still necessary? {IT 2018-03-21}
       command = [
         'git add -A',
         'git diff-index --quiet --cached HEAD || git commit -m "' + config.plugin.name + ': Update readme.txt"'
@@ -89,10 +84,10 @@ module.exports = (gulp, config, plugins, options) => {
       'git diff-index --quiet HEAD --'
     ].join(' && ')
 
-    spawn(command, { stdio: 'inherit', shell: true }).on('exit', (code) => {
+    shell.exec(command, (code) => {
       if (!code) return done()
 
-      exec('git status', () => {
+      shell.exec('git status', () => {
         let err = new Error('Working copy is not clean!')
         err.showStack = false
         done(err)
@@ -117,6 +112,11 @@ module.exports = (gulp, config, plugins, options) => {
     let command = []
 
     if (!fs.existsSync(util.getProductionRepoPath())) {
+      // ensure that the tmp dir exists
+      if (!fs.existsSync(config.paths.tmp)) {
+        shell.mkdir('-p', config.paths.tmp)
+      }
+
       // repo does not exist yet
       command = [
         'cd ' + config.paths.tmp,
@@ -130,7 +130,15 @@ module.exports = (gulp, config, plugins, options) => {
       ]
     }
 
-    exec(command.join(' && '), done)
+    shell.exec(command.join(' && '), (code, stdout, stderr) => {
+      // ignore missing ref error - this will happen when the remote repo is empty (for example, a new WC plugin)
+      // and we try to `git pull`
+      if (code === 1 && stderr.indexOf('Your configuration specifies to merge with the ref') > -1) {
+        return done()
+      } else {
+        return done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null)
+      }
+    })
   })
 
   // commit and push update to WC repo
@@ -192,6 +200,11 @@ module.exports = (gulp, config, plugins, options) => {
   })
 
   gulp.task('shell:svn_checkout', (done) => {
+    // ensure that the tmp dir exists
+    if (!fs.existsSync(config.paths.tmp)) {
+      shell.mkdir('-p', config.paths.tmp)
+    }
+
     let command = 'svn co --force-interactive ' + config.deploy.production.url + ' ' + util.getProductionRepoPath()
 
     exec(command, done)
