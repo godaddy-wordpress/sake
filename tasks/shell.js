@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const log = require('fancy-log')
 const shell = require('shelljs')
+const _str = require('underscore.string')
 
 module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
@@ -143,11 +144,17 @@ module.exports = (gulp, config, plugins, options) => {
 
   // commit and push update to WC repo
   gulp.task('shell:git_push_wc_repo', (done) => {
+    let closeIssues = ''
+
+    if (options.wc_issues_to_close) {
+      closeIssues = ' -m "' + _str.capitalize(options.wc_issues_to_close.map((issue) => `closes #${issue}`).join(', ')) + '"'
+    }
+
     let command = [
       'cd ' + util.getProductionRepoPath(),
       'git pull',
       'git add -A',
-      'git commit -m "Update ' + config.plugin.name + ' to ' + util.getVersionBump() + '"',
+      'git commit -m "Update ' + config.plugin.name + ' to ' + util.getVersionBump() + '"' + closeIssues,
       'git push'
     ].join(' && ')
 

@@ -76,6 +76,60 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     })
   })
 
+  gulp.task('github:get_wc_issues', (done) => {
+    let owner = config.deploy.production.owner
+    let repo = config.deploy.production.name
+
+    let github = new GitHub({
+      protocol: 'https',
+      debug: false
+    })
+
+    github.authenticate({
+      type: 'basic',
+      username: process.env.GITHUB_USERNAME,
+      password: process.env.GITHUB_API_KEY
+    })
+
+    github.issues.getForRepo({
+      owner: owner,
+      repo: repo,
+      state: 'open'
+    }, function (err, result) {
+      if (err) {
+        log.error('Could not get issues for WC repo: ' + err.toString())
+        done()
+      } else {
+        if (!result.data.length) {
+          done()
+        } else {
+          inquirer.prompt([ {
+            type: 'checkbox',
+            name: 'issues_to_close',
+            message: 'Issues on WC repo exist for ' + util.getPluginName() + '. Select an issue this release should close.',
+            choices: function () {
+              let choices = result.data.sort().map((result) => {
+                return {
+                  value: result.number,
+                  name: 'Close issue #' + result.number + ': ' + result.html_url
+                }
+              })
+
+              return choices
+            }
+          } ]).then(function (answers) {
+            if (answers.issues_to_close === 'none') {
+              log.warn('No issues will be closed for release of ' + util.getPluginName())
+            } else {
+              options.wc_issues_to_close = answers.issues_to_close
+            }
+            done()
+          })
+        }
+      }
+    })
+  })
+
   // creates a docs issue for the plugin
   gulp.task('github:docs_issue', (done) => {
     let owner = 'skyverge'

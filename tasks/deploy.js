@@ -69,6 +69,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       'build',
       // grab issue to close with commit
       'github:get_rissue',
+      'github:get_wc_issues',
       // git commit & push
       'shell:git_push_update',
       // deploy to 3rd party repo
