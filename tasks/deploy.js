@@ -15,23 +15,13 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   function validateEnvVariables () {
     if (validatedEnvVariables) return
 
-    let errors = []
+    let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
 
-    if (!process.env.GITHUB_USERNAME) {
-      errors.push('GITHUB_USERNAME not set')
+    if (config.deploy.type === 'wc') {
+      variables.concat(['TRELLO_API_KEY', 'TRELLO_API_TOKEN'])
     }
 
-    if (!process.env.GITHUB_API_KEY) {
-      errors.push('GITHUB_API_KEY not set')
-    }
-
-    if (errors.length) {
-      let err = new Error('Environment variables missing or invalid: \n * ' + errors.join('\n * '))
-      err.showStack = false
-      throw err
-    }
-
-    validatedEnvVariables = true
+    util.validateEnvironmentVariables(variables)
   }
 
   // deploy the plugin
@@ -49,7 +39,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     // ensure scripts and styles are minified
     options.minify = true
 
-    return gulp.series([
+    let tasks = [
       // preflight checks, will fail the deploy on errors
       'deploy:preflight',
       // ensure version is bumped
@@ -78,7 +68,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       // git commit & push
       'shell:git_push_update',
       // deploy to 3rd party repo
-      'deploy_to_remote_repo',
+      'deploy_to_production_repo',
       // rebuild plugin options
       function rebuildPluginConfig (cb) {
         util.buildPluginConfig()
@@ -87,10 +77,17 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       // create the zip, which will be attached to the releases
       'compress',
       // create releases, attaching the zip
-      'deploy_create_releases',
-      // create a docs issue, if necessary
-      'github:docs_issue'
-    ])(done)
+      'deploy_create_releases'
+    ]
+
+    if (config.trelloBoard && config.deploy.type === 'wc') {
+      tasks.push('trello:update_wc_card')
+    }
+
+    // finally, create a docs issue, if necessary
+    tasks.push('github:docs_issue')
+
+    return gulp.series(tasks)(done)
   })
 
   // run deploy preflight checks
@@ -198,11 +195,9 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     return gulp.series(tasks)(done)
   })
 
-  // main task for deploying the plugin after build to the remote 3rd party repo
-  gulp.task('deploy_to_remote_repo', (done) => {
+  // main task for deploying the plugin after build to the production repo
+  gulp.task('deploy_to_production_repo', (done) => {
     let tasks = []
-
-    // TODO: add a sanity check here to verify that the build dir is not empty
 
     if (config.deploy.type === 'wc') {
       tasks.push('deploy_to_wc_repo')
@@ -344,6 +339,11 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       })
     }
 
-    async.parallel(requests, done)
+    async.parallel(requests, (err) => {
+      if (err) {
+        log.error('An error occurred when fetching latest WP / WC versions: ' + err.toString())
+      }
+      done()
+    })
   })
 }

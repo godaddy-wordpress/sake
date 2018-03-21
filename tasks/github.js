@@ -222,6 +222,9 @@ module.exports = (gulp, config, plugins, options, pipes) => {
         } else {
           log('GH release created')
 
+          // set the release url for Trello task
+          options.release_url = result.data.html_url
+
           github.repos.uploadAsset({
             url: result.data.upload_url,
             name: zipName,
