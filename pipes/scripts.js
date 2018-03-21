@@ -15,7 +15,7 @@ module.exports = (config, plugins, options) => {
       return plugins.if(options.minify, plugins.uglify())
     })
     .pipe(plugins.rename, { suffix: '.min' })
-    .pipe(plugins.sourcemaps.write, '.', { mapFile: (mapFilePath) => mapFilePath.replace('.js.map', '.map') }) // source map files are named *.map instead of *.js.map
+    .pipe(plugins.sourcemaps.write, '.', { includeContent: false, mapFile: (mapFilePath) => mapFilePath.replace('.js.map', '.map') }) // source map files are named *.map instead of *.js.map
 
   return { scripts: pipes }
 }

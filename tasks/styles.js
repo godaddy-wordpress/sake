@@ -40,7 +40,7 @@ module.exports = (gulp, config, plugins, options) => {
       .pipe(plugins.sass({ outputStyle: 'nested' }))
       .pipe(plugins.postcss(cssPlugins))
       .pipe(plugins.rename({ suffix: '.min' }))
-      .pipe(plugins.sourcemaps.write('.', { mapFile: (mapFilePath) => mapFilePath.replace('.css.map', '.map') })) // source map files are named *.map instead of *.js.map
+      .pipe(plugins.sourcemaps.write('.', { includeContent: false, mapFile: (mapFilePath) => mapFilePath.replace('.css.map', '.map') })) // source map files are named *.map instead of *.js.map
       .pipe(gulp.dest(`${config.paths.src}/${config.paths.css}`))
       .pipe(plugins.if(() => config.isWatching && config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
   })
