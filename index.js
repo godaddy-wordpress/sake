@@ -65,7 +65,8 @@ let defaults = {
   deploy: {
     // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc', specify `null` for no automated deploy
     type: 'wc'
-  }
+  },
+  platform: 'wc' // the platform this plugin is for, 'wc' or 'edd'
 }
 
 // load local configuration

@@ -56,6 +56,7 @@
     "node-wp-i18n": "^1.0.5",
     "parse-git-config": "^2.0.0",
     "parse-github-url": "^1.0.2",
+    "request": "^2.85.0",
     "semver": "^5.5.0",
     "shelljs": "^0.8.1",
     "strip-ansi": "^4.0.0",

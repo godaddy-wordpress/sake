@@ -2,6 +2,8 @@ const fs = require('fs')
 const log = require('fancy-log')
 const dateFormat = require('dateformat')
 const _ = require('lodash')
+const async = require('async')
+const request = require('request')
 
 module.exports = (gulp, config, plugins, options, pipes) => {
   const util = require('../lib/utilities')(config, options)
@@ -52,6 +54,9 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       'deploy:preflight',
       // ensure version is bumped
       'bump',
+      // fetch the latest WP/WC versions & bump the "tested up to" values
+      'fetch_latest_wp_wc_versions',
+      'bump:minreqs',
       // prompt for the version to deploy as
       'prompt:deploy',
       function (cb) {
@@ -306,5 +311,39 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     }
 
     gulp.series(tasks)(done)
+  })
+
+  gulp.task('fetch_latest_wp_wc_versions', (done) => {
+    log.info('Fetching latest WP and WC versions')
+
+    let requests = []
+
+    requests.push((cb) => {
+      request('https://api.wordpress.org/core/version-check/1.7/', (err, res, body) => {
+        if (err) return cb(err)
+
+        if (body) {
+          options.tested_up_to_wp_version = JSON.parse(body).offers[0].version
+        }
+
+        return cb()
+      })
+    })
+
+    if (config.platform === 'wc') {
+      requests.push((cb) => {
+        request('https://api.wordpress.org/plugins/info/1.0/woocommerce.json', (err, res, body) => {
+          if (err) return cb(err)
+
+          if (body) {
+            options.tested_up_to_wc_version = JSON.parse(body).version
+          }
+
+          return cb()
+        })
+      })
+    }
+
+    async.parallel(requests, done)
   })
 }
