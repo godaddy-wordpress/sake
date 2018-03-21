@@ -242,7 +242,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     ]
 
     // no need to build when part of deploy process
-    if (!options.deploy) {
+    if (options.deploy) {
       tasks.shift()
     }
 
@@ -301,7 +301,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     ]
 
     // no need to build when part of deploy process
-    if (!options.deploy) {
+    if (options.deploy) {
       tasks.shift()
     }
 
