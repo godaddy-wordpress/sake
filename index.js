@@ -101,7 +101,7 @@ let config = _.merge(defaults, localConfig)
 let options = minimist(process.argv.slice(2), {
   boolean: ['minify'],
   default: {
-    minify: false
+    minify: true
   }
 })
 
