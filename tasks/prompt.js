@@ -54,14 +54,14 @@ module.exports = (gulp, config, plugins, options) => {
         message: 'What specific version would you like',
         when: function (answers) {
           return _.values(answers).shift() === 'custom'
-        }, // jshint ignore:line
+        },
         validate: function (value) {
           var valid = semver.valid(value) && true
           return valid || 'Must be a valid semver, such as 1.2.3-rc1. See ' + chalk.underline.blue('http://semver.org/') + ' for more details.'
         }
-      } // jshint ignore:line
+      }
     ]).then(function (answers) {
-      config.deploy = _.merge(config.deploy, answers)
+      options = _.merge(options, answers)
       done()
     })
   })

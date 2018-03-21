@@ -1,9 +1,11 @@
 module.exports = (gulp, config, plugins, options, pipes) => {
+  const util = require('../lib/utilities')(config, options)
+
   // bumps the version in the main plugin file to match changelog.txt
   gulp.task('bump', () => {
     return gulp.src(`${config.paths.src}/${config.plugin.mainFile}`)
-      .pipe(plugins.replace(/ \* Version: [0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*\n/, ' * Version: ' + config.plugin.version.current + '\n'))
-      .pipe(plugins.replace(/const VERSION = '[0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*';/, "const VERSION = '" + config.plugin.version.current + "';"))
+      .pipe(plugins.replace(/ \* Version: [0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*\n/, () => ' * Version: ' + util.getPluginVersion() + '\n'))
+      .pipe(plugins.replace(/const VERSION = '[0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*';/, () => "const VERSION = '" + util.getPluginVersion() + "';"))
       .pipe(gulp.dest(config.paths.src))
   })
 

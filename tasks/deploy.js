@@ -2,6 +2,7 @@ const fs = require('fs')
 const log = require('fancy-log')
 const dateFormat = require('dateformat')
 const _ = require('lodash')
+const chalk = require('chalk')
 const async = require('async')
 const request = require('request')
 
@@ -50,8 +51,8 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       // prompt for the version to deploy as
       'prompt:deploy',
       function (cb) {
-        if (config.deploy.version === 'skip') {
-          log.warn('Deploy skipped!')
+        if (options.version === 'skip') {
+          log.error(chalk.red('Deploy skipped!'))
           return done()
         }
         cb()
@@ -124,11 +125,10 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
   // internal task for replacing version and date when deploying
   gulp.task('replace:version', () => {
-    if (!config.deploy || !config.deploy.version) {
-      throw new Error('No version specified')
+    if (!util.getVersionBump()) {
+      throw new Error('No version replacement specified')
     }
 
-    // maybe use gulp replace task instead?
     const versions = util.getPrereleaseVersions(util.getPluginVersion())
     const replacements = versions.map(version => {
       return { match: version, replacement: () => util.getVersionBump() }
