@@ -150,15 +150,19 @@ module.exports = (gulp, config, plugins, options) => {
       closeIssues = ' -m "' + _str.capitalize(options.wc_issues_to_close.map((issue) => `closes #${issue}`).join(', ')) + '"'
     }
 
-    let command = [
-      'cd ' + util.getProductionRepoPath(),
-      'git pull',
-      'git add -A',
-      'git commit -m "Update ' + config.plugin.name + ' to ' + util.getVersionBump() + '"' + closeIssues,
-      'git push'
-    ].join(' && ')
+    // always ensure to pull the repo, but bypass the missing ref error
+    gulp.series('shell:git_pull_wc_repo')((err) => {
+      if (err) return done(err)
 
-    exec(command, done)
+      let command = [
+        'cd ' + util.getProductionRepoPath(),
+        'git add -A',
+        'git commit -m "Update ' + config.plugin.name + ' to ' + util.getVersionBump() + '"' + closeIssues,
+        'git push'
+      ].join(' && ')
+
+      exec(command, done)
+    })
   })
 
   // TODO: do we need this anymore?
