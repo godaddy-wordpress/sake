@@ -62,11 +62,10 @@ let defaults = {
   },
   // which framework version this plugin uses - valid values: 'v5', 'v4', or pass boolean `false` to indicate a non-frameworked plugin
   framework: 'v5',
-  deploy: {
-    // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc', specify `null` for no automated deploy
-    type: 'wc'
-  },
-  platform: 'wc' // the platform this plugin is for, 'wc' or 'edd'
+  // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc', specify `null` or `false` for no automated deploy
+  deploy: 'wc',
+  // the platform this plugin is for, 'wc' or 'edd'
+  platform: 'wc'
 }
 
 // load local configuration

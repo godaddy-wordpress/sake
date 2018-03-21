@@ -98,11 +98,11 @@ module.exports = (gulp, config, plugins, options) => {
         })
       }
 
-      // remove composer autoloader, unless required
+      // skip composer autoloader, unless required
       if (!config.autoload && config.paths.vendor) {
         paths = paths.concat([
-          `!${config.paths.src}/${config.paths.vendor}/composer{,/**}`,
-          `!${config.paths.src}/${config.paths.vendor}/autoload.php`
+          `!${config.paths.vendor}/composer{,/**}`,
+          `!${config.paths.vendor}/autoload.php`
         ])
       }
     }
