@@ -1,13 +1,19 @@
 {
   "name": "sake",
   "version": "0.1.0",
-  "description": "SkyVerge WP plugin build & deploy tool, a.k.a SkyMake",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": "SkyVerge Team",
+  "homepage": "https://www.skyverge.com/",
+  "description": "SkyVerge WP/WC plugin build & deploy tool, a.k.a SkyMake",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skyverge/sake.git"
   },
-  "author": "",
-  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/skyverge/sake/issues?state=open"
+  },
+  "engines": {
+    "node": ">= 8.9.0"
+  },
   "bin": {
     "sake": "bin/sake.js"
   },
@@ -32,12 +38,9 @@
     "gulp-coffeelint": "^0.6.0",
     "gulp-copy": "^1.1.0",
     "gulp-eslint": "^4.0.2",
-    "gulp-exec": "^3.0.1",
     "gulp-filter": "^5.1.0",
     "gulp-if": "^2.0.2",
     "gulp-imagemin": "^4.1.0",
-    "gulp-load-plugins": "^1.5.0",
-    "gulp-newer": "^1.4.0",
     "gulp-postcss": "^7.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.6.1",
@@ -61,10 +64,8 @@
     "semver": "^5.5.0",
     "shelljs": "^0.8.1",
     "strip-ansi": "^4.0.0",
-    "through2": "^2.0.3",
     "underscore.string": "^3.3.4",
-    "undertaker-forward-reference": "^1.0.2",
-    "yargs": "^11.0.0"
+    "undertaker-forward-reference": "^1.0.2"
   },
   "devDependencies": {
     "gulp-debug": "^3.2.0",
