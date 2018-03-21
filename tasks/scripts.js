@@ -54,7 +54,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       // plugins.if(() => config.isWatching, plugins.newer({dest: config.paths.assetPaths.js + '/**', ext: 'min.js'})),
       .pipe(plugins.sourcemaps.init())
       // compile coffee files to JS
-      .pipe(plugins.coffee({ bare: true }))
+      .pipe(plugins.coffee({ bare: false }))
       // transpile & minify, write sourcemaps
       .pipe(pipes.scripts.minify())
       .pipe(gulp.dest(config.paths.assetPaths.js))

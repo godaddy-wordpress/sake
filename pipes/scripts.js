@@ -15,6 +15,9 @@ module.exports = (config, plugins, options) => {
       return plugins.if(options.minify, plugins.uglify())
     })
     .pipe(plugins.rename, { suffix: '.min' })
+    // ensure admin/ and frontend/ are removed from the source paths
+    // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
+    .pipe(plugins.sourcemaps.mapSources, (sourcePath, file) => '../' + sourcePath)
     .pipe(plugins.sourcemaps.write, '.', { includeContent: false, mapFile: (mapFilePath) => mapFilePath.replace('.js.map', '.map') }) // source map files are named *.map instead of *.js.map
 
   return { scripts: pipes }
