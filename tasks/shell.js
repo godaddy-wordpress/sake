@@ -112,20 +112,31 @@ module.exports = (gulp, config, plugins, options) => {
     exec(command, done)
   })
 
-  // pull updates from WC repo
+  // pull updates from WC repo, or clone repo, if deploying for the first time
   gulp.task('shell:git_pull_wc_repo', (done) => {
-    let command = [
-      'cd ' + util.getWCRepoPath(),
-      'git pull && git push'
-    ].join(' && ')
+    let command = []
 
-    exec(command, done)
+    if (!fs.existsSync(util.getProductionRepoPath())) {
+      // repo does not exist yet
+      command = [
+        'cd ' + config.paths.tmp,
+        'git clone ' + config.deploy.production.url
+      ]
+    } else {
+      // repo already exists
+      command = [
+        'cd ' + util.getProductionRepoPath(),
+        'git pull && git push'
+      ]
+    }
+
+    exec(command.join(' && '), done)
   })
 
   // commit and push update to WC repo
   gulp.task('shell:git_push_wc_repo', (done) => {
     let command = [
-      'cd ' + util.getWCRepoPath(),
+      'cd ' + util.getProductionRepoPath(),
       'git pull',
       'git add -A',
       'git commit -m "Update ' + config.plugin.name + ' to ' + util.getVersionBump() + '"',
@@ -139,7 +150,7 @@ module.exports = (gulp, config, plugins, options) => {
   // commit and push update, ver 2
   gulp.task('shell:git_update_wc_repo', (done) => {
     let command = [
-      'cd ' + util.getWCRepoPath(),
+      'cd ' + util.getProductionRepoPath(),
       'git pull',
       'git add -A',
       'git diff-index --quiet --cached HEAD || git commit -m "Updating ' + config.plugin.name + '"',
@@ -181,7 +192,7 @@ module.exports = (gulp, config, plugins, options) => {
   })
 
   gulp.task('shell:svn_checkout', (done) => {
-    let command = 'svn co --force-interactive ' + config.deploy.production.url + ' ' + util.getWPRepoPath()
+    let command = 'svn co --force-interactive ' + config.deploy.production.url + ' ' + util.getProductionRepoPath()
 
     exec(command, done)
   })
@@ -190,7 +201,7 @@ module.exports = (gulp, config, plugins, options) => {
     const commitMsg = 'Committing ' + util.getPluginVersion() + ' to trunk'
 
     let command = [
-      'cd ' + path.join(util.getWPRepoPath(), 'trunk'),
+      'cd ' + path.join(util.getProductionRepoPath(), 'trunk'),
       'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
       'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
       'svn commit --force-interactive --username="' + config.deploy.production.user + '" -m "' + commitMsg + '"'
@@ -203,7 +214,7 @@ module.exports = (gulp, config, plugins, options) => {
     const commitMsg = 'Tagging ' + util.getPluginVersion()
 
     let command = [
-      'cd ' + path.join(util.getWPRepoPath(), 'tags', util.getPluginVersion()),
+      'cd ' + path.join(util.getProductionRepoPath(), 'tags', util.getPluginVersion()),
       'svn commit --force-interactive --username="' + config.deploy.production.user + '" -m "' + commitMsg + '"'
     ].join(' && ')
 
@@ -214,7 +225,7 @@ module.exports = (gulp, config, plugins, options) => {
     const commitMsg = 'Committing assets for ' + util.getPluginVersion()
 
     let command = [
-      'cd ' + path.join(util.getWPRepoPath(), 'assets'),
+      'cd ' + path.join(util.getProductionRepoPath(), 'assets'),
       'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
       'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
       'svn commit --force-interactive --username="' + config.deploy.production.user + '" -m "' + commitMsg + '"'

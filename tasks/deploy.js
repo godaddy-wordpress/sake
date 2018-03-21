@@ -23,18 +23,6 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       errors.push('GITHUB_API_KEY not set')
     }
 
-    if (config.deploy.type === 'wc') {
-      if (!process.env.WT_REPOS_PATH) {
-        errors.push('WT_REPOS_PATH not set')
-      }
-
-      let reposPath = util.resolvePath(process.env.WT_REPOS_PATH)
-
-      if (!fs.existsSync(reposPath)) {
-        errors.push(`WT_REPOS_PATH is invalid - the path '${reposPath}' does not exist`)
-      }
-    }
-
     if (errors.length) {
       let err = new Error('Environment variables missing or invalid: \n * ' + errors.join('\n * '))
       err.showStack = false
@@ -184,7 +172,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     let tasks = [
       function (cb) {
         options.owner = config.deploy.dev.owner
-        options.repo = config.deploy.dev.repo
+        options.repo = config.deploy.dev.name
         cb()
       },
       'github:create_release'
@@ -194,7 +182,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       tasks = tasks.concat([
         function (cb) {
           options.owner = config.deploy.production.owner
-          options.repo = config.deploy.production.repo
+          options.repo = config.deploy.production.name
           cb()
         },
         'github:create_release'

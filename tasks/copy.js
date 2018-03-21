@@ -130,21 +130,21 @@ module.exports = (gulp, config, plugins, options) => {
 
   // copy files from build to WC repo folder
   gulp.task('copy:wc_repo', () => {
-    return gulp.src(`${config.paths.build}/**/*`).pipe(gulp.dest(util.getWCRepoPath()))
+    return gulp.src(`${config.paths.build}/**/*`).pipe(gulp.dest(util.getProductionRepoPath()))
   })
 
   // copy files from build to WP trunk folder
   gulp.task('copy:wp_trunk', () => {
-    return gulp.src(`${config.paths.build}/**/*`).pipe(gulp.dest(path.join(util.getWPRepoPath(), 'trunk')))
+    return gulp.src(`${config.paths.build}/**/*`).pipe(gulp.dest(path.join(util.getProductionRepoPath(), 'trunk')))
   })
 
   // copy files from build to WP assets folder
   gulp.task('copy:wp_assets', () => {
-    return gulp.src(`${config.paths.wpAssets}/**/*`).pipe(gulp.dest(path.join(util.getWPRepoPath(), 'assets')))
+    return gulp.src(`${config.paths.wpAssets}/**/*`).pipe(gulp.dest(path.join(util.getProductionRepoPath(), 'assets')))
   })
 
   // copy files from WP trunk to tag
   gulp.task('copy:wp_tag', () => {
-    return gulp.src(path.join(util.getWPRepoPath(), 'trunk/**/*')).pipe(gulp.dest(path.join(util.getWPRepoPath(), 'tags', util.getPluginVersion())))
+    return gulp.src(path.join(util.getProductionRepoPath(), 'trunk/**/*')).pipe(gulp.dest(path.join(util.getProductionRepoPath(), 'tags', util.getPluginVersion())))
   })
 }

@@ -46,7 +46,7 @@ let defaults = {
     images: 'assets/img',
     fonts: 'assets/fonts',
     build: 'build',
-    tmp: '/tmp'
+    tmp: '/tmp/sake'
   },
   // task-specific configuration
   tasks: {

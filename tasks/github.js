@@ -12,7 +12,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
 
   gulp.task('github:get_rissue', (done) => {
     let owner = config.deploy.dev.owner
-    let repo = config.deploy.dev.repo
+    let repo = config.deploy.dev.name
 
     let github = new GitHub({
       protocol: 'https',
@@ -39,6 +39,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     }, function (err, result) {
       if (err) {
         log.error('Could not get release issue: ' + err.toString())
+        done()
       } else {
         if (!result.data.length) {
           done()

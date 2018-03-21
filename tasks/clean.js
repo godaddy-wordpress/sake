@@ -17,10 +17,8 @@ module.exports = (gulp, config, plugins, options) => {
 
   // clean WooCommerce repo dir
   gulp.task('clean:wc_repo', () => {
-    return gulp.src([
-      util.getWCRepoPath() + '*',
-      '!' + util.getWCRepoPath() + '.*'
-    ], defaultOptions).pipe(plugins.clean({ force: true }))
+    // this will automatically exclude any dotfiles, such as the .git directory
+    return gulp.src(util.getProductionRepoPath() + '**/*', defaultOptions).pipe(plugins.clean({ force: true }))
   })
 
   // delete prerelease
@@ -33,11 +31,11 @@ module.exports = (gulp, config, plugins, options) => {
 
   // clear wp repo trunk
   gulp.task('clean:wp_trunk', () => {
-    return gulp.src(path.join(util.getWPRepoPath(), 'trunk'), defaultOptions).pipe(plugins.clean({ force: true }))
+    return gulp.src(path.join(util.getProductionRepoPath(), 'trunk'), defaultOptions).pipe(plugins.clean({ force: true }))
   })
 
   // clear wp repo trunk
   gulp.task('clean:wp_assets', () => {
-    return gulp.src(path.join(util.getWPRepoPath(), 'assets'), defaultOptions).pipe(plugins.clean({ force: true }))
+    return gulp.src(path.join(util.getProductionRepoPath(), 'assets'), defaultOptions).pipe(plugins.clean({ force: true }))
   })
 }
