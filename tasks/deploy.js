@@ -303,7 +303,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     let tasks = [
       // copy files to build directory
       'build',
-      // ensure WC repo is up to date
+      // ensure WP repo is up to date
       'shell:svn_checkout',
       // clean the WC plugin dir
       'clean:wp_trunk',

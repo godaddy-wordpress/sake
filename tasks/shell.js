@@ -181,7 +181,7 @@ module.exports = (gulp, config, plugins, options) => {
   })
 
   gulp.task('shell:svn_checkout', (done) => {
-    let command = 'svn co --force-interactive ' + config.deploy.repo + ' ' + util.getWPRepoPath()
+    let command = 'svn co --force-interactive ' + config.deploy.production.url + ' ' + util.getWPRepoPath()
 
     exec(command, done)
   })
@@ -193,7 +193,7 @@ module.exports = (gulp, config, plugins, options) => {
       'cd ' + path.join(util.getWPRepoPath(), 'trunk'),
       'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
       'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
-      'svn commit --force-interactive --username="' + config.deploy.user + '" -m "' + commitMsg + '"'
+      'svn commit --force-interactive --username="' + config.deploy.production.user + '" -m "' + commitMsg + '"'
     ].join(' && ')
 
     exec(command, done)
@@ -204,7 +204,7 @@ module.exports = (gulp, config, plugins, options) => {
 
     let command = [
       'cd ' + path.join(util.getWPRepoPath(), 'tags', util.getPluginVersion()),
-      'svn commit --force-interactive --username="' + config.deploy.user + '" -m "' + commitMsg + '"'
+      'svn commit --force-interactive --username="' + config.deploy.production.user + '" -m "' + commitMsg + '"'
     ].join(' && ')
 
     exec(command, done)
@@ -217,7 +217,7 @@ module.exports = (gulp, config, plugins, options) => {
       'cd ' + path.join(util.getWPRepoPath(), 'assets'),
       'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
       'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
-      'svn commit --force-interactive --username="' + config.deploy.user + '" -m "' + commitMsg + '"'
+      'svn commit --force-interactive --username="' + config.deploy.production.user + '" -m "' + commitMsg + '"'
     ].join(' && ')
 
     exec(command, done)
