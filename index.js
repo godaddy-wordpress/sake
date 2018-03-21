@@ -64,7 +64,7 @@ let defaults = {
   framework: 'v5',
   // which deploy type does this plugin use - either 'wc' or 'wp', defaults to 'wc', specify `null` or `false` for no automated deploy
   deploy: 'wc',
-  // the platform this plugin is for, 'wc' or 'edd'
+  // the e-commerce platform this plugin is for, 'wc' or 'edd'
   platform: 'wc'
 }
 
