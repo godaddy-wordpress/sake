@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "author": "SkyVerge Team",
   "homepage": "https://www.skyverge.com/",
+  "license": "GPL-3.0",
   "description": "SkyVerge WP/WC plugin build & deploy tool, a.k.a SkyMake",
   "repository": {
     "type": "git",
