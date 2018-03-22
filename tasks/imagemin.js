@@ -1,7 +1,5 @@
-'use strict'
-
-// compile sass styles
 module.exports = (gulp, config, plugins) => {
+  // optimize images
   gulp.task('imagemin', () => {
     return gulp.src(`${config.paths.assetPaths.images}/**.*{png,jpg,gif,svg}`)
       .pipe(plugins.imagemin())

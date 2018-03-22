@@ -2,7 +2,7 @@ const async = require('async')
 const Trello = require('node-trello')
 const querystring = require('querystring')
 
-module.exports = (gulp, config, plugins, options, pipes) => {
+module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
 
   gulp.task('trello:update_wc_card', (done) => {

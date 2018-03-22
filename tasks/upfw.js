@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const dottie = require('dottie')
 
-module.exports = (gulp, config, plugins, options, pipes) => {
+module.exports = (gulp, config, plugins, options) => {
   // reload the framework version after updating the framework
   gulp.task('set_framework_version', (done) => {
     config.plugin.frameworkVersion = require('../lib/utilities')(config, options).getFrameworkVersion()

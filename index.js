@@ -116,8 +116,6 @@ let plugins = require('gulp-load-plugins')()
 // support lazy evaluation yet: https://github.com/robrich/gulp-if/issues/75
 plugins.browserSync = require('browser-sync').create()
 
-const pipes = util.loadPipes(plugins) // load reusable pipes
-
 // attach CLI options to config - config should be the only thing passed around
 // even gulp or plugins can be loaded by tasks themselves
 // but how can we pass around util? basically helper functions? do we require them when needed,
@@ -135,7 +133,7 @@ const pipes = util.loadPipes(plugins) // load reusable pipes
 
 // load gulp plugins and tasks
 require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
-  require(path.join(__dirname, 'tasks', file))(gulp, config, plugins, options, pipes)
+  require(path.join(__dirname, 'tasks', file))(gulp, config, plugins, options)
 })
 
 gulp.task('default', gulp.series('compile'))

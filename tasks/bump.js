@@ -1,5 +1,6 @@
-module.exports = (gulp, config, plugins, options, pipes) => {
+module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
+  const pipes = require('../pipes/replace.js')(config, plugins, options)
 
   // bumps the version in the main plugin file to match changelog.txt
   gulp.task('bump', () => {
@@ -26,20 +27,20 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     return gulp.src([`${config.paths.src}/${config.plugin.mainFile}`, `${config.paths.src}/readme.txt`])
       // note the need to cast the version optiosn to boolean, as passing a string version,
       // such as '4.4.0' will not evaluate to true in gulp-if
-      .pipe(plugins.if(Boolean(options.minimum_php_version), pipes.replace.minimum_php_version()))
-      .pipe(plugins.if(Boolean(options.minimum_wp_version), pipes.replace.minimum_wp_version()))
-      .pipe(plugins.if(Boolean(options.tested_up_to_wp_version), pipes.replace.tested_up_to_wp_version()))
-      .pipe(plugins.if(Boolean(options.minimum_wc_version), pipes.replace.minimum_wc_version()))
-      .pipe(plugins.if(Boolean(options.tested_up_to_wc_version), pipes.replace.tested_up_to_wc_version()))
-      .pipe(plugins.if(Boolean(options.framework_version && config.framework === 'v4'), pipes.replace.framework_version_v4()))
-      .pipe(plugins.if(Boolean(options.backwards_compatible && config.framework === 'v4'), pipes.replace.backwards_compatible()))
+      .pipe(plugins.if(Boolean(options.minimum_php_version), pipes.minimum_php_version()))
+      .pipe(plugins.if(Boolean(options.minimum_wp_version), pipes.minimum_wp_version()))
+      .pipe(plugins.if(Boolean(options.tested_up_to_wp_version), pipes.tested_up_to_wp_version()))
+      .pipe(plugins.if(Boolean(options.minimum_wc_version), pipes.minimum_wc_version()))
+      .pipe(plugins.if(Boolean(options.tested_up_to_wc_version), pipes.tested_up_to_wc_version()))
+      .pipe(plugins.if(Boolean(options.framework_version && config.framework === 'v4'), pipes.framework_version_v4()))
+      .pipe(plugins.if(Boolean(options.backwards_compatible && config.framework === 'v4'), pipes.backwards_compatible()))
       .pipe(gulp.dest(config.paths.src))
   })
 
   // bumps the v5 framework version in plugin files
   gulp.task('bump:framework_version', () => {
     return gulp.src([`${config.paths.src}/**/*.php`, `!${config.paths.src}/${config.paths.framework.base}`])
-      .pipe(plugins.if(Boolean(options.framework_version), pipes.replace.framework_version()))
+      .pipe(plugins.if(Boolean(options.framework_version), pipes.framework_version()))
       .pipe(gulp.dest(config.paths.src))
   })
 }

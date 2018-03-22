@@ -1,5 +1,7 @@
 const lazypipe = require('lazypipe')
 
+// these pipes are not meant to be reusable - rather, they existy so that the bump:minreqs task would
+// be easier to maintain without wrapping each individual replacement in gulp-if
 module.exports = (config, plugins, options) => {
   const pipes = {}
 
@@ -40,5 +42,5 @@ module.exports = (config, plugins, options) => {
   pipes.backwards_compatible = lazypipe()
     .pipe(plugins.replace, /('backwards_compatible'[\s]*=>[\s]*)'([^']*)'/, (match, m) => `${m}'${options.backwards_compatible}'`)
 
-  return { replace: pipes }
+  return pipes
 }

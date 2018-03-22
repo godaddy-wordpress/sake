@@ -7,7 +7,7 @@ const codename = require('codename')
 const dateFormat = require('dateformat')
 const log = require('fancy-log')
 
-module.exports = (gulp, config, plugins, options, pipes) => {
+module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
 
   gulp.task('github:get_rissue', (done) => {

@@ -6,7 +6,7 @@ const chalk = require('chalk')
 const async = require('async')
 const request = require('request')
 
-module.exports = (gulp, config, plugins, options, pipes) => {
+module.exports = (gulp, config, plugins, options) => {
   const util = require('../lib/utilities')(config, options)
 
   let validatedEnvVariables = false
@@ -95,8 +95,8 @@ module.exports = (gulp, config, plugins, options, pipes) => {
   gulp.task('deploy:preflight', (done) => {
     let tasks = [
       'shell:git_ensure_clean_working_copy',
-      'scripts:lint',
-      'styles:lint'
+      'lint:scripts',
+      'lint:styles'
     ]
 
     if (config.deploy.type === 'wc') {
@@ -130,7 +130,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
     }
 
     const versions = util.getPrereleaseVersions(util.getPluginVersion())
-    const replacements = versions.map(version => {
+    const versionReplacements = versions.map(version => {
       return { match: version, replacement: () => util.getVersionBump() }
     })
 
@@ -154,7 +154,7 @@ module.exports = (gulp, config, plugins, options, pipes) => {
       `!${config.paths.src}/*.yml`
     ], { base: './', allowEmpty: true })
       // unlike gulp-replace, gulp-replace-task supports multiple replacements
-      .pipe(plugins.replaceTask({ patterns: replacements, usePrefix: false }))
+      .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
       .pipe(filter)
       .pipe(plugins.replace('XXXX.XX.XX', date))
       .pipe(plugins.replace(/[0-9]+\.nn\.nn/, date))
