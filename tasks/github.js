@@ -7,12 +7,10 @@ const codename = require('codename')
 const dateFormat = require('dateformat')
 const log = require('fancy-log')
 
-module.exports = (gulp, config, plugins, options) => {
-  const util = require('../lib/utilities')(config, options)
-
+module.exports = (gulp, plugins, sake) => {
   gulp.task('github:get_rissue', (done) => {
-    let owner = config.deploy.dev.owner
-    let repo = config.deploy.dev.name
+    let owner = sake.config.deploy.dev.owner
+    let repo = sake.config.deploy.dev.name
 
     let github = new GitHub({
       protocol: 'https',
@@ -27,8 +25,8 @@ module.exports = (gulp, config, plugins, options) => {
 
     let labels = ['release']
 
-    if (config.multiPluginRepo) {
-      labels.push(config.plugin.id.replace('woocommerce-', ''))
+    if (sake.config.multiPluginRepo) {
+      labels.push(sake.config.plugin.id.replace('woocommerce-', ''))
     }
 
     github.issues.getForRepo({
@@ -47,7 +45,7 @@ module.exports = (gulp, config, plugins, options) => {
           inquirer.prompt([ {
             type: 'list',
             name: 'issues_to_close',
-            message: 'Release issues exist for ' + util.getPluginName() + '. Select an issue this release should close.',
+            message: 'Release issues exist for ' + sake.getPluginName() + '. Select an issue this release should close.',
             choices: function () {
               let choices = result.data.map((result) => {
                 return {
@@ -65,9 +63,9 @@ module.exports = (gulp, config, plugins, options) => {
             }
           } ]).then(function (answers) {
             if (answers.issues_to_close === 'none') {
-              log.warn('No issues will be closed for release of ' + util.getPluginName())
+              log.warn('No issues will be closed for release of ' + sake.getPluginName())
             } else {
-              options.release_issue_to_close = answers.issues_to_close
+              sake.options.release_issue_to_close = answers.issues_to_close
             }
             done()
           })
@@ -77,8 +75,8 @@ module.exports = (gulp, config, plugins, options) => {
   })
 
   gulp.task('github:get_wc_issues', (done) => {
-    let owner = config.deploy.production.owner
-    let repo = config.deploy.production.name
+    let owner = sake.config.deploy.production.owner
+    let repo = sake.config.deploy.production.name
 
     let github = new GitHub({
       protocol: 'https',
@@ -106,7 +104,7 @@ module.exports = (gulp, config, plugins, options) => {
           inquirer.prompt([ {
             type: 'checkbox',
             name: 'issues_to_close',
-            message: 'Issues on WC repo exist for ' + util.getPluginName() + '. Select an issue this release should close.',
+            message: 'Issues on WC repo exist for ' + sake.getPluginName() + '. Select an issue this release should close.',
             choices: function () {
               let choices = result.data.sort().map((result) => {
                 return {
@@ -119,9 +117,9 @@ module.exports = (gulp, config, plugins, options) => {
             }
           } ]).then(function (answers) {
             if (answers.issues_to_close === 'none') {
-              log.warn('No issues will be closed for release of ' + util.getPluginName())
+              log.warn('No issues will be closed for release of ' + sake.getPluginName())
             } else {
-              options.wc_issues_to_close = answers.issues_to_close
+              sake.options.wc_issues_to_close = answers.issues_to_close
             }
             done()
           })
@@ -150,7 +148,7 @@ module.exports = (gulp, config, plugins, options) => {
     inquirer.prompt([ {
       type: 'list',
       name: 'create_docs_issue',
-      message: 'Should a Docs issue be created for ' + util.getPluginName() + '? See the changelog: \n\n' + util.getPluginChanges() + '\n\n',
+      message: 'Should a Docs issue be created for ' + sake.getPluginName() + '? See the changelog: \n\n' + sake.getPluginChanges() + '\n\n',
       choices: [{
         value: 1,
         name: 'Yes -- create a docs issue'
@@ -163,19 +161,19 @@ module.exports = (gulp, config, plugins, options) => {
         github.issues.create({
           owner: owner,
           repo: repo,
-          title: util.getPluginName() + ': Updated to ' + util.getPluginVersion(),
-          body: util.getPluginChanges() + (options.release_issue_to_close ? '\r\n\r\nSee skyverge/' + config.plugin.id + '#' + options.release_issue_to_close : ''),
+          title: sake.getPluginName() + ': Updated to ' + sake.getPluginVersion(),
+          body: sake.getPluginChanges() + (sake.options.release_issue_to_close ? '\r\n\r\nSee skyverge/' + sake.config.plugin.id + '#' + sake.options.release_issue_to_close : ''),
           assignee: assignee,
-          labels: [ config.plugin.id.replace('woocommerce-', ''), 'docs', 'sales' ]
+          labels: [ sake.config.plugin.id.replace('woocommerce-', ''), 'docs', 'sales' ]
         }, function (err, result) {
           if (!err) {
             log(result)
             log('Docs issue created!')
           }
-          done(err)
+          sake.throwError(err)
         })
       } else {
-        log.warn('No docs issue was created for ' + util.getPluginName())
+        log.warn('No docs issue was created for ' + sake.getPluginName())
         done()
       }
     })
@@ -183,16 +181,16 @@ module.exports = (gulp, config, plugins, options) => {
 
   // creates a release for the plugin, attaching the build zip to it
   gulp.task('github:create_release', (done) => {
-    let owner = options.owner || 'skyverge'
-    let repo = options.repo || config.plugin.id
-    let version = util.getPluginVersion()
-    let zipName = `${config.plugin.id}.${version}.zip`
-    let zipPath = path.join(process.cwd(), config.paths.build, zipName)
+    let owner = sake.options.owner || 'skyverge'
+    let repo = sake.options.repo || sake.config.plugin.id
+    let version = sake.getPluginVersion()
+    let zipName = `${sake.config.plugin.id}.${version}.zip`
+    let zipPath = path.join(process.cwd(), sake.config.paths.build, zipName)
     let tasks = []
 
     // prepare a zip if it doesn't already exist
     if (!fs.existsSync(zipPath)) {
-      tasks.push(options.deploy ? 'compress' : 'zip')
+      tasks.push(sake.options.deploy ? 'compress' : 'zip')
     }
 
     let github = new GitHub({
@@ -202,7 +200,7 @@ module.exports = (gulp, config, plugins, options) => {
 
     github.authenticate({
       type: 'basic',
-      // TODO: consider moving these to config instead
+      // TODO: consider moving these to sake.config instead
       username: process.env.GITHUB_USERNAME,
       password: process.env.GITHUB_API_KEY
     })
@@ -214,32 +212,28 @@ module.exports = (gulp, config, plugins, options) => {
         owner: owner,
         repo: repo,
         tag_name: version,
-        name: util.getPluginName(false) + ' v' + version,
-        body: util.getPluginChanges()
+        name: sake.getPluginName(false) + ' v' + version,
+        body: sake.getPluginChanges()
       }, function (err, result) {
-        if (err) {
-          cb(new Error('Creating GH release failed: ' + err.toString()))
-        } else {
-          log('GH release created')
+        if (err) sake.throwError('Creating GH release failed: ' + err.toString())
 
-          // set the release url for Trello task
-          options.release_url = result.data.html_url
+        log('GH release created')
 
-          github.repos.uploadAsset({
-            url: result.data.upload_url,
-            name: zipName,
-            file: fs.readFileSync(zipPath),
-            contentType: 'application/zip',
-            contentLength: fs.statSync(zipPath).size
-          }, function (err) {
-            if (err) {
-              return cb(new Error('Uploading release ZIP failed: ' + err.toString()))
-            }
+        // set the release url for Trello task
+        sake.options.release_url = result.data.html_url
 
-            log('Plugin zip uploaded')
-            cb()
-          })
-        }
+        github.repos.uploadAsset({
+          url: result.data.upload_url,
+          name: zipName,
+          file: fs.readFileSync(zipPath),
+          contentType: 'application/zip',
+          contentLength: fs.statSync(zipPath).size
+        }, function (err) {
+          if (err) sake.throwError('Uploading release ZIP failed: ' + err.toString())
+
+          log('Plugin zip uploaded')
+          cb()
+        })
       })
     })
 
@@ -248,7 +242,7 @@ module.exports = (gulp, config, plugins, options) => {
 
   // create release milestones for each tuesday
   gulp.task('github:create_release_milestones', (done) => {
-    let year = options.year || new Date().getFullYear()
+    let year = sake.options.year || new Date().getFullYear()
     let tuesdays = getTuesdays(year)
 
     createMilestones(tuesdays, done)
@@ -275,7 +269,7 @@ module.exports = (gulp, config, plugins, options) => {
 
   // create monthly milestones
   gulp.task('github:create_month_milestones', (done) => {
-    let year = options.year || new Date().getFullYear()
+    let year = sake.options.year || new Date().getFullYear()
     let months = getMonths(year)
 
     createMilestones(months, done)
@@ -298,8 +292,8 @@ module.exports = (gulp, config, plugins, options) => {
 
   // create a milestone for each date passed in
   const createMilestones = (dates, done) => {
-    let owner = options.owner || 'skyverge'
-    let repo = options.repo || config.plugin.id
+    let owner = sake.options.owner || 'skyverge'
+    let repo = sake.options.repo || sake.config.plugin.id
 
     let github = new GitHub({
       protocol: 'https',

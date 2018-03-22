@@ -2,10 +2,10 @@ const fs = require('fs')
 const path = require('path')
 const dottie = require('dottie')
 
-module.exports = (gulp, config, plugins, options) => {
+module.exports = (gulp, plugins, sake) => {
   // reload the framework version after updating the framework
   gulp.task('set_framework_version', (done) => {
-    config.plugin.frameworkVersion = require('../lib/utilities')(config, options).getFrameworkVersion()
+    sake.config.plugin.frameworkVersion = require('../lib/utilities')(sake.config, sake.options).getFrameworkVersion()
     done()
   })
 
@@ -18,31 +18,29 @@ module.exports = (gulp, config, plugins, options) => {
       'shell:update_framework_commit'
     ]
 
-    if (config.framework === 'v4' && !dottie.get(config.composer, 'require.skyverge/wc-plugin-framework')) {
+    if (sake.config.framework === 'v4' && !dottie.get(sake.config.composer, 'require.skyverge/wc-plugin-framework')) {
       tasks.unshift('shell:update_framework')
     }
 
-    if (config.framework === 'v5') {
+    if (sake.config.framework === 'v5') {
       tasks.unshift('bump:framework_version')
     }
 
     // update composer
-    if (!options['skip-composer-update']) {
+    if (!sake.options['skip-composer-update']) {
       // ensure FW version to update to is specified
-      if (!options.framework_version) {
-        let err = new Error('Framework version not specified')
-        err.showStack = false
-        throw err
+      if (!sake.options.framework_version) {
+        sake.throwError('Framework version not specified')
       }
 
-      dottie.set(config.composer, 'require.skyverge/wc-plugin-framework', options.framework_version)
+      dottie.set(sake.config.composer, 'require.skyverge/wc-plugin-framework', sake.options.framework_version)
 
       // update composer.json
-      fs.writeFileSync(path.join(process.cwd(), 'composer.json'), JSON.stringify(config.composer, null, '  '))
+      fs.writeFileSync(path.join(process.cwd(), 'composer.json'), JSON.stringify(sake.config.composer, null, '  '))
 
       tasks.unshift('shell:composer_update')
     } else {
-      options.framework_version = config.plugin.frameworkVersion
+      sake.options.framework_version = sake.config.plugin.frameworkVersion
     }
 
     gulp.series(tasks)(done)

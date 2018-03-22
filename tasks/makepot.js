@@ -1,14 +1,12 @@
-'use strict'
-
 const wpi18n = require('node-wp-i18n')
 
 // generate POT files
-module.exports = (gulp, config, plugins) => {
+module.exports = (gulp, plugins, sake) => {
   gulp.task('makepot', () => {
     let options = {
-      cwd: `${process.cwd()}/${config.paths.src}`,
+      cwd: `${process.cwd()}/${sake.config.paths.src}`,
       exclude: [ 'lib/*', 'vendor/.*', 'tests/.*', 'node_modules/.*' ],
-      potHeaders: { 'report-msgid-bugs-to': config.tasks.makepot.reportBugsTo },
+      potHeaders: { 'report-msgid-bugs-to': sake.config.tasks.makepot.reportBugsTo },
       processPot: function (pot) {
         delete pot.headers['x-generator']
         return pot

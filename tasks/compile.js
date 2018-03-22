@@ -1,5 +1,5 @@
-module.exports = (gulp, config, plugins, options) => {
-  const pipes = require('../pipes/scripts.js')(config, plugins, options)
+module.exports = (gulp, plugins, sake) => {
+  const pipes = require('../pipes/scripts.js')(plugins, sake)
 
   // compile plugin assets
   gulp.task('compile', (done) => {
@@ -7,7 +7,7 @@ module.exports = (gulp, config, plugins, options) => {
     let tasks = ['lint:php', 'scripts', 'styles', 'imagemin']
 
     // unless exclusively told not to, generate the POT file as well
-    if (!options.skip_pot) {
+    if (!sake.options.skip_pot) {
       tasks.push('makepot')
     }
 
@@ -25,26 +25,26 @@ module.exports = (gulp, config, plugins, options) => {
 
   // compile, transpile and minify coffee files
   gulp.task('compile:coffee', () => {
-    return gulp.src(`${config.paths.assetPaths.js}/**/*.coffee`)
-      // plugins.if(() => config.isWatching, plugins.newer({dest: config.paths.assetPaths.js + '/**', ext: 'min.js'})),
+    return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
+      // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
       .pipe(plugins.sourcemaps.init())
       // compile coffee files to JS
       .pipe(plugins.coffee({ bare: false }))
       // transpile & minify, write sourcemaps
       .pipe(pipes.compileJs())
-      .pipe(gulp.dest(config.paths.assetPaths.js))
-      .pipe(plugins.if(() => config.isWatching && config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+      .pipe(gulp.dest(sake.config.paths.assetPaths.js))
+      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
   })
 
   // transpile and minify js files
   gulp.task('compile:js', () => {
-    return gulp.src(config.paths.assetPaths.javascriptSources)
-      // plugins.if(() => config.isWatching, plugins.newer({dest: config.paths.assetPaths.js + '/**', ext: 'min.js'})),
+    return gulp.src(sake.config.paths.assetPaths.javascriptSources)
+      // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
       .pipe(plugins.sourcemaps.init())
       // transpile & minify, write sourcemaps
       .pipe(pipes.compileJs())
-      .pipe(gulp.dest(config.paths.assetPaths.js))
-      .pipe(plugins.if(() => config.isWatching && config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+      .pipe(gulp.dest(sake.config.paths.assetPaths.js))
+      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
   })
 
   /** Styles */
@@ -56,11 +56,11 @@ module.exports = (gulp, config, plugins, options) => {
   gulp.task('compile:scss', () => {
     let cssPlugins = [require('autoprefixer')()]
 
-    if (options.minify) {
+    if (sake.options.minify) {
       cssPlugins.push(require('cssnano')())
     }
 
-    return gulp.src(`${config.paths.assetPaths.css}/**/*.scss`)
+    return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
       .pipe(plugins.sourcemaps.init())
       .pipe(plugins.sass({ outputStyle: 'nested' }))
       .pipe(plugins.postcss(cssPlugins))
@@ -69,7 +69,7 @@ module.exports = (gulp, config, plugins, options) => {
       // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
       .pipe(plugins.sourcemaps.mapSources((sourcePath, file) => '../' + sourcePath))
       .pipe(plugins.sourcemaps.write('.', { mapFile: (mapFilePath) => mapFilePath.replace('.css.map', '.map') })) // source map files are named *.map instead of *.js.map
-      .pipe(gulp.dest(`${config.paths.src}/${config.paths.css}`))
-      .pipe(plugins.if(() => config.isWatching && config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
+      .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
+      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
   })
 }

@@ -6,39 +6,35 @@ const chalk = require('chalk')
 const async = require('async')
 const request = require('request')
 
-module.exports = (gulp, config, plugins, options) => {
-  const util = require('../lib/utilities')(config, options)
-
+module.exports = (gulp, plugins, sake) => {
   let validatedEnvVariables = false
 
-  // TODO: consider setting these variables in the config on load instead, and validating config vars instead
+  // TODO: consider setting these variables in the sake.config on load instead, and validating sake.config vars instead
   // validate env variables before deploy
   function validateEnvVariables () {
     if (validatedEnvVariables) return
 
     let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
 
-    if (config.deploy.type === 'wc') {
+    if (sake.config.deploy.type === 'wc') {
       variables.concat(['TRELLO_API_KEY', 'TRELLO_API_TOKEN'])
     }
 
-    util.validateEnvironmentVariables(variables)
+    sake.validateEnvironmentVariables(variables)
   }
 
   // deploy the plugin
   gulp.task('deploy', (done) => {
     validateEnvVariables()
 
-    if (!util.isDeployable()) {
-      let err = new Error('Plugin is not deployable: \n * ' + util.getChangelogErrors().join('\n * '))
-      err.showStack = false
-      throw err
+    if (!sake.isDeployable()) {
+      sake.throwError('Plugin is not deployable: \n * ' + sake.getChangelogErrors().join('\n * '))
     }
 
     // indicate that we are deploying
-    options.deploy = true
+    sake.options.deploy = true
     // ensure scripts and styles are minified
-    options.minify = true
+    sake.options.minify = true
 
     let tasks = [
       // preflight checks, will fail the deploy on errors
@@ -51,7 +47,7 @@ module.exports = (gulp, config, plugins, options) => {
       // prompt for the version to deploy as
       'prompt:deploy',
       function (cb) {
-        if (options.version === 'skip') {
+        if (sake.options.version === 'skip') {
           log.error(chalk.red('Deploy skipped!'))
           return done()
         }
@@ -70,9 +66,9 @@ module.exports = (gulp, config, plugins, options) => {
       'shell:git_push_update',
       // deploy to 3rd party repo
       'deploy_to_production_repo',
-      // rebuild plugin options
+      // rebuild plugin sake.options
       function rebuildPluginConfig (cb) {
-        util.buildPluginConfig()
+        sake.buildPluginConfig()
         cb()
       },
       // create the zip, which will be attached to the releases
@@ -81,7 +77,7 @@ module.exports = (gulp, config, plugins, options) => {
       'deploy_create_releases'
     ]
 
-    if (config.trelloBoard && config.deploy.type === 'wc') {
+    if (sake.config.trelloBoard && sake.config.deploy.type === 'wc') {
       tasks.push('trello:update_wc_card')
     }
 
@@ -99,7 +95,7 @@ module.exports = (gulp, config, plugins, options) => {
       'lint:styles'
     ]
 
-    if (config.deploy.type === 'wc') {
+    if (sake.config.deploy.type === 'wc') {
       tasks.unshift('search:wt_update_key')
     }
 
@@ -108,15 +104,13 @@ module.exports = (gulp, config, plugins, options) => {
 
   // internal task for making sure the WT updater keys have been set
   gulp.task('search:wt_update_key', (done) => {
-    fs.readFile(`${config.paths.src}/${config.plugin.mainFile}`, 'utf8', (err, data) => {
-      if (err) {
-        throw new Error(err)
-      }
+    fs.readFile(`${sake.config.paths.src}/${sake.config.plugin.mainFile}`, 'utf8', (err, data) => {
+      if (err) sake.throwError(err)
 
       let results = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
 
       if (!results) {
-        throw new Error('WooThemes updater keys for the plugin have not been properly set ;(')
+        sake.throwError('WooThemes updater keys for the plugin have not been properly set ;(')
       }
 
       done()
@@ -125,33 +119,33 @@ module.exports = (gulp, config, plugins, options) => {
 
   // internal task for replacing version and date when deploying
   gulp.task('replace:version', () => {
-    if (!util.getVersionBump()) {
-      throw new Error('No version replacement specified')
+    if (!sake.getVersionBump()) {
+      sake.throwError('No version replacement specified')
     }
 
-    const versions = util.getPrereleaseVersions(util.getPluginVersion())
+    const versions = sake.getPrereleaseVersions(sake.getPluginVersion())
     const versionReplacements = versions.map(version => {
-      return { match: version, replacement: () => util.getVersionBump() }
+      return { match: version, replacement: () => sake.getVersionBump() }
     })
 
     const filter = plugins.filter('**/{readme.txt,changelog.txt}', { restore: true })
     const date = dateFormat(new Date(), 'yyyy.mm.dd')
 
     return gulp.src([
-      `${config.paths.src}/**/*.php`,
-      `${config.paths.src}/readme.txt`,
-      `${config.paths.src}/changelog.txt`,
-      `${config.paths.assetPaths.js}/**/*.{coffee,js}`,
-      `!${config.paths.assetPaths.js}/**/*.min.js`,
-      `${config.paths.assetPaths.css}/**/*.scss`,
-      `${config.paths.assetPaths.css}/**/*.css`,
-      `!${config.paths.src}/lib/**`,
-      `!${config.paths.src}/vendor/**`,
-      `!${config.paths.src}/tests/**`,
-      `!${config.paths.src}/node_modules/**`,
-      `!${config.paths.src}/*.json`,
-      `!${config.paths.src}/*.xml`,
-      `!${config.paths.src}/*.yml`
+      `${sake.config.paths.src}/**/*.php`,
+      `${sake.config.paths.src}/readme.txt`,
+      `${sake.config.paths.src}/changelog.txt`,
+      `${sake.config.paths.assetPaths.js}/**/*.{coffee,js}`,
+      `!${sake.config.paths.assetPaths.js}/**/*.min.js`,
+      `${sake.config.paths.assetPaths.css}/**/*.scss`,
+      `${sake.config.paths.assetPaths.css}/**/*.css`,
+      `!${sake.config.paths.src}/lib/**`,
+      `!${sake.config.paths.src}/vendor/**`,
+      `!${sake.config.paths.src}/tests/**`,
+      `!${sake.config.paths.src}/node_modules/**`,
+      `!${sake.config.paths.src}/*.json`,
+      `!${sake.config.paths.src}/*.xml`,
+      `!${sake.config.paths.src}/*.yml`
     ], { base: './', allowEmpty: true })
       // unlike gulp-replace, gulp-replace-task supports multiple replacements
       .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
@@ -174,18 +168,18 @@ module.exports = (gulp, config, plugins, options) => {
 
     let tasks = [
       function (cb) {
-        options.owner = config.deploy.dev.owner
-        options.repo = config.deploy.dev.name
+        sake.options.owner = sake.config.deploy.dev.owner
+        sake.options.repo = sake.config.deploy.dev.name
         cb()
       },
       'github:create_release'
     ]
 
-    if (config.deploy.type === 'wc' && config.deploy.production) {
+    if (sake.config.deploy.type === 'wc' && sake.config.deploy.production) {
       tasks = tasks.concat([
         function (cb) {
-          options.owner = config.deploy.production.owner
-          options.repo = config.deploy.production.name
+          sake.options.owner = sake.config.deploy.production.owner
+          sake.options.repo = sake.config.deploy.production.name
           cb()
         },
         'github:create_release'
@@ -199,9 +193,9 @@ module.exports = (gulp, config, plugins, options) => {
   gulp.task('deploy_to_production_repo', (done) => {
     let tasks = []
 
-    if (config.deploy.type === 'wc') {
+    if (sake.config.deploy.type === 'wc') {
       tasks.push('deploy_to_wc_repo')
-    } else if (config.deploy.type === 'wp') {
+    } else if (sake.config.deploy.type === 'wp') {
       tasks.push('deploy_to_wp_repo')
     } else {
       log.warn('No deploy type set, skipping deploy to remote repo')
@@ -242,7 +236,7 @@ module.exports = (gulp, config, plugins, options) => {
     ]
 
     // no need to build when part of deploy process
-    if (options.deploy) {
+    if (sake.options.deploy) {
       tasks.shift()
     }
 
@@ -269,17 +263,17 @@ module.exports = (gulp, config, plugins, options) => {
   gulp.task('deploy_to_wp_repo', (done) => {
     let tasks = ['copy_to_wp_repo', 'shell:svn_commit_trunk']
 
-    options = _.merge({
+    sake.options = _.merge({
       deployTag: true,
       deployAssets: true
-    }, options)
+    }, sake.options)
 
-    if (options.deployTag) {
+    if (sake.options.deployTag) {
       tasks.push('copy:wp_tag')
       tasks.push('shell:svn_commit_tag')
     }
 
-    if (options.deployAssets) {
+    if (sake.options.deployAssets) {
       tasks.push('clean:wp_assets')
       tasks.push('copy:wp_assets')
       tasks.push('shell:svn_commit_assets')
@@ -301,7 +295,7 @@ module.exports = (gulp, config, plugins, options) => {
     ]
 
     // no need to build when part of deploy process
-    if (options.deploy) {
+    if (sake.options.deploy) {
       tasks.shift()
     }
 
@@ -318,20 +312,20 @@ module.exports = (gulp, config, plugins, options) => {
         if (err) return cb(err)
 
         if (body) {
-          options.tested_up_to_wp_version = JSON.parse(body).offers[0].version
+          sake.options.tested_up_to_wp_version = JSON.parse(body).offers[0].version
         }
 
         return cb()
       })
     })
 
-    if (config.platform === 'wc') {
+    if (sake.config.platform === 'wc') {
       requests.push((cb) => {
         request('https://api.wordpress.org/plugins/info/1.0/woocommerce.json', (err, res, body) => {
           if (err) return cb(err)
 
           if (body) {
-            options.tested_up_to_wc_version = JSON.parse(body).version
+            sake.options.tested_up_to_wc_version = JSON.parse(body).version
           }
 
           return cb()

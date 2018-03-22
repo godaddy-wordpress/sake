@@ -1,6 +1,6 @@
 const lazypipe = require('lazypipe')
 
-module.exports = (config, plugins, options) => {
+module.exports = (plugins, sake) => {
   const pipes = {}
 
   // transpile, minify and write sourcemaps
@@ -12,7 +12,7 @@ module.exports = (config, plugins, options) => {
     .pipe(plugins.babel, { presets: ['babel-preset-env'].map(require.resolve) })
     .pipe(() => {
       // see https://github.com/OverZealous/lazypipe#using-with-more-complex-function-arguments-such-as-gulp-if
-      return plugins.if(options.minify, plugins.uglify())
+      return plugins.if(sake.options.minify, plugins.uglify())
     })
     .pipe(plugins.rename, { suffix: '.min' })
     // ensure admin/ and frontend/ are removed from the source paths

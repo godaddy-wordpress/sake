@@ -1,14 +1,13 @@
-module.exports = (gulp, config, plugins, options) => {
+module.exports = (gulp, plugins, sake) => {
   gulp.task('compress', () => {
-    const util = require('../lib/utilities')(config, options)
+    let zipDest = sake.options.zipDest || sake.config.paths.build
+    let zipFileName = sake.config.plugin.id + '.' + sake.getPluginVersion() + '.zip'
 
-    let zipDest = options.zipDest || config.paths.build
-    let zipFileName = config.plugin.id + '.' + util.getPluginVersion() + '.zip'
-    config.paths.zipDest = util.resolvePath(zipDest)
+    sake.config.paths.zipDest = sake.resolvePath(zipDest)
 
-    return gulp.src([`${config.paths.build}/**/*`, `!${config.paths.build}/**/*.zip`])
+    return gulp.src([`${sake.config.paths.build}/**/*`, `!${sake.config.paths.build}/**/*.zip`])
       .pipe(plugins.zip(zipFileName))
-      .pipe(gulp.dest(config.paths.zipDest))
+      .pipe(gulp.dest(sake.config.paths.zipDest))
   })
 
   gulp.task('zip', gulp.series('build', 'compress'))

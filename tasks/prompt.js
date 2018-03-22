@@ -1,40 +1,38 @@
 const inquirer = require('inquirer')
 const semver = require('semver')
-const _ = require('lodash')
 const chalk = require('chalk')
+const _ = require('lodash')
 
-module.exports = (gulp, config, plugins, options) => {
-  const util = require('../lib/utilities')(config, options)
-
+module.exports = (gulp, plugins, sake) => {
   // internal task for prompting the deploy version
   gulp.task('prompt:deploy', (done) => {
-    let currentVersion = util.getPluginVersion()
+    let currentVersion = sake.getPluginVersion()
 
     inquirer.prompt([
       {
         name: 'version',
         type: 'list',
-        message: 'Plugin Changelog: \n' + util.readChangelog() + '\n\nBump version from ' + chalk.cyan(currentVersion) + ' to:',
+        message: 'Plugin Changelog: \n' + sake.readChangelog() + '\n\nBump version from ' + chalk.cyan(currentVersion) + ' to:',
         'default': getDefault(),
         choices: [
           {
             value: [ currentVersion, 'prerelease' ],
-            name: chalk.yellow('Build:  ' + util.getPluginVersion('prerelease')) +
+            name: chalk.yellow('Build:  ' + sake.getPluginVersion('prerelease')) +
             ' Unstable, betas, and release candidates.'
           },
           {
             value: [ currentVersion, 'patch' ],
-            name: chalk.yellow('Patch:  ' + util.getPluginVersion('patch')) +
+            name: chalk.yellow('Patch:  ' + sake.getPluginVersion('patch')) +
             '   Backwards-compatible bug fixes.'
           },
           {
             value: [ currentVersion, 'minor' ],
-            name: chalk.yellow('Minor:  ' + util.getPluginVersion('minor')) +
+            name: chalk.yellow('Minor:  ' + sake.getPluginVersion('minor')) +
             '   Add functionality in a backwards-compatible manner.'
           },
           {
             value: [ currentVersion, 'major' ],
-            name: chalk.yellow('Major:  ' + util.getPluginVersion('major')) +
+            name: chalk.yellow('Major:  ' + sake.getPluginVersion('major')) +
             '   Incompatible API changes.'
           },
           {
@@ -61,7 +59,7 @@ module.exports = (gulp, config, plugins, options) => {
         }
       }
     ]).then(function (answers) {
-      options = _.merge(options, answers)
+      sake.options = _.merge(sake.options, answers)
       done()
     })
   })
@@ -81,7 +79,7 @@ module.exports = (gulp, config, plugins, options) => {
   function getDefault () {
     var value = 1
 
-    switch (util.getDefaultIncrement()) {
+    switch (sake.getDefaultIncrement()) {
       case 'minor':
         value = 2
         break

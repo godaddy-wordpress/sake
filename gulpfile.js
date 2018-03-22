@@ -104,9 +104,9 @@ let options = minimist(process.argv.slice(2), {
   }
 })
 
-const util = require('./lib/utilities')(config, options)
+const sake = require('./lib/sake')(config, options)
 
-util.initConfig()
+sake.initConfig()
 
 let plugins = require('gulp-load-plugins')()
 
@@ -133,7 +133,7 @@ plugins.browserSync = require('browser-sync').create()
 
 // load gulp plugins and tasks
 require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
-  require(path.join(__dirname, 'tasks', file))(gulp, config, plugins, options)
+  require(path.join(__dirname, 'tasks', file))(gulp, plugins, sake)
 })
 
 gulp.task('default', gulp.series('compile'))
