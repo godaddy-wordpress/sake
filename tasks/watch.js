@@ -22,7 +22,7 @@ module.exports = (gulp, plugins, sake) => {
         if (err) {
           log.error(err)
         }
-        port = bs.sake.options.get('port')
+        port = bs.options.get('port')
       })
     }
 
@@ -31,7 +31,7 @@ module.exports = (gulp, plugins, sake) => {
 
     // kick off the watchers
     // TODO: consider breaking the pipes apart, so that we can only lint and compile the
-    // files that were actually changed (ie not all coffee files when only a single one was changed)
+    // files that were actually changed (ie not all coffee files when only a single one was changed) {IT 2018-03-21}
     gulp.watch(sake.config.paths.assetPaths.javascriptSources, gulp.parallel('scripts:js'))
     gulp.watch(`${sake.config.paths.assetPaths.js}/**/*.coffee`, gulp.parallel('scripts:coffee'))
     gulp.watch(`${sake.config.paths.assetPaths.css}/**/*.scss`, gulp.parallel('styles'))
