@@ -32,7 +32,7 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint plain JS
   gulp.task('lint:js', () => {
-    let esLintFile = sake.options['eslint-sake.configFile'] ? path.join(process.cwd(), sake.options['eslint-sake.configFile']) : path.join(__dirname, '../lib/lintfiles/.eslintrc')
+    let esLintFile = sake.options['eslint-configFile'] ? path.join(process.cwd(), sake.options['eslint-configFile']) : path.join(__dirname, '../lib/lintfiles/.eslintrc')
 
     return gulp.src(sake.config.paths.assetPaths.javascriptSources)
       .pipe(plugins.eslint({ configFile: esLintFile }))

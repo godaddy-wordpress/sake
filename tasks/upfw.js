@@ -5,7 +5,7 @@ const dottie = require('dottie')
 module.exports = (gulp, plugins, sake) => {
   // reload the framework version after updating the framework
   gulp.task('set_framework_version', (done) => {
-    sake.config.plugin.frameworkVersion = require('../lib/utilities')(sake.config, sake.options).getFrameworkVersion()
+    sake.config.plugin.frameworkVersion = sake.getFrameworkVersion()
     done()
   })
 

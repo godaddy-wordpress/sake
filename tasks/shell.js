@@ -129,7 +129,7 @@ module.exports = (gulp, plugins, sake) => {
     shell.exec(command.join(' && '), (code, stdout, stderr) => {
       // ignore missing ref error - this will happen when the remote repo is empty (for example, a new WC plugin)
       // and we try to `git pull`
-      if (code === 1 && stderr.indexOf('Your sake.configuration specifies to merge with the ref') > -1) {
+      if (code === 1 && stderr.indexOf('Your configuration specifies to merge with the ref') > -1) {
         return done()
       } else {
         return done(code > 0 ? 'Command failed [exit code ' + code + ']: ' + command : null)

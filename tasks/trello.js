@@ -11,7 +11,7 @@ module.exports = (gulp, plugins, sake) => {
 
     // sanity check
     if (!sake.config.trelloBoard) {
-      sake.throwError('No Trello board sake.configured')
+      sake.throwError('No Trello board configured')
     }
 
     sake.validateEnvironmentVariables(['TRELLO_API_KEY', 'TRELLO_API_TOKEN'])
