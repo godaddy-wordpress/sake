@@ -162,11 +162,12 @@ module.exports = (gulp, plugins, sake) => {
           assignee: assignee,
           labels: [ sake.config.plugin.id.replace('woocommerce-', ''), 'docs', 'sales' ]
         }, function (err, result) {
-          if (!err) {
-            log(result)
-            log('Docs issue created!')
-          }
-          sake.throwError(err)
+          if (err) sake.throwError(err)
+
+          log(result)
+          log('Docs issue created!')
+
+          done()
         })
       } else {
         log.warn('No docs issue was created for ' + sake.getPluginName())
