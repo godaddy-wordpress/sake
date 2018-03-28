@@ -234,6 +234,7 @@ module.exports = (gulp, plugins, sake) => {
 
     let command = [
       'cd ' + path.join(sake.getProductionRepoPath(), 'tags', sake.getPluginVersion()),
+      'svn add .',
       'svn commit --force-interactive --username="' + sake.config.deploy.production.user + '" -m "' + commitMsg + '"'
     ].join(' && ')
 
