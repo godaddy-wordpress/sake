@@ -67,8 +67,8 @@ module.exports = (gulp, plugins, sake) => {
       .pipe(plugins.rename({ suffix: '.min' }))
       // ensure admin/ and frontend/ are removed from the source paths
       // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-      .pipe(plugins.sourcemaps.mapSources((sourcePath, file) => '../' + sourcePath))
-      .pipe(plugins.sourcemaps.write('.', { mapFile: (mapFilePath) => mapFilePath.replace('.css.map', '.map') })) // source map files are named *.map instead of *.js.map
+      .pipe(plugins.sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
+      .pipe(plugins.sourcemaps.write('.', { includeContent: false }))
       .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
       .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
   })
