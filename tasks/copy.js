@@ -110,7 +110,7 @@ module.exports = (gulp, plugins, sake) => {
       .pipe(plugins.replace(/^.*sourceMappingURL=.*$/mg, '')) // remove source mapping references - TODO: consider skipping sourcemaps in compilers instead when running build/deploy tasks
       .pipe(plugins.replace('\n', '')) // remove an extra line added by libsass/node-sass
       .pipe(filter.restore)
-      .pipe(gulp.dest(sake.config.paths.build))
+      .pipe(gulp.dest(`${sake.config.paths.build}/${sake.config.plugin.id}`))
   })
 
   // copy plugin zip and changelog to prereleases folder
@@ -119,7 +119,7 @@ module.exports = (gulp, plugins, sake) => {
 
     return gulp.src([
       `${sake.config.paths.build}/${sake.config.plugin.id}*.zip`,
-      `${sake.config.paths.build}/changelog.txt`
+      `${sake.config.paths.build}/${sake.config.plugin.id}/changelog.txt`
     ]).pipe(filter)
       .pipe(plugins.rename({ prefix: sake.config.plugin.id + '_' }))
       .pipe(filter.restore)
@@ -128,12 +128,12 @@ module.exports = (gulp, plugins, sake) => {
 
   // copy files from build to WC repo folder
   gulp.task('copy:wc_repo', () => {
-    return gulp.src(`${sake.config.paths.build}/**/*`).pipe(gulp.dest(sake.getProductionRepoPath()))
+    return gulp.src(`${sake.config.paths.build}/${sake.config.plugin.id}/**/*`).pipe(gulp.dest(sake.getProductionRepoPath()))
   })
 
   // copy files from build to WP trunk folder
   gulp.task('copy:wp_trunk', () => {
-    return gulp.src(`${sake.config.paths.build}/**/*`).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'trunk')))
+    return gulp.src(`${sake.config.paths.build}/${sake.config.plugin.id}/**/*`).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'trunk')))
   })
 
   // copy files from build to WP assets folder
