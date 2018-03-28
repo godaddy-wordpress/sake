@@ -10,7 +10,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // clean (empty) build dir
   gulp.task('clean:build', () => {
-    return gulp.src(sake.config.paths.build, defaultOptions).pipe(plugins.clean({ force: true }))
+    return gulp.src([
+      `${sake.config.paths.build}/${sake.config.plugin.id}`,
+      `${sake.config.paths.build}/${sake.config.plugin.id}.*.zip`
+    ], defaultOptions).pipe(plugins.clean({ force: true }))
   })
 
   // clean WooCommerce repo dir
