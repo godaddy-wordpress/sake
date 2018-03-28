@@ -14,6 +14,10 @@ module.exports = (gulp, plugins, sake) => {
       sake.throwError('No Trello board configured')
     }
 
+    if (!sake.options.release_url) {
+      sake.throwError('No release url set. Set a release url with --release_url option')
+    }
+
     sake.validateEnvironmentVariables(['TRELLO_API_KEY', 'TRELLO_API_TOKEN'])
 
     let trello = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOKEN)
