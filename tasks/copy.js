@@ -44,7 +44,7 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
 
       // skip sake sake.config
-      `!${sake.config.paths.src}/**/sake.sake.config.js`
+      `!${sake.config.paths.src}/**/sake.config.js`
     ]
 
     if (sake.config.framework) {
