@@ -79,22 +79,23 @@ module.exports = (gulp, plugins, sake) => {
     // skip copying composer dev packages
     if (sake.config.composer) {
       if (sake.config.composer['require-dev']) {
-        let vendorPath = dottie.get(sake.config.composer, 'sake.config.vendor-dir') || 'vendor'
-
         Object.keys(sake.config.composer['require-dev']).forEach((pkg) => {
           // skip copying the dev package directory
-          let packagePath = path.join(vendorPath, pkg)
+          let packagePath = path.join(sake.config.paths.vendor, pkg)
 
           // if there are no other non-dev packages from the same vendor, skip the folder for the vendor itself as well
           let vendor = pkg.split('/')[0]
 
           if (!(sake.config.composer.require && Object.keys(sake.config.composer.require).some((pkg) => pkg.indexOf(vendor) > -1))) {
-            packagePath = path.join(vendorPath, vendor)
+            packagePath = path.join(sake.config.paths.vendor, vendor)
           }
 
           paths.push(`!${packagePath}{,/**}`)
         })
       }
+
+      // skip copying binaries
+      paths.push(`!${sake.config.paths.vendor}/bin{,/**}`)
 
       // skip composer autoloader, unless required
       if (!sake.config.autoload && sake.config.paths.vendor) {
@@ -105,7 +106,7 @@ module.exports = (gulp, plugins, sake) => {
       }
     }
 
-    return gulp.src(paths, { nodir: true, base: sake.config.paths.src })
+    return gulp.src(paths, { base: sake.config.paths.src })
       .pipe(filter)
       .pipe(plugins.replace(/^.*sourceMappingURL=.*$/mg, '')) // remove source mapping references - TODO: consider skipping sourcemaps in compilers instead when running build/deploy tasks
       .pipe(plugins.replace('\n', '')) // remove an extra line added by libsass/node-sass
