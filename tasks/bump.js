@@ -31,7 +31,7 @@ module.exports = (gulp, plugins, sake) => {
       .pipe(plugins.if(Boolean(sake.options.tested_up_to_wp_version), pipes.tested_up_to_wp_version()))
       .pipe(plugins.if(Boolean(sake.options.minimum_wc_version), pipes.minimum_wc_version()))
       .pipe(plugins.if(Boolean(sake.options.tested_up_to_wc_version), pipes.tested_up_to_wc_version()))
-      .pipe(plugins.if(Boolean(sake.options.framework_version && sake.config.framework === 'v4'), pipes.framework_version_v4()))
+      .pipe(plugins.if(Boolean(sake.options.framework_version), pipes.framework_version()))
       .pipe(plugins.if(Boolean(sake.options.backwards_compatible && sake.config.framework === 'v4'), pipes.backwards_compatible()))
       .pipe(gulp.dest(sake.config.paths.src))
   })

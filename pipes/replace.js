@@ -34,9 +34,10 @@ module.exports = (plugins, sake) => {
     .pipe(plugins.replace, /SkyVerge\\WooCommerce\\PluginFramework\\v[0-9]+_[0-9]+_[0-9]+/g, (match) => 'SkyVerge\\WooCommerce\\PluginFramework\\v' + sake.options.framework_version.replace(/\./g, '_'))
     .pipe(plugins.replace, /SkyVerge\\\\WooCommerce\\\\PluginFramework\\\\v[0-9]+_[0-9]+_[0-9]+/g, (match) => 'SkyVerge\\\\WooCommerce\\\\PluginFramework\\\\v' + sake.options.framework_version.replace(/\./g, '_'))
 
-  // replace FW version v4
-  pipes.framework_version_v4 = lazypipe()
+  // replace FW version v4 and v5
+  pipes.framework_version = lazypipe()
     .pipe(plugins.replace, /SV_WC_Framework_Bootstrap::instance\(\)->register_plugin\( '([^']*)'/, () => `SV_WC_Framework_Bootstrap::instance()->register_plugin( '${sake.options.framework_version}'`)
+    .pipe(plugins.replace, /FRAMEWORK_VERSION = .*\n/, () => `FRAMEWORK_VERSION = '${sake.options.framework_version}';\n`)
 
   // replace FW backwards comaptibility
   pipes.backwards_compatible = lazypipe()
