@@ -196,7 +196,7 @@ module.exports = (gulp, plugins, sake) => {
       github.repos.createRelease({
         owner: owner,
         repo: repo,
-        tag_name: version,
+        tag_name: sake.config.multiPluginRepo ? sake.config.plugin.id + '-' + version : version,
         name: sake.getPluginName(false) + ' v' + version,
         body: sake.getPluginChanges()
       }, function (err, result) {
