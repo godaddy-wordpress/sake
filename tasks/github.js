@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const async = require('async')
 const chalk = require('chalk')
-const codename = require('codename')
+const codename = require('codename')()
 const dateFormat = require('dateformat')
 const log = require('fancy-log')
 
@@ -252,7 +252,8 @@ module.exports = (gulp, plugins, sake) => {
       d.setDate(d.getDate() + (9 - d.getDay()) % 7)
 
       while (y === d.getFullYear()) {
-        tuesdays.push(new Date(d.getTime()))
+        let date = new Date(d.getTime())
+        tuesdays.push({date: date, name: `Deploy on ${dateFormat(date, 'mm/dd')}`})
         d.setDate(d.getDate() + 7)
       }
 
@@ -263,12 +264,11 @@ module.exports = (gulp, plugins, sake) => {
   // create monthly milestones
   gulp.task('github:create_month_milestones', (done) => {
     let year = sake.options.year || new Date().getFullYear()
-    let months = getMonths(year)
 
-    createMilestones(months, done)
+    createMilestones(getMonthlyMilestones(year), done)
 
     // helper to get all months in a year
-    function getMonths (y) {
+    function getMonthlyMilestones (y) {
       // ensure year is an integer
       y = parseInt(y, 10)
 
@@ -276,7 +276,7 @@ module.exports = (gulp, plugins, sake) => {
 
       for (let i = 0; i < 12; i++) {
         let d = new Date(y, i + 1, 0)
-        months.push(d)
+        months.push({date: d, name: dateFormat(d, 'mmmm yyyy')})
       }
 
       return months
@@ -284,9 +284,9 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   // create a milestone for each date passed in
-  const createMilestones = (dates, done) => {
-    let owner = sake.options.owner || 'skyverge'
-    let repo = sake.options.repo || sake.config.plugin.id
+  const createMilestones = (milestones, done) => {
+    let owner = sake.options.owner || sake.config.deploy.dev.owner
+    let repo = sake.options.repo || sake.config.deploy.dev.name
     let github = new GitHub({ debug: false })
 
     github.authenticate({
@@ -295,26 +295,34 @@ module.exports = (gulp, plugins, sake) => {
       password: process.env.GITHUB_API_KEY
     })
 
-    async.each(dates, function (date, cb) {
-      let milestoneName = codename.generate([ 'unique', 'alliterative', 'random' ], [ 'adjectives', 'animals' ])
+    async.eachLimit(milestones, 5, function (milestone, cb) {
+      let description = codename.generate([ 'unique', 'alliterative', 'random' ], [ 'adjectives', 'animals' ]).join(' ')
+      let formattedDate = dateFormat(milestone.date, 'yyyy-mm-dd')
 
       github.issues.createMilestone({
         owner: owner,
         repo: repo,
-        title: dateFormat(date, 'mmmm yyyy'),
-        description: milestoneName ? milestoneName[0] + ' ' + milestoneName[1] : '',
-        due_on: date
+        title: milestone.name,
+        description: description,
+        due_on: milestone.date
       }, function (err, result) {
         if (err) {
-          log.error('Error creating milestone')
+          // format the error for readability
+          let formattedError = err
+          try {
+            if (err.message) {
+              err = JSON.parse(err.message)
+            }
+            formattedError = JSON.stringify(err, null, 2)
+          } catch (e) {}
+          log.error(chalk.red(`Error creating milestone ${description} for ${formattedDate}:`) + '\n' + formattedError)
         } else {
-          log(result)
-          log('Milestone created!')
+          log.info(chalk.green(`Milestone ${description} for ${formattedDate} created!`))
         }
         cb()
       })
     }, function (error) {
-      done(!error)
+      done(error)
     })
   }
 }
