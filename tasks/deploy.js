@@ -170,6 +170,7 @@ module.exports = (gulp, plugins, sake) => {
       function (cb) {
         sake.options.owner = sake.config.deploy.dev.owner
         sake.options.repo = sake.config.deploy.dev.name
+        sake.options.prefix_release_tag = sake.config.multiPluginRepo
         cb()
       },
       'github:create_release'
@@ -180,6 +181,7 @@ module.exports = (gulp, plugins, sake) => {
         function (cb) {
           sake.options.owner = sake.config.deploy.production.owner
           sake.options.repo = sake.config.deploy.production.name
+          sake.options.prefix_release_tag = false
           cb()
         },
         'github:create_release'
