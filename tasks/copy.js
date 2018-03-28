@@ -115,11 +115,13 @@ module.exports = (gulp, plugins, sake) => {
 
   // copy plugin zip and changelog to prereleases folder
   gulp.task('copy:prerelease', () => {
-    const filter = plugins.filter(['**/changelog.txt'], { restore: true })
+    let filename = sake.config.deploy.type === 'wp' ? 'readme' : 'changelog'
+
+    const filter = plugins.filter([`**/${filename}.txt`], { restore: true })
 
     return gulp.src([
       `${sake.config.paths.build}/${sake.config.plugin.id}*.zip`,
-      `${sake.config.paths.build}/${sake.config.plugin.id}/changelog.txt`
+      `${sake.config.paths.build}/${sake.config.plugin.id}/${filename}.txt`
     ]).pipe(filter)
       .pipe(plugins.rename({ prefix: sake.config.plugin.id + '_' }))
       .pipe(filter.restore)
