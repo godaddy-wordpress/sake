@@ -53,8 +53,10 @@ module.exports = (gulp, plugins, sake) => {
 
       // get the card for our plugin
       (board, list, cb) => {
+        // TODO: consider displaying the results in a list and adding a prompt to allow manually selecting
+        // the correct card to update {IT 2018-03-28}
         let query = querystring.stringify({
-          query: sake.config.plugin.id,
+          query: 'name:' + sake.config.plugin.name.replace('WooCommerce', '').trim(),
           modelType: 'cards',
           idBoards: board.id,
           board_fields: 'name',
