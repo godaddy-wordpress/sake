@@ -3,6 +3,7 @@ const inquirer = require('inquirer')
 const fs = require('fs')
 const path = require('path')
 const async = require('async')
+const chalk = require('chalk')
 const codename = require('codename')
 const dateFormat = require('dateformat')
 const log = require('fancy-log')
@@ -133,17 +134,24 @@ module.exports = (gulp, plugins, sake) => {
       password: process.env.GITHUB_API_KEY
     })
 
+    let message = 'Should a Docs issue be created for ' + sake.getPluginName() + '?'
+
+    if (sake.pluginHasNewFeatures()) {
+      message += chalk.yellow('\n\nThe changelog below contains new features and/or tweaks.\nA docs issue should always be created for releases with new features or user-facing changes.')
+    }
+
     inquirer.prompt([ {
       type: 'list',
       name: 'create_docs_issue',
-      message: 'Should a Docs issue be created for ' + sake.getPluginName() + '? See the changelog: \n\n' + sake.getPluginChanges() + '\n\n',
+      message: message + '\n\nChangelog: \n\n' + sake.getPluginChanges() + '\n\n',
       choices: [{
         value: 1,
         name: 'Yes -- create a docs issue'
       }, {
         value: 0,
         name: "No -- don't create a docs issue!"
-      }]
+      }],
+      default: sake.pluginHasNewFeatures() ? 0 : 1
     } ]).then(function (answers) {
       if (answers.create_docs_issue) {
         github.issues.create({
