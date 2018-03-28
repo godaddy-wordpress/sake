@@ -11,11 +11,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:get_rissue', (done) => {
     let owner = sake.config.deploy.dev.owner
     let repo = sake.config.deploy.dev.name
-
-    let github = new GitHub({
-      protocol: 'https',
-      debug: false
-    })
+    let github = new GitHub({ debug: false })
 
     github.authenticate({
       type: 'basic',
@@ -77,11 +73,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:get_wc_issues', (done) => {
     let owner = sake.config.deploy.production.owner
     let repo = sake.config.deploy.production.name
-
-    let github = new GitHub({
-      protocol: 'https',
-      debug: false
-    })
+    let github = new GitHub({ debug: false })
 
     github.authenticate({
       type: 'basic',
@@ -133,11 +125,7 @@ module.exports = (gulp, plugins, sake) => {
     let owner = 'skyverge'
     let repo = 'wc-plugins-sales-docs'
     let assignee = 'bekarice'
-
-    let github = new GitHub({
-      protocol: 'https',
-      debug: true
-    })
+    let github = new GitHub({ debug: false })
 
     github.authenticate({
       type: 'basic',
@@ -193,10 +181,7 @@ module.exports = (gulp, plugins, sake) => {
       tasks.push(sake.options.deploy ? 'compress' : 'zip')
     }
 
-    let github = new GitHub({
-      protocol: 'https',
-      debug: true
-    })
+    let github = new GitHub({ debug: false })
 
     github.authenticate({
       type: 'basic',
@@ -294,11 +279,7 @@ module.exports = (gulp, plugins, sake) => {
   const createMilestones = (dates, done) => {
     let owner = sake.options.owner || 'skyverge'
     let repo = sake.options.repo || sake.config.plugin.id
-
-    let github = new GitHub({
-      protocol: 'https',
-      debug: true
-    })
+    let github = new GitHub({ debug: false })
 
     github.authenticate({
       type: 'basic',
