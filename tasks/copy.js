@@ -1,5 +1,4 @@
 const path = require('path')
-const dottie = require('dottie')
 
 module.exports = (gulp, plugins, sake) => {
   // copy files from source to build

@@ -64,13 +64,13 @@ module.exports = (gulp, plugins, sake) => {
       'github:get_wc_issues',
       // git commit & push
       'shell:git_push_update',
-      // deploy to 3rd party repo
-      'deploy_to_production_repo',
       // rebuild plugin sake.options
       function rebuildPluginConfig (cb) {
         sake.buildPluginConfig()
         cb()
       },
+      // deploy to 3rd party repo
+      'deploy_to_production_repo',
       // create the zip, which will be attached to the releases
       'compress',
       // create releases, attaching the zip
