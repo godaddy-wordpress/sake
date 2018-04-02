@@ -1,10 +1,29 @@
 const path = require('path')
+const dottie = require('dottie')
 
 module.exports = (gulp, plugins, sake) => {
   gulp.task('lint', gulp.parallel('lint:php', 'lint:scripts', 'lint:styles'))
 
   gulp.task('lint:php', (done) => {
-    return gulp.src(`${sake.config.paths.src}/**/*.php`)
+
+    let paths = [
+      `${sake.config.paths.src}/**/*.php`,
+      `!${sake.config.paths.vendor}/**/*.php`,
+      `!**/node_modules/**/*.php`
+    ]
+
+    // skip composer paths
+    if (sake.config.composer) {
+      let installerPaths = dottie.get(sake.config.composer, 'extra.installer-paths')
+
+      if (installerPaths) {
+        Object.keys(installerPaths).forEach((vendorPath) => {
+          paths.push(`!${vendorPath}/**/*.php`)
+        })
+      }
+    }
+
+    return gulp.src(paths)
       .pipe(plugins.phplint('', { skipPassedFiles: true, notify: false }))
       .pipe(plugins.phplint.reporter((file) => {
         let report = file.phplintReport || {}
