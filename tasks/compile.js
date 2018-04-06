@@ -60,7 +60,10 @@ module.exports = (gulp, plugins, sake) => {
       cssPlugins.push(require('cssnano')())
     }
 
-    return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
+    return gulp.src([
+      `${sake.config.paths.assetPaths.css}/**/*.scss`,
+      `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
+    ])
       .pipe(plugins.sourcemaps.init())
       .pipe(plugins.sass({ outputStyle: 'nested' }))
       .pipe(plugins.postcss(cssPlugins))
