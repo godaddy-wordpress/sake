@@ -54,8 +54,10 @@ module.exports = (gulp, plugins, sake) => {
     let esLintFile = sake.options['eslint-configFile'] ? path.join(process.cwd(), sake.options['eslint-configFile']) : path.join(__dirname, '../lib/lintfiles/.eslintrc')
 
     return gulp.src(sake.config.paths.assetPaths.javascriptSources)
-      .pipe(plugins.eslint({ configFile: esLintFile }))
-      .pipe(plugins.eslint.failOnError()) // fail task on errors
+      .pipe(plugins.eslint({
+        configFile: esLintFile,
+        quiet: true // only report errors
+      }))
   })
 
   // main task for linting styles
