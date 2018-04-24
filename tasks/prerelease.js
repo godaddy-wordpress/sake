@@ -30,4 +30,6 @@ module.exports = (gulp, plugins, sake) => {
 
     gulp.series('bump', 'zip', 'clean:prerelease', 'copy:prerelease', 'clean:build')(done)
   })
+
+  gulp.task( 'pre', gulp.parallel('prerelease'))
 }
