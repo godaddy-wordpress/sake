@@ -8,8 +8,9 @@ module.exports = (gulp, plugins, sake) => {
     let paths = [
       `${sake.config.paths.src}/**/*`,
 
-      // skip .map file
-      `!${sake.config.paths.src}/**/*.map`,
+      // skip .map files
+      `!${sake.config.paths.src}/${sake.config.paths.js}/**/*.map`,
+      `!${sake.config.paths.src}/${sake.config.paths.css}/**/*.map`,
 
       // skip coffee and unminified js files
       `!${sake.config.paths.src}/${sake.config.paths.js}/**/*.coffee`,
@@ -61,6 +62,12 @@ module.exports = (gulp, plugins, sake) => {
       }
 
       paths = paths.concat([
+        // skip framework .map files
+        `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.general.js}/**/*.map`,
+        `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.gateway.js}/**/*.map`,
+        `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.general.css}/**/*.map`,
+        `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.gateway.css}/**/*.map`,
+
         // skip framework coffee files
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.general.js}/**/*.coffee`,
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.gateway.js}/**/*.coffee`,

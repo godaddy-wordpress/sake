@@ -79,7 +79,7 @@ module.exports = (gulp, plugins, sake) => {
   // ensure the working copy (git tree) has no uncommited changes
   gulp.task('shell:git_ensure_clean_working_copy', (done) => {
     let command = [
-      'git diff-index --quiet HEAD --'
+      'git diff-index --quiet HEAD'
     ].join(' && ')
 
     shell.exec(command, (code) => {
