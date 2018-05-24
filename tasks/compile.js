@@ -57,7 +57,7 @@ module.exports = (gulp, plugins, sake) => {
     let cssPlugins = [require('autoprefixer')()]
 
     if (sake.options.minify) {
-      cssPlugins.push(require('cssnano')())
+      cssPlugins.push(require('cssnano')({ zindex: false }))
     }
 
     return gulp.src([
