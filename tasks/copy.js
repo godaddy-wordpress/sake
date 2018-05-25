@@ -29,6 +29,7 @@ module.exports = (gulp, plugins, sake) => {
       // skip composer and npm files
       `!${sake.config.paths.src}/**/composer.json`,
       `!${sake.config.paths.src}/**/composer.lock`,
+      `!${sake.config.paths.src}/**/options.json`,
       `!${sake.config.paths.src}/**/package.json`,
       `!${sake.config.paths.src}/**/package-lock.json`,
       `!${sake.config.paths.src}/**/node_modules{,/**}`,
@@ -41,6 +42,7 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/codeception*.*`,
       `!${sake.config.paths.src}/**/*.zip`,
       `!${sake.config.paths.src}/**/test.sh`,
+      `!${sake.config.paths.src}/**/readme.md`,
       `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
 
       // skip sake sake.config
