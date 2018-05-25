@@ -158,7 +158,7 @@ module.exports = (gulp, plugins, sake) => {
           owner: owner,
           repo: repo,
           title: sake.getPluginName() + ': Updated to ' + sake.getPluginVersion(),
-          body: sake.getPluginChanges() + (sake.options.release_issue_to_close ? '\r\n\r\nSee skyverge/' + sake.config.plugin.id + '#' + sake.options.release_issue_to_close : ''),
+          body: sake.getPluginChanges() + (sake.options.release_issue_to_close ? '\r\n\r\nSee ' + sake.config.deploy.dev.owner + '/' + sake.config.deploy.dev.name + '#' + sake.options.release_issue_to_close : ''),
           assignee: assignee,
           labels: [ sake.config.plugin.id.replace('woocommerce-', ''), 'docs', 'sales' ]
         }, function (err, result) {
