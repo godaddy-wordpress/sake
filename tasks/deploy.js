@@ -59,12 +59,14 @@ module.exports = (gulp, plugins, sake) => {
       'clean:prerelease',
       // build the plugin - compiles and copies to build dir
       'build',
+      // ensure the required framework version is installed
+      'deploy:validate_framework_version',
       // grab issue to close with commit
       'github:get_rissue',
       'github:get_wc_issues',
       // git commit & push
       'shell:git_push_update',
-      // rebuild plugin sake.options
+      // rebuild plugin configuration (version number, etc)
       function rebuildPluginConfig (cb) {
         sake.buildPluginConfig()
         cb()
@@ -100,6 +102,14 @@ module.exports = (gulp, plugins, sake) => {
     }
 
     gulp.parallel(tasks)(done)
+  })
+
+  gulp.task('deploy:validate_framework_version', (done) => {
+    if (sake.config.framework === 'v5' && sake.getFrameworkVersion() !== sake.getRequiredFrameworkVersion()) {
+      sake.throwError('Required framework version in composer.json (' + sake.getRequiredFrameworkVersion() + ') and installed framework version (' + sake.getFrameworkVersion() + ') do not match. Halting deploy.')
+    }
+
+    done()
   })
 
   // internal task for making sure the WT updater keys have been set
