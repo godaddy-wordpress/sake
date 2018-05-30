@@ -11,5 +11,5 @@ module.exports = (gulp, plugins, sake) => {
     tasks = _.without(tasks, 'shell:composer_install')
   }
 
-  return gulp.task('build', gulp.series(tasks))
+  gulp.task('build', gulp.series(tasks))
 }
