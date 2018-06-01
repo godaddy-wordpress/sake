@@ -17,7 +17,7 @@ module.exports = (gulp, plugins, sake) => {
     let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
 
     if (sake.config.deploy.type === 'wc') {
-      variables.concat(['TRELLO_API_KEY', 'TRELLO_API_TOKEN'])
+      variables.concat(['WC_USERNAME', 'WC_PASSWORD'])
     }
 
     sake.validateEnvironmentVariables(variables)
@@ -79,8 +79,8 @@ module.exports = (gulp, plugins, sake) => {
       'deploy_create_releases'
     ]
 
-    if (sake.config.trelloBoard && sake.config.deploy.type === 'wc') {
-      tasks.push('trello:update_wc_card')
+    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+      tasks.push('wc:deploy')
     }
 
     // finally, create a docs issue, if necessary
