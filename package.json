@@ -26,6 +26,7 @@
     "babel-preset-env": "^1.6.1",
     "browser-sync": "^2.23.6",
     "chalk": "^2.3.2",
+    "chromeless": "^1.5.2",
     "codename": "0.0.4",
     "cssnano": "^3.10.0",
     "dateformat": "^3.0.3",
