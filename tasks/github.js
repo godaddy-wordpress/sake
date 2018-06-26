@@ -213,7 +213,6 @@ module.exports = (gulp, plugins, sake) => {
 
         log('GH release created')
 
-        // set the release url for Trello task
         sake.options.release_url = result.data.html_url
 
         github.repos.uploadAsset({
