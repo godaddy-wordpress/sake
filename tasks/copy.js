@@ -114,6 +114,11 @@ module.exports = (gulp, plugins, sake) => {
       }
     }
 
+    // skip the WP assets dir if it's in the root
+    if (sake.config.deploy.type === 'wp' && sake.config.paths.wpAssets) {
+      paths.push(`!${sake.config.paths.wpAssets}{,/**}`)
+    }
+
     return gulp.src(paths, { base: sake.config.paths.src })
       .pipe(filter)
       .pipe(plugins.replace(/^.*sourceMappingURL=.*$/mg, '')) // remove source mapping references - TODO: consider skipping sourcemaps in compilers instead when running build/deploy tasks
