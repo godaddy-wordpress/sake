@@ -125,7 +125,6 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:docs_issue', (done) => {
     let owner = 'skyverge'
     let repo = 'wc-plugins-sales-docs'
-    let assignee = 'bekarice'
     let github = new GitHub({ debug: false })
 
     github.authenticate({
@@ -159,7 +158,6 @@ module.exports = (gulp, plugins, sake) => {
           repo: repo,
           title: sake.getPluginName() + ': Updated to ' + sake.getPluginVersion(),
           body: sake.getPluginChanges() + (sake.options.release_issue_to_close ? '\r\n\r\nSee ' + sake.config.deploy.dev.owner + '/' + sake.config.deploy.dev.name + '#' + sake.options.release_issue_to_close : ''),
-          assignee: assignee,
           labels: [ sake.config.plugin.id.replace('woocommerce-', ''), 'docs', 'sales' ]
         }, function (err, result) {
           if (err) sake.throwError(err)
