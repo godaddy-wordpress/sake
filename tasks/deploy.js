@@ -311,19 +311,23 @@ module.exports = (gulp, plugins, sake) => {
 
     let requests = []
 
-    requests.push((cb) => {
-      request('https://api.wordpress.org/core/version-check/1.7/', (err, res, body) => {
-        if (err) return cb(err)
+    // only fetch the latest if a version is specified
+    // this allows us to set to a version that isn't yet released
+    if ( ! sake.options['tested_up_to_wp_version'] ) {
+      requests.push((cb) => {
+        request('https://api.wordpress.org/core/version-check/1.7/', (err, res, body) => {
+          if (err) return cb(err)
 
-        if (body) {
-          sake.options.tested_up_to_wp_version = JSON.parse(body).offers[0].version
-        }
+          if (body) {
+            sake.options.tested_up_to_wp_version = JSON.parse(body).offers[0].version
+          }
 
-        return cb()
+          return cb()
+        })
       })
-    })
+    }
 
-    if (sake.config.platform === 'wc') {
+    if (sake.config.platform === 'wc' && ! sake.options['tested_up_to_wc_version'] ) {
       requests.push((cb) => {
         request('https://api.wordpress.org/plugins/info/1.0/woocommerce.json', (err, res, body) => {
           if (err) return cb(err)
