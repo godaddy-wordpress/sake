@@ -55,7 +55,9 @@ let defaults = {
     // the directory where plugin files are copied during the build task, relative to current working directory
     build: 'build',
     // path to the directory where production (WC and WP.org SVN) repos are cloned, may be an absolute path or relative to current working directory
-    tmp: '/tmp/sake'
+    tmp: '/tmp/sake',
+    // array of paths that should be excluded from the build
+    exclude: []
   },
 
   // Task-specific settings, set the key to task name and provide any settings as needed. Since sake uses Gulp behind the scenes
