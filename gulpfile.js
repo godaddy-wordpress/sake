@@ -61,10 +61,11 @@ let defaults = {
   // Task-specific settings, set the key to task name and provide any settings as needed. Since sake uses Gulp behind the scenes
   // and Gulp prefers code over configuration, there isn't a lot to do here. As you can see, some of these values can be defined
   // as environment variables, as this makes more sense - ie whether you want to use browsersync or not is specific tp your local
-  // dev environment and workflow, not to a particualr repo.
+  // dev environment and workflow, not to a particular repo.
   tasks: {
     makepot: {
-      reportBugsTo: 'https://woocommerce.com/my-account/marketplace-ticket-form/'
+      reportBugsTo: 'https://woocommerce.com/my-account/marketplace-ticket-form/',
+      domainPath: '/i18n/languages'
     },
     watch: {
       useBrowserSync: process.env.USE_BROWSERSYNC || false
