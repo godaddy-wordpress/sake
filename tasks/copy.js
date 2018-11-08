@@ -8,6 +8,9 @@ module.exports = (gulp, plugins, sake) => {
     let paths = [
       `${sake.config.paths.src}/**/*`,
 
+      // skip archived projects
+      `!${sake.config.paths.src}/**/archive`,
+
       // skip .map files
       `!${sake.config.paths.src}/${sake.config.paths.js}/**/*.map`,
       `!${sake.config.paths.src}/${sake.config.paths.css}/**/*.map`,
