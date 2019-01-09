@@ -41,6 +41,7 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/sake.options.json`,
       `!${sake.config.paths.src}/**/codeception*.*`,
       `!${sake.config.paths.src}/**/*.zip`,
+      `!${sake.config.paths.src}/**/*.iml`, // IDE configuration
       `!${sake.config.paths.src}/**/test.sh`,
       `!${sake.config.paths.src}/**/readme.md`,
       `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
