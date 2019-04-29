@@ -9,10 +9,13 @@ const _ = require('lodash')
 const ForwardReference = require('undertaker-forward-reference')
 
 // local .env file, overriding any global env variables
-if (fs.existsSync('.env')) {
-  let result = require('dotenv').config()
+let parentEnvPath = path.join('..', '.env')
+let envPath = fs.existsSync('.env') ? '.env' : (fs.existsSync(parentEnvPath) ? parentEnvPath : null)
 
-  log.warn('Loading ENV variables from .env file')
+if (envPath) {
+  let result = require('dotenv').config({ path: envPath })
+
+  log.warn(`Loading ENV variables from ${path.join(process.cwd(), envPath)}`)
 
   for (let k in result.parsed) {
     process.env[k] = result.parsed[k]
