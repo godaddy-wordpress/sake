@@ -3,8 +3,7 @@ const log = require('fancy-log')
 const dateFormat = require('dateformat')
 const _ = require('lodash')
 const chalk = require('chalk')
-const async = require('async')
-const request = require('request')
+const axios = require('axios')
 
 module.exports = (gulp, plugins, sake) => {
   let validatedEnvVariables = false
@@ -313,39 +312,30 @@ module.exports = (gulp, plugins, sake) => {
 
     // only fetch the latest if a version is specified
     // this allows us to set to a version that isn't yet released
-    if ( ! sake.options['tested_up_to_wp_version'] ) {
-      requests.push((cb) => {
-        request('https://api.wordpress.org/core/version-check/1.7/', (err, res, body) => {
-          if (err) return cb(err)
-
-          if (body) {
-            sake.options.tested_up_to_wp_version = JSON.parse(body).offers[0].version
-          }
-
-          return cb()
-        })
-      })
+    if (!sake.options.tested_up_to_wp_version) {
+      requests.push(
+        axios.get('https://api.wordpress.org/core/version-check/1.7/')
+          .then(res => {
+            sake.options.tested_up_to_wp_version = res.data.offers[0].version
+          })
+      )
     }
 
-    if (sake.config.platform === 'wc' && ! sake.options['tested_up_to_wc_version'] ) {
-      requests.push((cb) => {
-        request('https://api.wordpress.org/plugins/info/1.0/woocommerce.json', (err, res, body) => {
-          if (err) return cb(err)
+    if (sake.config.platform === 'wc' && !sake.options.tested_up_to_wc_version) {
+      requests.push(
+        axios.get('https://api.wordpress.org/plugins/info/1.0/woocommerce.json')
+          .then(res => {
+            if (res.data.error) {
+              throw res.data.error
+            }
 
-          if (body) {
-            sake.options.tested_up_to_wc_version = JSON.parse(body).version
-          }
-
-          return cb()
-        })
-      })
+            sake.options.tested_up_to_wc_version = res.data.version
+          })
+      )
     }
 
-    async.parallel(requests, (err) => {
-      if (err) {
-        log.error('An error occurred when fetching latest WP / WC versions: ' + err.toString())
-      }
-      done()
-    })
+    axios.all(requests)
+      .then(() => done())
+      .catch(err => sake.throwDeferredError('An error occurred when fetching latest WP / WC versions: ' + err.toString()))
   })
 }
