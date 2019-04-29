@@ -15,6 +15,10 @@ module.exports = (gulp, plugins, sake) => {
 
     let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
 
+    if (sake.config.deploy.type === 'wc') {
+      variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+    }
+
     sake.validateEnvironmentVariables(variables)
   }
 
@@ -73,6 +77,10 @@ module.exports = (gulp, plugins, sake) => {
       // create releases, attaching the zip
       'deploy_create_releases'
     ]
+
+    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+      tasks.push('wc:deploy')
+    }
 
     // finally, create a docs issue, if necessary
     tasks.push('github:docs_issue')
@@ -148,7 +156,7 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/*.xml`,
       `!${sake.config.paths.src}/*.yml`
     ], { base: './', allowEmpty: true })
-      // unlike gulp-replace, gulp-replace-task supports multiple replacements
+    // unlike gulp-replace, gulp-replace-task supports multiple replacements
       .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
       .pipe(filter)
       .pipe(plugins.replace('XXXX.XX.XX', date))
