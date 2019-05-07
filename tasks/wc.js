@@ -27,8 +27,19 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('wc:validate', done => {
     log.info('Making sure plugin is deployable...')
 
-    axios.get(getApiURL('queue-item'), apiOptions)
+    let url = getApiURL('queue-item')
+
+    if (sake.options.debug) {
+      log.info('GET: ', url)
+    }
+
+    axios.get(url, apiOptions)
       .then(res => {
+        if (sake.options.debug) {
+          log.info('Response:')
+          console.debug(res.data)
+        }
+
         if (res.data.code && res.data.code === 'wccom_rest_no_queue_item') {
           log.info('No previous upload in queue')
           return done()
@@ -41,6 +52,8 @@ module.exports = (gulp, plugins, sake) => {
         if (res.data.queue_item_version && semver.gte(res.data.queue_item_version, sake.getPluginVersion())) {
           throw `Queued version for plugin is already higher than or equal to ${sake.getPluginVersion()}`
         }
+
+        log.info('Plugin can be deployed')
 
         done()
       })
@@ -55,17 +68,30 @@ module.exports = (gulp, plugins, sake) => {
 
     log.info('Getting plugin upload URL...')
 
-    axios.post(getApiURL('init'), null, apiOptions)
+    let url = getApiURL('init')
+
+    if (sake.options.debug) {
+      log.info('POST: ', url)
+    }
+
+    axios.post(url, null, apiOptions)
       .then(res => {
+        if (sake.options.debug) {
+          log.info('Response:')
+          console.debug(res.data)
+        }
+
         if (res.data.code) {
           throw `Unexpected response code from WC API (${res.data.code})`
         }
 
-        if (res.data.upload_url) {
+        if (!res.data.upload_url) {
           throw `WC API did not return a upload URL`
         }
 
         sake.options.wc_upload_url = res.data.upload_url
+
+        log.info('Received upload URL (%s)', res.data.upload_url)
 
         done()
       })
@@ -81,8 +107,19 @@ module.exports = (gulp, plugins, sake) => {
 
     log.info('Uploading plugin to woocommerce.com...')
 
-    axios.post(sake.options.wc_upload_url, {file: fs.createReadStream(zipPath)}, apiOptions)
+    let url = sake.options.wc_upload_url
+
+    if (sake.options.debug) {
+      log.info('POST: ', url)
+    }
+
+    axios.post(url, { file: fs.createReadStream(zipPath) }, apiOptions)
       .then(res => {
+        if (sake.options.debug) {
+          log.info('Response:')
+          console.debug(res.data)
+        }
+
         if (res.data.code) {
           throw `Unexpected response code from WC API (${res.data.code})`
         }
@@ -92,6 +129,8 @@ module.exports = (gulp, plugins, sake) => {
         }
 
         sake.options.wc_upload_queue_item_id = res.data.queue_item_id
+
+        log.info('Plugin successfully uploaded')
 
         done()
       })
@@ -104,14 +143,28 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('wc:notify', (done) => {
     log.info('Notifying Woo that the plugin has been uploaded...')
 
-    axios.patch(getApiURL('queue-item'), {
+    let url = getApiURL('queue-item')
+
+    if (sake.options.debug) {
+      log.info('PATCH: ', url)
+    }
+
+    axios.patch(url, {
       queue_item_id: sake.options.wc_upload_queue_item_id,
       queue_item_version: sake.getPluginVersion()
     }, apiOptions)
       .then(res => {
+        if (sake.options.debug) {
+          log.info('Response:')
+          console.debug(res.data)
+        }
+
         if (res.data.code) {
           throw `Unexpected response code from WC API (${res.data.code})`
         }
+
+        log.info('Woo has been notified!')
+
         done()
       })
       .catch(err => {
