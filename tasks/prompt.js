@@ -64,6 +64,21 @@ module.exports = (gulp, plugins, sake) => {
     })
   })
 
+  // internal task for prompting whether to upload the plugin to woo
+  gulp.task('prompt:wc_upload', (done) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'upload_to_wc',
+      message: 'Upload plugin to WooCommerce.com?'
+    }]).then((answers) => {
+      if (answers.upload_to_wc) {
+        gulp.series('wc:deploy')(done)
+      } else {
+        done()
+      }
+    })
+  })
+
   function filterIncrement (value) {
     if (value[1] === 'custom') {
       return 'custom'

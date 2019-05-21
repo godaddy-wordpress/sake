@@ -79,7 +79,7 @@ module.exports = (gulp, plugins, sake) => {
     ]
 
     if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
-      tasks.push('wc:deploy')
+      tasks.push('prompt:wc_upload')
     }
 
     // finally, create a docs issue, if necessary
