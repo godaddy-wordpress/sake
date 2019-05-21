@@ -1,5 +1,6 @@
 const inquirer = require('inquirer')
 const semver = require('semver')
+const log = require('fancy-log')
 const chalk = require('chalk')
 const _ = require('lodash')
 
@@ -74,6 +75,7 @@ module.exports = (gulp, plugins, sake) => {
       if (answers.upload_to_wc) {
         gulp.series('wc:deploy')(done)
       } else {
+        log.error(chalk.red('Skipped uploading to WooCommerce.com'))
         done()
       }
     })
