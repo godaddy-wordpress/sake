@@ -63,6 +63,7 @@
     "node-wp-i18n": "^1.2.1",
     "parse-git-config": "^2.0.3",
     "parse-github-url": "^1.0.2",
+    "request": "^2.88.0",
     "resolve-bin": "^0.4.0",
     "semver": "^5.5.1",
     "shelljs": "^0.8.2",

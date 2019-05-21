@@ -111,32 +111,48 @@ module.exports = (gulp, plugins, sake) => {
 
     if (sake.options.debug) {
       log.info('POST: ', url)
+      log.info('Using ZIP file: %s as %s', zipPath, `${sake.config.plugin.id}.zip`)
     }
 
-    axios.post(url, { file: fs.createReadStream(zipPath) }, apiOptions)
-      .then(res => {
-        if (sake.options.debug) {
-          log.info('Response:')
-          console.debug(res.data)
+    // Using request module here because it looks like axios does not really support
+    // uploads in node, yet: https://github.com/axios/axios/issues/2
+    require('request').post({
+      url: url,
+      formData: {
+        file: {
+          value: fs.createReadStream(zipPath),
+          options: {
+            filename: `${sake.config.plugin.id}.zip`,
+            contentType: 'application/zip'
+          }
         }
+      },
+      json: true
+    }, (err, res, body) => {
 
-        if (res.data.code) {
-          throw `Unexpected response code from WC API (${res.data.code})`
-        }
+      if (err) {
+        throw `Unexpected error when uploading (${err})`
+      }
 
-        if (!res.data.queue_item_id) {
-          throw `WC API did not return a queue item id (${res.data.message})`
-        }
+      if (sake.options.debug) {
+        log.info('Response:')
+        console.debug(body)
+      }
 
-        sake.options.wc_upload_queue_item_id = res.data.queue_item_id
+      if (body.code) {
+        throw `Unexpected response code from WC API (${body.code})`
+      }
 
-        log.info('Plugin successfully uploaded')
+      if (!body.queue_item_id || !body.success) {
+        throw `WC API did not return a queue item id or successful response (${body.message})`
+      }
 
-        done()
-      })
-      .catch(err => {
-        sake.throwDeferredError(formatError(err))
-      })
+      sake.options.wc_upload_queue_item_id = body.queue_item_id
+
+      log.info('Plugin successfully uploaded')
+
+      done()
+    })
   })
 
   // internal task that handles notifying Woo that the upload has finished
