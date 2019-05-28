@@ -1,5 +1,6 @@
 const inquirer = require('inquirer')
 const semver = require('semver')
+const log = require('fancy-log')
 const chalk = require('chalk')
 const _ = require('lodash')
 
@@ -61,6 +62,22 @@ module.exports = (gulp, plugins, sake) => {
     ]).then(function (answers) {
       sake.options = _.merge(sake.options, answers)
       done()
+    })
+  })
+
+  // internal task for prompting whether to upload the plugin to woo
+  gulp.task('prompt:wc_upload', (done) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'upload_to_wc',
+      message: 'Upload plugin to WooCommerce.com?'
+    }]).then((answers) => {
+      if (answers.upload_to_wc) {
+        gulp.series('wc:deploy')(done)
+      } else {
+        log.error(chalk.red('Skipped uploading to WooCommerce.com'))
+        done()
+      }
     })
   })
 

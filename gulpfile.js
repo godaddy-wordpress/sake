@@ -9,10 +9,13 @@ const _ = require('lodash')
 const ForwardReference = require('undertaker-forward-reference')
 
 // local .env file, overriding any global env variables
-if (fs.existsSync('.env')) {
-  let result = require('dotenv').config()
+let parentEnvPath = path.join('..', '.env')
+let envPath = fs.existsSync('.env') ? '.env' : (fs.existsSync(parentEnvPath) ? parentEnvPath : null)
 
-  log.warn('Loading ENV variables from .env file')
+if (envPath) {
+  let result = require('dotenv').config({ path: envPath })
+
+  log.warn(`Loading ENV variables from ${path.join(process.cwd(), envPath)}`)
 
   for (let k in result.parsed) {
     process.env[k] = result.parsed[k]
@@ -117,7 +120,8 @@ let config = _.merge(defaults, localConfig)
 let options = minimist(process.argv.slice(2), {
   boolean: ['minify'],
   default: {
-    minify: true
+    minify: true,
+    debug: false
   }
 })
 
@@ -132,21 +136,6 @@ let plugins = require('gulp-load-plugins')()
 // always have to load and create an instance of it, because gulp-if does not
 // support lazy evaluation yet: https://github.com/robrich/gulp-if/issues/75
 plugins.browserSync = require('browser-sync').create()
-
-// attach CLI options to config - config should be the only thing passed around
-// even gulp or plugins can be loaded by tasks themselves
-// but how can we pass around util? basically helper functions? do we require them when needed,
-// or create some kind of class "Sake" that is passed around and contains all the utiulity methods?
-// How can I make sure that util tasks that depend on
-//
-// sake.init() =>
-// sake.loadConfig()
-// sake.buildPluginConfig()
-// sake.buildDeployConfig()
-// sake.parseCliOptions()
-// sake.loadGulpPlugins()
-// sake.loadGulpTasks()
-// sake.util.getVersionBump()
 
 // load gulp plugins and tasks
 require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
