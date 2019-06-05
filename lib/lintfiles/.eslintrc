@@ -6,6 +6,10 @@
       "always",
       { "arraysInArrays" : true }
     ],
+    "camelcase": [
+      "error",
+      { "properties": "never" }
+    ],
     "eqeqeq" : "warn",
     "key-spacing": [
       "error",
@@ -15,10 +19,6 @@
       "error",
       "tab",
       { "VariableDeclarator": { "var": 2, "let": 2, "const": 3 } }
-    ],
-    "init-declarations" : [
-      "warn",
-      "always"
     ],
     "lines-between-class-members" : [
       "warn",
@@ -33,7 +33,7 @@
     "no-eq-null" : "error",
     "no-lonely-if" : "error",
     "no-mixed-spaces-and-tabs" : [
-      "error",
+      "warn",
       "smart-tabs"
     ],
     "no-multiple-empty-lines" : "warn",
