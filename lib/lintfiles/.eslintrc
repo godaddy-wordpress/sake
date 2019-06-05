@@ -41,6 +41,7 @@
     "no-undef-init" : "error",
     "no-unneeded-ternary" : "error",
     "no-unused-expressions" : "warn",
+    "no-unused-vars" : "error",
     "no-whitespace-before-property" : "error",
     "object-curly-spacing" : [
       "error",
