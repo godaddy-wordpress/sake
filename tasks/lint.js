@@ -61,7 +61,7 @@ module.exports = (gulp, plugins, sake) => {
 
     return gulp.src(sake.config.paths.assetPaths.javascriptSources)
       .pipe(plugins.eslint(esLintOptions))
-      .pipe(plugins.eslint.format('codeframe'))
+      .pipe(plugins.eslint.format('table'))
   })
 
   // main task for linting styles

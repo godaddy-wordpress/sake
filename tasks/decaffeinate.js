@@ -14,12 +14,12 @@ module.exports = (gulp, plugins, sake) => {
       fix: true
     }
 
-    // unfortunately esLint won't be able to auto-fix the JavaScript output from CoffeeScript, but it will list necessary changes
     return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
       .pipe(plugins.coffee({ bare: true }))
       .pipe(gulp.dest(sake.config.paths.assetPaths.js))
       .pipe(plugins.eslint(esLintOptions))
       .pipe(plugins.eslint.format('table'))
+      .pipe(gulp.dest(sake.config.paths.assetPaths.js))
       .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
   })
 }

@@ -1,11 +1,70 @@
 {
   "extends" : "wordpress",
   "rules" : {
-    "eqeqeq" : "error",
+    "array-bracket-spacing" : [
+      "error",
+      "always",
+      { "arraysInArrays" : true }
+    ],
+    "eqeqeq" : "warn",
+    "key-spacing": [
+      "error",
+      { "beforeColon" : false, "afterColon" : true, "align" : "value" }
+    ],
+    "indent" : [
+      "error",
+      "tab",
+      { "VariableDeclarator": { "var": 2, "let": 2, "const": 3 } }
+    ],
+    "init-declarations" : [
+      "warn",
+      "always"
+    ],
+    "lines-between-class-members" : [
+      "warn",
+      "always"
+    ],
+    "newline-after-var" : [
+      "warn",
+      "always"
+    ],
+    "new-parens" : "error",
     "no-caller" : "error",
     "no-eq-null" : "error",
-    "no-undef" : "error",
-    "no-unused-expressions" : "error",
-    "no-unused-vars" : "error"
+    "no-lonely-if" : "error",
+    "no-mixed-spaces-and-tabs" : [
+      "error",
+      "smart-tabs"
+    ],
+    "no-multiple-empty-lines" : "warn",
+    "no-sparse-arrays" : "error",
+    "no-undef-init" : "error",
+    "no-unneeded-ternary" : "error",
+    "no-unused-expressions" : "warn",
+    "no-whitespace-before-property" : "error",
+    "object-curly-spacing" : [
+      "error",
+      "always",
+      { "arraysInObjects" : true, "objectsInObjects" : true }
+    ],
+    "padded-blocks": [
+      "warn",
+      { "classes": "always" }
+    ],
+    "padding-line-between-statements" : [
+      "warn",
+      { "blankLine" : "always", "prev" : "directive", "next" : "*" },
+      { "blankLine" : "any",    "prev" : "directive", "next" : "directive" },
+      { "blankLine" : "always", "prev" : ["class", "function"], "next" : "*" },
+      { "blankLine" : "any",    "prev" : ["const", "let", "var"], "next" : ["const", "let", "var"] },
+      { "blankLine" : "always", "prev" : "*", "next" : ["if", "switch", "while", "for", "throw", "continue", "return", "block-like", "multiline-block-like", "multiline-expression"] },
+      { "blankLine" : "always", "prev" : ["if", "switch", "while", "for", "block-like", "multiline-block-like", "multiline-expression"], "next" :  "*" }
+    ],
+    "space-in-parens": [
+      "error",
+      "always"
+    ],
+    "use-isnan": "error",
+    "vars-on-top" : "off"
   }
 }
