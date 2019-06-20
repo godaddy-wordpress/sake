@@ -87,7 +87,13 @@
     "jsdoc/require-returns-description" : "warn",
     "jsdoc/require-returns-type" : "warn"
   },
-  "settings": {
-    "jsdoc": "ignorePrivate"
+  "settings" : {
+    "jsdoc" : "ignorePrivate"
+  },
+  "parserOptions" : {
+    "ecmaVersion" : 6,
+    "ecmaFeatures" : {
+      "experimentalObjectRestSpread" : true
+    }
   }
 }
