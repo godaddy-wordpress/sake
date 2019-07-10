@@ -159,9 +159,7 @@ module.exports = (gulp, plugins, sake) => {
       // unlike gulp-replace, gulp-replace-task supports multiple replacements
       .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
       .pipe(filterChangelog)
-      .pipe(plugins.replace('XXXX.XX.XX', date))
       .pipe(plugins.replace(/[0-9]+\.nn\.nn/, date))
-      .pipe(plugins.replace(/[0-9]+-nn-nn/, date))
       .pipe(filterChangelog.restore)
       .pipe(gulp.dest('./'))
   })
