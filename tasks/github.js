@@ -9,18 +9,26 @@ const dateFormat = require('dateformat')
 const log = require('fancy-log')
 
 module.exports = (gulp, plugins, sake) => {
+  let githubInstance
 
-  const github = new GitHub({
-    debug: false,
-    auth: {
-      username: process.env.GITHUB_USERNAME,
-      password: process.env.GITHUB_API_KEY
+  getGithub = () => {
+    if (!githubInstance) {
+      githubInstance = new GitHub({
+        debug: false,
+        auth: {
+          username: process.env.GITHUB_USERNAME,
+          password: process.env.GITHUB_API_KEY
+        }
+      })
     }
-  })
+
+    return githubInstance
+  }
 
   gulp.task('github:get_rissue', (done) => {
     let owner = sake.config.deploy.dev.owner
     let repo = sake.config.deploy.dev.name
+    let github = getGithub()
 
     let labels = ['release']
 
@@ -74,6 +82,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:get_wc_issues', (done) => {
     let owner = sake.config.deploy.production.owner
     let repo = sake.config.deploy.production.name
+    let github = getGithub()
 
     github.issues.listForRepo({
       owner: owner,
@@ -118,6 +127,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:docs_issue', (done) => {
     let owner = 'skyverge'
     let repo = 'wc-plugins-sales-docs'
+    let github = getGithub()
 
     let message = 'Should a Docs issue be created for ' + sake.getPluginName() + '?'
 
@@ -162,6 +172,8 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:create_release', (done) => {
     let owner = sake.options.owner || 'skyverge'
     let repo = sake.options.repo || sake.config.plugin.id
+    let github = getGithub()
+
     let version = sake.getPluginVersion()
     let zipName = `${sake.config.plugin.id}.${version}.zip`
     let zipPath = path.join(process.cwd(), sake.config.paths.build, zipName)
@@ -260,6 +272,7 @@ module.exports = (gulp, plugins, sake) => {
   const createMilestones = (milestones, done) => {
     let owner = sake.options.owner || sake.config.deploy.dev.owner
     let repo = sake.options.repo || sake.config.deploy.dev.name
+    let github = getGithub()
 
     async.eachLimit(milestones, 5, function (milestone, cb) {
       let description = codename.generate(['unique', 'alliterative', 'random'], ['adjectives', 'animals']).join(' ')
