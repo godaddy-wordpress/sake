@@ -42,7 +42,7 @@ module.exports = (gulp, plugins, sake) => {
           name: 'issues_to_close',
           message: 'Release issues exist for ' + sake.getPluginName() + '. Select an issue this release should close.',
           choices: function () {
-            let choices = result.data.map((result) => {
+            let choices = result.data.filter((result) => !result.pull_request).map((result) => {
               return {
                 value: result.number,
                 name: 'Close issue #' + result.number + ': ' + result.html_url
@@ -87,9 +87,9 @@ module.exports = (gulp, plugins, sake) => {
           inquirer.prompt([{
             type: 'checkbox',
             name: 'issues_to_close',
-            message: 'Issues on WC repo exist for ' + sake.getPluginName() + '. Select an issue this release should close.',
+            message: 'Issues on WC repo exist for ' + sake.getPluginName() + '. Select an issue this release should close. To skip, press Enter without selecting anything.',
             choices: function () {
-              let choices = result.data.sort().map((result) => {
+              let choices = result.data.filter((result) => !result.pull_request).sort().map((result) => {
                 return {
                   value: result.number,
                   name: 'Close issue #' + result.number + ': ' + result.html_url
