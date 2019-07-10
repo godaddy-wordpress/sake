@@ -202,8 +202,10 @@ module.exports = (gulp, plugins, sake) => {
           url: result.data.upload_url,
           name: zipName,
           file: fs.readFileSync(zipPath),
-          contentType: 'application/zip',
-          contentLength: fs.statSync(zipPath).size
+          headers: {
+            'content-type': 'application/zip',
+            'content-length': fs.statSync(zipPath).size
+          }
         }).then(() => {
           log('Plugin zip uploaded')
           cb()
