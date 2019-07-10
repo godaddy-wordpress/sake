@@ -19,7 +19,7 @@
     "sake": "bin/sake.js"
   },
   "dependencies": {
-    "@octokit/rest": "^15.10.0",
+    "@octokit/rest": "^16.28.3",
     "async": "^2.6.1",
     "autoprefixer": "^8.6.5",
     "axios": "^0.18.0",
