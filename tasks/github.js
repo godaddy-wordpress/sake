@@ -125,8 +125,8 @@ module.exports = (gulp, plugins, sake) => {
 
   // creates a docs issue for the plugin
   gulp.task('github:docs_issue', (done) => {
-    let owner = 'skyverge'
-    let repo = 'wc-plugins-sales-docs'
+    let owner = sake.config.deploy.docs.owner
+    let repo = sake.config.deploy.docs.name
     let github = getGithub()
 
     let message = 'Should a Docs issue be created for ' + sake.getPluginName() + '?'
