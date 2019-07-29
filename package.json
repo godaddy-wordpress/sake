@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^15.10.0",
-    "@skyverge/eslint-config": "^0.1.0",
+    "@skyverge/eslint-config": "^0.1.2",
     "async": "^2.6.3",
     "autoprefixer": "^8.6.5",
     "axios": "^0.18.0",
