@@ -39,7 +39,7 @@ module.exports = (plugins, sake) => {
     .pipe(plugins.replace, /SV_WC_Framework_Bootstrap::instance\(\)->register_plugin\( '([^']*)'/, () => `SV_WC_Framework_Bootstrap::instance()->register_plugin( '${sake.options.framework_version}'`)
     .pipe(plugins.replace, /FRAMEWORK_VERSION = .*\n/, () => `FRAMEWORK_VERSION = '${sake.options.framework_version}';\n`)
 
-  // replace FW backwards comaptibility
+  // replace FW backwards compatibility
   pipes.backwards_compatible = lazypipe()
     .pipe(plugins.replace, /('backwards_compatible'[\s]*=>[\s]*)'([^']*)'/, (match, m) => `${m}'${sake.options.backwards_compatible}'`)
 

@@ -3,7 +3,14 @@ module.exports = (gulp, plugins, sake) => {
 
   // bumps the version in the main plugin file to match changelog.txt
   gulp.task('bump', () => {
-    return gulp.src(`${sake.config.paths.src}/${sake.config.plugin.mainFile}`)
+    let pluginFiles = [`${sake.config.paths.src}/${sake.config.plugin.mainFile}`]
+
+    // also include the main Plugin class file
+    if (sake.config.framework === 'v5') {
+      pluginFiles.push(`${sake.config.paths.src}/includes/Plugin.php`)
+    }
+
+    return gulp.src(pluginFiles, { base: '.', allowEmpty: true })
       .pipe(plugins.replace(/ \* Version: [0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*\n/, () => ' * Version: ' + sake.getPluginVersion() + '\n'))
       .pipe(plugins.replace(/const VERSION = '[0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*';/, () => "const VERSION = '" + sake.getPluginVersion() + "';"))
       .pipe(gulp.dest(sake.config.paths.src))

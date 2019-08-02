@@ -10,7 +10,7 @@ module.exports = (gulp, plugins, sake) => {
 
   // TODO: consider setting these variables in the sake.config on load instead, and validating sake.config vars instead
   // validate env variables before deploy
-  function validateEnvVariables () {
+  function validateEnvVariables() {
     if (validatedEnvVariables) return
 
     let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
@@ -66,7 +66,7 @@ module.exports = (gulp, plugins, sake) => {
       // git commit & push
       'shell:git_push_update',
       // rebuild plugin configuration (version number, etc)
-      function rebuildPluginConfig (cb) {
+      function rebuildPluginConfig(cb) {
         sake.buildPluginConfig()
         cb()
       },
@@ -137,7 +137,7 @@ module.exports = (gulp, plugins, sake) => {
       return { match: version, replacement: () => sake.getVersionBump() }
     })
 
-    const filter = plugins.filter('**/{readme.txt,changelog.txt}', { restore: true })
+    const filterChangelog = plugins.filter('**/{readme.txt,changelog.txt}', { restore: true })
     const date = dateFormat(new Date(), 'yyyy.mm.dd')
 
     return gulp.src([
@@ -156,13 +156,11 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/*.xml`,
       `!${sake.config.paths.src}/*.yml`
     ], { base: './', allowEmpty: true })
-    // unlike gulp-replace, gulp-replace-task supports multiple replacements
+      // unlike gulp-replace, gulp-replace-task supports multiple replacements
       .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
-      .pipe(filter)
-      .pipe(plugins.replace('XXXX.XX.XX', date))
+      .pipe(filterChangelog)
       .pipe(plugins.replace(/[0-9]+\.nn\.nn/, date))
-      .pipe(plugins.replace(/[0-9]+-nn-nn/, date))
-      .pipe(filter.restore)
+      .pipe(filterChangelog.restore)
       .pipe(gulp.dest('./'))
   })
 
