@@ -51,13 +51,17 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint plain JS
   gulp.task('lint:js', () => {
+    // use WordPress standards - overrideable by individual plugins that provide a .eslintrc file
+    // see https://github.com/WordPress-Coding-Standards/eslint-config-wordpress/blob/master/index.js
     let esLintFile = sake.options['eslint-configFile'] ? path.join(process.cwd(), sake.options['eslint-configFile']) : path.join(__dirname, '../lib/lintfiles/.eslintrc')
+    let esLintOptions = {
+      configFile: esLintFile,
+      quiet: false
+    }
 
     return gulp.src(sake.config.paths.assetPaths.javascriptSources)
-      .pipe(plugins.eslint({
-        configFile: esLintFile,
-        quiet: true // only report errors
-      }))
+      .pipe(plugins.eslint(esLintOptions))
+      .pipe(plugins.eslint.format('table'))
   })
 
   // main task for linting styles

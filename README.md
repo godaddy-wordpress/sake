@@ -1,4 +1,6 @@
-# SkyVerge WP/WC plugin build & deploy tool, a.k.a SkyMake
+# 酒 SkyMake
+
+#### SkyVerge WordPress and WooCommerce plugin build & deploy tool
 
 Requires node 8.9.4+
 
