@@ -66,7 +66,7 @@ module.exports = (gulp, plugins, sake) => {
           }
         }]).then(function (answers) {
           if (answers.issues_to_close === 'none') {
-            log.warn('No issues will be closed for release of ' + sake.getPluginName())
+            log.warn(chalk.yellow('No issues will be closed for release of ' + sake.getPluginName()))
           } else {
             sake.options.release_issue_to_close = answers.issues_to_close
           }
@@ -74,12 +74,18 @@ module.exports = (gulp, plugins, sake) => {
         })
       }
     }).catch((err) => {
-      log.error('Could not get release issue: ' + err.toString())
+      log.error(chalk.red('Could not get release issue: ' + err.toString()))
       done()
     })
   })
 
   gulp.task('github:get_wc_issues', (done) => {
+
+    if (!sake.config.deploy.production) {
+      log.warn(chalk.yellow('No WC (production) repo configured for ' + sake.getPluginName() + ', skipping'))
+      return done()
+    }
+
     let owner = sake.config.deploy.production.owner
     let repo = sake.config.deploy.production.name
     let github = getGithub()
@@ -118,7 +124,7 @@ module.exports = (gulp, plugins, sake) => {
         }
       })
       .catch((err) => {
-        log.error('Could not get issues for WC repo: ' + err.toString())
+        log.error(chalk.red('Could not get issues for WC repo: ' + err.toString()))
         done()
       })
   })
