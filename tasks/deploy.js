@@ -220,6 +220,7 @@ module.exports = (gulp, plugins, sake) => {
       tasks.push('deploy_to_wp_repo')
     } else {
       log.warn(chalk.yellow('No deploy type set, skipping deploy to remote repo'))
+      return done()
     }
 
     gulp.series(tasks)(done)
