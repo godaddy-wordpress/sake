@@ -10,7 +10,7 @@ module.exports = (gulp, plugins, sake) => {
       pluginFiles.push(`${sake.config.paths.src}/includes/Plugin.php`)
     }
 
-    return gulp.src(pluginFiles, { base: '.', allowEmpty: true })
+    return gulp.src(pluginFiles, { base: sake.config.paths.src, allowEmpty: true })
       .pipe(plugins.replace(/ \* Version: [0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*\n/, () => ' * Version: ' + sake.getPluginVersion() + '\n'))
       .pipe(plugins.replace(/const VERSION = '[0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*';/, () => "const VERSION = '" + sake.getPluginVersion() + "';"))
       .pipe(gulp.dest(sake.config.paths.src))

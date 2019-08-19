@@ -60,9 +60,8 @@ module.exports = (gulp, plugins, sake) => {
       'build',
       // ensure the required framework version is installed
       'deploy:validate_framework_version',
-      // grab issue to close with commit
-      'github:get_rissue',
-      'github:get_wc_issues',
+      // grab issues to close with commit
+      'get_issues_to_close',
       // git commit & push
       'shell:git_push_update',
       // rebuild plugin configuration (version number, etc)
@@ -165,6 +164,19 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   /**
+   * Grab any issues to close with the deploy
+   */
+  gulp.task('get_issues_to_close', (done) => {
+    let tasks = ['github:get_rissue']
+
+    if ('wc' == sake.config.deploy.type) {
+      tasks.push('github:get_wc_issues')
+    }
+
+    gulp.series(tasks)(done)
+  })
+
+  /**
    * Create releases for a deploy
    *
    * This task is especially useful if your deploy failed before the release
@@ -207,7 +219,8 @@ module.exports = (gulp, plugins, sake) => {
     } else if (sake.config.deploy.type === 'wp') {
       tasks.push('deploy_to_wp_repo')
     } else {
-      log.warn('No deploy type set, skipping deploy to remote repo')
+      log.warn(chalk.yellow('No deploy type set, skipping deploy to remote repo'))
+      return done()
     }
 
     gulp.series(tasks)(done)
