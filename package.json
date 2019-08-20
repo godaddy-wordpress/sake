@@ -28,6 +28,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
     "browser-sync": "^2.26.7",
     "chalk": "^2.4.1",
     "codename": "0.0.6",
