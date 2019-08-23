@@ -1,3 +1,5 @@
+const webpack = require('webpack-stream')
+
 module.exports = (gulp, plugins, sake) => {
   const pipes = require('../pipes/scripts.js')(plugins, sake)
 
@@ -17,7 +19,7 @@ module.exports = (gulp, plugins, sake) => {
   /** Scripts */
 
   // the main task to compile scripts
-  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js'))
+  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js', 'compile:blocks'))
 
   // Note: ideally, we would only open a single stream of the script files, linting and compiling in the same
   // stream/task, but unfortunately it looks like this is not possible, ast least not when reporting the
@@ -44,6 +46,31 @@ module.exports = (gulp, plugins, sake) => {
       // transpile & minify, write sourcemaps
       .pipe(pipes.compileJs())
       .pipe(gulp.dest(sake.config.paths.assetPaths.js))
+      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+  })
+
+  gulp.task('compile:blocks', () => {
+    return gulp.src(sake.config.paths.assetPaths.blockSources)
+      .pipe(plugins.sourcemaps.init())
+      .pipe(webpack({
+        entry: `${sake.config.paths.assetPaths.js}/blocks/index.js`,
+        output: {
+          filename: '[name].bundle.js',
+        },
+        module: {
+          rules: [{
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env', '@babel/preset-react']
+              }
+            }
+          }]
+        }
+      }))
+    .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/dist`))
       .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
   })
 
