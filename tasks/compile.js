@@ -1,4 +1,6 @@
 const webpack = require('webpack-stream')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = (gulp, plugins, sake) => {
   const pipes = require('../pipes/scripts.js')(plugins, sake)
@@ -50,28 +52,37 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   gulp.task('compile:blocks', () => {
-    return gulp.src(sake.config.paths.assetPaths.blockSources)
-      .pipe(plugins.sourcemaps.init())
-      .pipe(webpack({
-        entry: `${sake.config.paths.assetPaths.js}/blocks/index.js`,
-        output: {
-          filename: '[name].bundle.js',
-        },
-        module: {
-          rules: [{
-            test: /\.js$/,
-            exclude: /node_modules/,
-            use: {
-              loader: 'babel-loader',
-              options: {
-                presets: ['@babel/preset-env', '@babel/preset-react']
+    const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
+    const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
+      return file.match(/.*\.js$/)
+    }) : false
+
+    if ( !blockSrc || blockSrc[0].length <= 0 ) {
+      return gulp.src(sake.config.paths.assetPaths.blockSources)
+    } else {
+      return gulp.src(sake.config.paths.assetPaths.blockSources)
+        .pipe(plugins.sourcemaps.init())
+        .pipe(webpack({
+          entry: `${blockPath}/${blockSrc[0]}`,
+          output: {
+            filename: path.basename(blockSrc[0], '.js') + '.min.js'
+          },
+          module: {
+            rules: [{
+              test: /\.js$/,
+              exclude: /node_modules/,
+              use: {
+                loader: 'babel-loader',
+                options: {
+                  presets: ['@babel/preset-env', '@babel/preset-react']
+                }
               }
-            }
-          }]
-        }
-      }))
-    .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/dist`))
-      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+            }]
+          }
+        }))
+        .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/`))
+        .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+    }
   })
 
   /** Styles */
