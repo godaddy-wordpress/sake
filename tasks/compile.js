@@ -57,7 +57,7 @@ module.exports = (gulp, plugins, sake) => {
       return file.match(/.*\.js$/)
     }) : false
 
-    if ( !blockSrc || blockSrc[0].length <= 0 ) {
+    if (!blockSrc || blockSrc[0].length <= 0) {
       return gulp.src(sake.config.paths.assetPaths.blockSources)
     } else {
       return gulp.src(sake.config.paths.assetPaths.blockSources)
@@ -66,6 +66,10 @@ module.exports = (gulp, plugins, sake) => {
           entry: `${blockPath}/${blockSrc[0]}`,
           output: {
             filename: path.basename(blockSrc[0], '.js') + '.min.js'
+          },
+          externals: {
+            'react': 'React',
+            'react-dom': 'ReactDOM'
           },
           module: {
             rules: [{
