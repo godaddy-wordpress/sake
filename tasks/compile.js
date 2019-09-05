@@ -52,6 +52,7 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   gulp.task('compile:blocks', () => {
+    const i18nPath = `${process.cwd()}/i18n/languages/`
     const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
     const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
       return file.match(/.*\.js$/)
@@ -78,7 +79,10 @@ module.exports = (gulp, plugins, sake) => {
               use: {
                 loader: 'babel-loader',
                 options: {
-                  presets: ['@babel/preset-env', '@babel/preset-react']
+                  presets: ['@babel/preset-env', '@babel/preset-react'],
+                  plugins: [
+                    ['@wordpress/babel-plugin-makepot', { 'output': `${i18nPath}${blockSrc[0].replace('wc-', 'woocommerce-').replace('.js', '.pot')}` }]
+                  ]
                 }
               }
             }]
