@@ -81,7 +81,7 @@ module.exports = (gulp, plugins, sake) => {
                 options: {
                   presets: ['@babel/preset-env', '@babel/preset-react'],
                   plugins: [
-                    ['@wordpress/babel-plugin-makepot', { 'output': `${i18nPath}${blockSrc[0].replace('wc-', 'woocommerce-').replace('.js', '.pot')}` }]
+                    ['@wordpress/babel-plugin-makepot', { 'output': `${i18nPath}${blockSrc[0].replace('.js', '.pot')}` }]
                   ]
                 }
               }
