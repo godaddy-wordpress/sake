@@ -52,7 +52,7 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   gulp.task('compile:blocks', () => {
-    const i18nPath = `${process.cwd()}/i18n/languages/`
+    const i18nPath = `${process.cwd()}/i18n/languages/blocks/`
     const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
     const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
       return file.match(/.*\.js$/)
