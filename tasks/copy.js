@@ -15,6 +15,7 @@ module.exports = (gulp, plugins, sake) => {
       // skip coffee and unminified js files
       `!${sake.config.paths.src}/${sake.config.paths.js}/**/*.coffee`,
       `!${sake.config.paths.src}/${sake.config.paths.js}/**/*(!.min).js`,
+      `!${sake.config.paths.src}/${sake.config.paths.js}/blocks/src{,/**}`,
 
       // skip scss and unminified css files
       `!${sake.config.paths.src}/${sake.config.paths.css}/**/*.scss`,

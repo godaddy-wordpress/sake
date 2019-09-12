@@ -1,3 +1,7 @@
+const webpack = require('webpack-stream')
+const fs = require('fs')
+const path = require('path')
+
 module.exports = (gulp, plugins, sake) => {
   const pipes = require('../pipes/scripts.js')(plugins, sake)
 
@@ -17,7 +21,7 @@ module.exports = (gulp, plugins, sake) => {
   /** Scripts */
 
   // the main task to compile scripts
-  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js'))
+  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js', 'compile:blocks'))
 
   // Note: ideally, we would only open a single stream of the script files, linting and compiling in the same
   // stream/task, but unfortunately it looks like this is not possible, ast least not when reporting the
@@ -45,6 +49,48 @@ module.exports = (gulp, plugins, sake) => {
       .pipe(pipes.compileJs())
       .pipe(gulp.dest(sake.config.paths.assetPaths.js))
       .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+  })
+
+  gulp.task('compile:blocks', () => {
+    const i18nPath = `${process.cwd()}/i18n/languages/blocks/`
+    const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
+    const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
+      return file.match(/.*\.js$/)
+    }) : false
+
+    if (!blockSrc || blockSrc[0].length <= 0) {
+      return gulp.src(sake.config.paths.assetPaths.blockSources)
+    } else {
+      return gulp.src(sake.config.paths.assetPaths.blockSources)
+        .pipe(plugins.sourcemaps.init())
+        .pipe(webpack({
+          entry: `${blockPath}/${blockSrc[0]}`,
+          output: {
+            filename: path.basename(blockSrc[0], '.js') + '.min.js'
+          },
+          externals: {
+            'react': 'React',
+            'react-dom': 'ReactDOM'
+          },
+          module: {
+            rules: [{
+              test: /\.js$/,
+              exclude: /node_modules/,
+              use: {
+                loader: 'babel-loader',
+                options: {
+                  presets: ['@babel/preset-env', '@babel/preset-react'],
+                  plugins: [
+                    ['@wordpress/babel-plugin-makepot', { 'output': `${i18nPath}${blockSrc[0].replace('.js', '.pot')}` }]
+                  ]
+                }
+              }
+            }]
+          }
+        }))
+        .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/`))
+        .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
+    }
   })
 
   /** Styles */

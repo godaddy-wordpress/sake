@@ -14,4 +14,5 @@ module.exports = (gulp, plugins, sake) => {
   // type-specific script tasks - lints and then compiles
   gulp.task('scripts:coffee', gulp.series('lint:coffee', 'compile:coffee'))
   gulp.task('scripts:js', gulp.series('lint:js', 'compile:js'))
+  gulp.task('scripts:blocks', gulp.series('compile:blocks'))
 }
