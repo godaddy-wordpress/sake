@@ -136,11 +136,12 @@ module.exports = (gulp, plugins, sake) => {
       return { match: version, replacement: () => sake.getVersionBump() }
     })
 
-    const filterChangelog = plugins.filter('**/{readme.txt,changelog.txt}', { restore: true })
+    const filterChangelog = plugins.filter('**/{readme.md,readme.txt,changelog.txt}', { restore: true })
     const date = dateFormat(new Date(), 'yyyy.mm.dd')
 
     return gulp.src([
       `${sake.config.paths.src}/**/*.php`,
+      `${sake.config.paths.src}/readme.md`,
       `${sake.config.paths.src}/readme.txt`,
       `${sake.config.paths.src}/changelog.txt`,
       `${sake.config.paths.assetPaths.js}/**/*.{coffee,js}`,
