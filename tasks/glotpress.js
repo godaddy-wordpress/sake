@@ -6,7 +6,7 @@ module.exports = (gulp, plugins, sake) => {
   let projectURL = (glotpress + 'projects/' + sake.config.translations.project).replace(/\/?$/, '/')
   let langPath = ('/projects/wp/skyverge/woocommerce-memberships' + sake.config.tasks.makepot.domainPath).replace(/\/?$/, '/')
 
-  gulp.task('getpomo', (done) => {
+  gulp.task('getpo', (done) => {
     async function getLanguages () {
       const browser = await puppeteer.launch({ headless: false, dumpio: true })
       const page = await browser.newPage()
