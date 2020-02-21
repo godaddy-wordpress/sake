@@ -35,6 +35,7 @@ module.exports = (gulp, plugins, sake) => {
 
       log.info('Project page: ' + title)
 
+      // look for all languages listed in table and collect page URLs
       const languages = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('table tr td strong a'))
         return links.map(a => a.href)
@@ -42,8 +43,8 @@ module.exports = (gulp, plugins, sake) => {
 
       log.info('Found ' + languages.length + ' languages')
 
+      // loop found languages and download a translation file from each
       for (let language of languages) {
-
         log.info('Downloading translations from ' + language + ' to ' + i18nPath)
 
         await page.goto(language)
