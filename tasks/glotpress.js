@@ -64,6 +64,7 @@ module.exports = (gulp, plugins, sake) => {
   // push translation source to GlotPress: uploads an updated .pot file for the matching project corresponding to the current plugin
   gulp.task('translations:push', (done) => {
     async function pushPot () {
+      // to push new strings into GlotPress we need a user with high privileges (not necessarily an admin)
       const username = process.env.GLOTPRESS_USER
       const password = process.env.GLOTPRESS_PASSWORD
       const browser = await puppeteer.launch({ headless: false, dumpio: true, ignoreHTTPSErrors: true, args: ['--disable-web-security'] })
@@ -98,6 +99,7 @@ module.exports = (gulp, plugins, sake) => {
 
       log.info('Logged in!')
 
+      // GlotPress original uploads page
       await page.goto(projectURL + 'import-originals/')
 
       // get the ElementHandle of the selector above
@@ -106,6 +108,7 @@ module.exports = (gulp, plugins, sake) => {
 
       log.info('Uploading translations source file from ' + potFile)
 
+      // this may seem to take an array of strings, while in fact just as simple string to the file path is what we need
       await fileUpload.uploadFile(potFile)
       await page.click('#submit')
       await page.waitForNavigation()
