@@ -207,7 +207,7 @@ module.exports = (gulp, plugins, sake) => {
         github.repos.uploadReleaseAsset({
           url: result.data.upload_url,
           name: zipName,
-          file: fs.readFileSync(zipPath),
+          data: fs.readFileSync(zipPath),
           headers: {
             'content-type': 'application/zip',
             'content-length': fs.statSync(zipPath).size
