@@ -1,4 +1,4 @@
-const GitHub = require('@octokit/rest')
+const { Octokit: GitHub } = require('@octokit/rest')
 const inquirer = require('inquirer')
 const fs = require('fs')
 const path = require('path')
