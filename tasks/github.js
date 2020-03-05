@@ -1,3 +1,4 @@
+const { createTokenAuth } = require("@octokit/auth-token")
 const { Octokit: GitHub } = require('@octokit/rest')
 const inquirer = require('inquirer')
 const fs = require('fs')
@@ -15,10 +16,8 @@ module.exports = (gulp, plugins, sake) => {
     if (!githubInstance) {
       githubInstance = new GitHub({
         debug: false,
-        auth: {
-          username: process.env.GITHUB_USERNAME,
-          password: process.env.GITHUB_API_KEY
-        }
+        authStrategy: createTokenAuth,
+        auth: process.env.GITHUB_API_KEY
       })
     }
 
