@@ -1,4 +1,5 @@
-const GitHub = require('@octokit/rest')
+const { createTokenAuth } = require("@octokit/auth-token")
+const { Octokit: GitHub } = require('@octokit/rest')
 const inquirer = require('inquirer')
 const fs = require('fs')
 const path = require('path')
@@ -15,10 +16,8 @@ module.exports = (gulp, plugins, sake) => {
     if (!githubInstance) {
       githubInstance = new GitHub({
         debug: false,
-        auth: {
-          username: process.env.GITHUB_USERNAME,
-          password: process.env.GITHUB_API_KEY
-        }
+        authStrategy: createTokenAuth,
+        auth: process.env.GITHUB_API_KEY
       })
     }
 
@@ -207,7 +206,7 @@ module.exports = (gulp, plugins, sake) => {
         github.repos.uploadReleaseAsset({
           url: result.data.upload_url,
           name: zipName,
-          file: fs.readFileSync(zipPath),
+          data: fs.readFileSync(zipPath),
           headers: {
             'content-type': 'application/zip',
             'content-length': fs.statSync(zipPath).size
