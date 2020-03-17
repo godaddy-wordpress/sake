@@ -198,18 +198,6 @@ module.exports = (gulp, plugins, sake) => {
       'github:create_release'
     ]
 
-    if (sake.config.deploy.type === 'wc' && sake.config.deploy.production) {
-      tasks = tasks.concat([
-        function (cb) {
-          sake.options.owner = sake.config.deploy.production.owner
-          sake.options.repo = sake.config.deploy.production.name
-          sake.options.prefix_release_tag = false
-          cb()
-        },
-        'github:create_release'
-      ])
-    }
-
     return gulp.series(tasks)(done)
   })
 
