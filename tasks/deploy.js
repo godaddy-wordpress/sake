@@ -79,6 +79,10 @@ module.exports = (gulp, plugins, sake) => {
       tasks.push('prompt:wc_upload')
     }
 
+    if (sake.config.deploy.type === 'wp') {
+      tasks.push('deploy_to_wp_repo')
+    }
+
     // finally, create a docs issue, if necessary
     tasks.push('github:docs_issue')
 
