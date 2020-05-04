@@ -87,6 +87,12 @@ module.exports = (gulp, plugins, sake) => {
       }
     }
 
+    paths = paths.concat([
+      // skip misc jilt promotions files
+      `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/gulpfile.js`,
+      `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/README.md`,
+    ])
+
     // skip copying composer dev packages
     if (sake.config.composer) {
       if (sake.config.composer['require-dev']) {
