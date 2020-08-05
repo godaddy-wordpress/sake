@@ -26,6 +26,8 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/.travis.yml`,
       `!${sake.config.paths.src}/**/phpunit.xml`,
       `!${sake.config.paths.src}/**/phpunit.travis.xml`,
+      `!${sake.config.paths.src}/**/docker-compose*.yml`,
+      `!${sake.config.paths.src}/**/wp-bootstrap.sh`,
       `!${sake.config.paths.src}/phpcs.xml`,
 
       // skip composer and npm files
