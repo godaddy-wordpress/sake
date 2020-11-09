@@ -50,6 +50,10 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/readme.md`,
       `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
 
+      // skip tartufo files
+      `!${sake.config.paths.src}/**/tool.tartufo`,
+      `!${sake.config.paths.src}/**/exclude-patterns.txt`,
+
       // skip sake sake.config
       `!${sake.config.paths.src}/**/sake.config.js`
     ]
