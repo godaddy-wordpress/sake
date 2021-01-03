@@ -183,6 +183,12 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('github:create_release', (done) => {
     let owner = sake.options.owner
     let repo = sake.options.repo || sake.config.plugin.id
+
+    if (!owner || !repo) {
+      log.warn(chalk.yellow('The owner or the slug of the repo for ' + sake.getPluginName() + ' are missing, skipping'))
+      return done()
+    }
+
     let github = getGithub()
 
     let version = sake.getPluginVersion()
