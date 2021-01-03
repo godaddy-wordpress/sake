@@ -12,7 +12,7 @@ const log = require('fancy-log')
 module.exports = (gulp, plugins, sake) => {
   let githubInstance
 
-  getGithub = () => {
+  let getGithub = () => {
     if (!githubInstance) {
       githubInstance = new GitHub({
         debug: false,
