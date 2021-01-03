@@ -5,14 +5,14 @@ module.exports = (gulp, plugins, sake) => {
   function validateEnvVariables () {
     let errors = []
 
-    if (!process.env.DROPBOX_PATH) {
-      errors.push('DROPBOX_PATH not set')
+    if (!process.env.SAKE_PRE_RELEASE_PATH) {
+      errors.push('SAKE_PRE_RELEASE_PATH not set')
     }
 
-    let dropboxPath = sake.resolvePath(process.env.DROPBOX_PATH)
+    let prereleasePath = sake.resolvePath(process.env.SAKE_PRE_RELEASE_PATH)
 
-    if (!fs.existsSync(dropboxPath)) {
-      errors.push(`DROPBOX_PATH is invalid - the path '${dropboxPath}' does not exist`)
+    if (!fs.existsSync(prereleasePath)) {
+      errors.push(`SAKE_PRE_RELEASE_PATH is invalid - the path '${prereleasePath}' does not exist`)
     }
 
     if (errors.length) {
