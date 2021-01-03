@@ -10,18 +10,18 @@ const dateFormat = require('dateformat')
 const log = require('fancy-log')
 
 module.exports = (gulp, plugins, sake) => {
-  let githubInstance
+  let githubInstances = {}
 
-  let getGithub = () => {
-    if (!githubInstance) {
-      githubInstance = new GitHub({
+  let getGithub = (target = 'dev') => {
+    if (!githubInstances[target]) {
+      githubInstances[target] = new GitHub({
         debug: false,
         authStrategy: createTokenAuth,
-        auth: process.env.GITHUB_API_KEY
+        auth: process.env[`SAKE_${target.toUpperCase()}_GITHUB_API_KEY`] || process.env.GITHUB_API_KEY
       })
     }
 
-    return githubInstance
+    return githubInstances[target]
   }
 
   gulp.task('github:get_rissue', (done) => {
