@@ -4,12 +4,13 @@ module.exports = (gulp, plugins, sake) => {
   // validate env variables before deploying a prerelease
   function validateEnvVariables () {
     let errors = []
+    let prereleasePath = ''
 
-    if (!process.env.SAKE_PRE_RELEASE_PATH) {
+    if (process.env.SAKE_PRE_RELEASE_PATH) {
+      prereleasePath = sake.resolvePath(process.env.SAKE_PRE_RELEASE_PATH)
+    } else {
       errors.push('SAKE_PRE_RELEASE_PATH not set')
     }
-
-    let prereleasePath = sake.resolvePath(process.env.SAKE_PRE_RELEASE_PATH)
 
     if (!fs.existsSync(prereleasePath)) {
       errors.push(`SAKE_PRE_RELEASE_PATH is invalid - the path '${prereleasePath}' does not exist`)
