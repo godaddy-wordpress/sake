@@ -181,7 +181,7 @@ module.exports = (gulp, plugins, sake) => {
 
   // creates a release for the plugin, attaching the build zip to it
   gulp.task('github:create_release', (done) => {
-    let owner = sake.options.owner || 'skyverge'
+    let owner = sake.options.owner
     let repo = sake.options.repo || sake.config.plugin.id
     let github = getGithub()
 
