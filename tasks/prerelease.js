@@ -12,7 +12,7 @@ module.exports = (gulp, plugins, sake) => {
       errors.push('SAKE_PRE_RELEASE_PATH not set')
     }
 
-    if (!fs.existsSync(prereleasePath)) {
+    if (prereleasePath && !fs.existsSync(prereleasePath)) {
       errors.push(`SAKE_PRE_RELEASE_PATH is invalid - the path '${prereleasePath}' does not exist`)
     }
 
