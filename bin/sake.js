@@ -3,7 +3,7 @@ const { spawn } = require('child_process')
 const path = require('path')
 
 /**
- * `sake` is simply a nice wrapper around `gulp`, designed simplify using gulp
+ * `sake` is simply a nice wrapper around `gulp`, designed to simplify using gulp
  * as our build/deploy tool. It passes the gulpfile from sake's directory instead
  * of the plugin repo and sets the correct current working directory. It works by
  * spawning a child node process, which runs gulp with our CLI args.
