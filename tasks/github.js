@@ -130,6 +130,12 @@ module.exports = (gulp, plugins, sake) => {
 
   // creates a docs issue for the plugin
   gulp.task('github:docs_issue', (done) => {
+
+    if (!sake.config.deploy.docs) {
+      log.warn(chalk.yellow('No docs repo configured for ' + sake.getPluginName() + ', skipping'))
+      return done()
+    }
+
     let owner = sake.config.deploy.docs.owner
     let repo = sake.config.deploy.docs.name
     let github = getGithub()
