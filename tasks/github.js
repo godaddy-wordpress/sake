@@ -10,24 +10,24 @@ const dateFormat = require('dateformat')
 const log = require('fancy-log')
 
 module.exports = (gulp, plugins, sake) => {
-  let githubInstance
+  let githubInstances = {}
 
-  getGithub = () => {
-    if (!githubInstance) {
-      githubInstance = new GitHub({
+  let getGithub = (target = 'dev') => {
+    if (!githubInstances[target]) {
+      githubInstances[target] = new GitHub({
         debug: false,
         authStrategy: createTokenAuth,
-        auth: process.env.GITHUB_API_KEY
+        auth: process.env[`SAKE_${target.toUpperCase()}_GITHUB_API_KEY`] || process.env.GITHUB_API_KEY
       })
     }
 
-    return githubInstance
+    return githubInstances[target]
   }
 
   gulp.task('github:get_rissue', (done) => {
     let owner = sake.config.deploy.dev.owner
     let repo = sake.config.deploy.dev.name
-    let github = getGithub()
+    let github = getGithub('dev')
 
     let labels = ['release']
 
@@ -87,7 +87,7 @@ module.exports = (gulp, plugins, sake) => {
 
     let owner = sake.config.deploy.production.owner
     let repo = sake.config.deploy.production.name
-    let github = getGithub()
+    let github = getGithub('production')
 
     github.issues.listForRepo({
       owner: owner,
@@ -130,9 +130,15 @@ module.exports = (gulp, plugins, sake) => {
 
   // creates a docs issue for the plugin
   gulp.task('github:docs_issue', (done) => {
+
+    if (!sake.config.deploy.docs) {
+      log.warn(chalk.yellow('No docs repo configured for ' + sake.getPluginName() + ', skipping'))
+      return done()
+    }
+
     let owner = sake.config.deploy.docs.owner
     let repo = sake.config.deploy.docs.name
-    let github = getGithub()
+    let github = getGithub('docs')
 
     let message = 'Should a Docs issue be created for ' + sake.getPluginName() + '?'
 
@@ -175,9 +181,15 @@ module.exports = (gulp, plugins, sake) => {
 
   // creates a release for the plugin, attaching the build zip to it
   gulp.task('github:create_release', (done) => {
-    let owner = sake.options.owner || 'skyverge'
+    let owner = sake.options.owner
     let repo = sake.options.repo || sake.config.plugin.id
-    let github = getGithub()
+
+    if (!owner || !repo) {
+      log.warn(chalk.yellow('The owner or the slug of the repo for ' + sake.getPluginName() + ' are missing, skipping'))
+      return done()
+    }
+
+    let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
 
     let version = sake.getPluginVersion()
     let zipName = `${sake.config.plugin.id}.${version}.zip`
@@ -279,7 +291,7 @@ module.exports = (gulp, plugins, sake) => {
   const createMilestones = (milestones, done) => {
     let owner = sake.options.owner || sake.config.deploy.dev.owner
     let repo = sake.options.repo || sake.config.deploy.dev.name
-    let github = getGithub()
+    let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
 
     async.eachLimit(milestones, 5, function (milestone, cb) {
       let description = codename.generate(['unique', 'alliterative', 'random'], ['adjectives', 'animals']).join(' ')

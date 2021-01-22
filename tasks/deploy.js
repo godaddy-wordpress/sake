@@ -13,10 +13,14 @@ module.exports = (gulp, plugins, sake) => {
   function validateEnvVariables() {
     if (validatedEnvVariables) return
 
-    let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
+    let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
 
     if (sake.config.deploy.type === 'wc') {
-      variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+      variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      variables = variables.concat(['WP_SVN_USER'])
     }
 
     sake.validateEnvironmentVariables(variables)
