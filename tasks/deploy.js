@@ -119,9 +119,13 @@ module.exports = (gulp, plugins, sake) => {
     fs.readFile(`${sake.config.paths.src}/${sake.config.plugin.mainFile}`, 'utf8', (err, data) => {
       if (err) sake.throwError(err)
 
-      let results = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
+      // matches " * Woo: ProductId:ProductKey" in the main plugin file PHPDoc
+      let phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+)/ig)
+      // matches legacy woothemes_queue_update() usage in the main plugin file
+      let phpFuncMatch = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
 
-      if (!results) {
+      // throw an error if no WT keys have been found with either method
+      if (!phpDocMatch && !phpFuncMatch) {
         sake.throwError('WooThemes updater keys for the plugin have not been properly set ;(')
       }
 
