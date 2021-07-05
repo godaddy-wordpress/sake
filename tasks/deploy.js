@@ -120,7 +120,7 @@ module.exports = (gulp, plugins, sake) => {
       if (err) sake.throwError(err)
 
       // matches " * Woo: ProductId:ProductKey" in the main plugin file PHPDoc
-      let phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+);/ig)
+      let phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+)/ig)
       // matches legacy woothemes_queue_update() usage in the main plugin file
       let phpFuncMatch = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
 
