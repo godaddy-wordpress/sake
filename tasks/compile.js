@@ -1,6 +1,7 @@
 const webpack = require('webpack-stream')
 const fs = require('fs')
 const path = require('path')
+const sass = require('gulp-sass')(require('sass'))
 
 module.exports = (gulp, plugins, sake) => {
   const pipes = require('../pipes/scripts.js')(plugins, sake)
@@ -111,7 +112,7 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
     ])
       .pipe(plugins.sourcemaps.init())
-      .pipe(plugins.sass({ outputStyle: 'nested' }))
+      .pipe(sass({ outputStyle: 'expanded' }))
       .pipe(plugins.postcss(cssPlugins))
       .pipe(plugins.rename({ suffix: '.min' }))
       // ensure admin/ and frontend/ are removed from the source paths
