@@ -88,8 +88,8 @@
     "standard": "^11.0.1"
   },
   "overrides" : {
-    "@oktokit/rest" : {
-      "macos-release" : "^3.1.0"
+    "os-name@3.1.0" : {
+      "macos-release" : "3.1.0"
     }
   }
 }
