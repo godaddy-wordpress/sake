@@ -52,6 +52,7 @@ module.exports = (gulp, plugins, sake) => {
 
       // skip tartufo files
       `!${sake.config.paths.src}/**/tool.tartufo`,
+      `!${sake.config.paths.src}/**/tartufo.toml`,
       `!${sake.config.paths.src}/**/exclude-patterns.txt`,
 
       // skip codeowners files
