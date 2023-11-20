@@ -146,8 +146,8 @@ module.exports = (gulp, plugins, sake) => {
     // skip any custom paths
     if ( Array.isArray( sake.config.paths.exclude ) && sake.config.paths.exclude.length ) {
       sake.config.paths.exclude.forEach( (path) => {
-			paths.push( `!${path}{,/**}` )
-        })
+        paths.push(`!${path}{,/**}`)
+      })
     }
 
     return gulp.src(paths, { base: sake.config.paths.src })

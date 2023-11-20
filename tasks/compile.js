@@ -22,7 +22,7 @@ module.exports = (gulp, plugins, sake) => {
   /** Scripts */
 
   // the main task to compile scripts
-  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js', 'compile:blocks', 'compile:bundle'))
+  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js', 'compile:blocks'))
 
   // Note: ideally, we would only open a single stream of the script files, linting and compiling in the same
   // stream/task, but unfortunately it looks like this is not possible, ast least not when reporting the
@@ -93,11 +93,6 @@ module.exports = (gulp, plugins, sake) => {
         .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/`))
         .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
     }
-  })
-
-  // this task will look for any NPM dependencies specified in the plugin's configuration and bundle them into the specified destination folder
-  gulp.task('compile:bundle', () => {
-
   })
 
   /** Styles */
