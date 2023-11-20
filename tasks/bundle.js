@@ -22,7 +22,7 @@ module.exports = (gulp, plugins, sake) => {
     try {
       shell.exec('npm install', { stdio: 'inherit' });
     } catch (error) {
-      sake.throwError('Error during npm install:', error.message)
+      sake.throwError('Error during npm install:' + error.message ?? 'unknown error.')
     }
 
     // loop through each script and copy it over the designated destination folder in the local plugin file path
@@ -45,7 +45,7 @@ module.exports = (gulp, plugins, sake) => {
         fs.copyFileSync(sourceFilePath, destinationFilePath);
         log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
       } catch (error) {
-        sake.throwError(`Error copying '${file}' from '${packageName}':`, error.message)
+        sake.throwError(`Error copying '${file}' from '${sourceFilePath}' to '${destinationFilePath}': ` + error.message ?? 'unknown error.')
       }
     })
   })
