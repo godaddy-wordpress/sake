@@ -129,7 +129,6 @@ module.exports = (gulp, plugins, sake) => {
       },
       json: true
     }, (err, res, body) => {
-
       if (err) {
         throw `Unexpected error when uploading (${err})`
       }

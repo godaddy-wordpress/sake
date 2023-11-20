@@ -10,7 +10,7 @@ module.exports = (gulp, plugins, sake) => {
 
   // TODO: consider setting these variables in the sake.config on load instead, and validating sake.config vars instead
   // validate env variables before deploy
-  function validateEnvVariables() {
+  function validateEnvVariables () {
     if (validatedEnvVariables) return
 
     let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
@@ -69,7 +69,7 @@ module.exports = (gulp, plugins, sake) => {
       // git commit & push
       'shell:git_push_update',
       // rebuild plugin configuration (version number, etc)
-      function rebuildPluginConfig(cb) {
+      function rebuildPluginConfig (cb) {
         sake.buildPluginConfig()
         cb()
       },
@@ -178,7 +178,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('get_issues_to_close', (done) => {
     let tasks = ['github:get_rissue']
 
-    if ('wc' == sake.config.deploy.type) {
+    if (sake.config.deploy.type == 'wc') {
       tasks.push('github:get_wc_issues')
     }
 

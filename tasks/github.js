@@ -1,4 +1,4 @@
-const { createTokenAuth } = require("@octokit/auth-token")
+const { createTokenAuth } = require('@octokit/auth-token')
 const { Octokit: GitHub } = require('@octokit/rest')
 const inquirer = require('inquirer')
 const fs = require('fs')
@@ -79,7 +79,6 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   gulp.task('github:get_wc_issues', (done) => {
-
     if (!sake.config.deploy.production) {
       log.warn(chalk.yellow('No WC (production) repo configured for ' + sake.getPluginName() + ', skipping'))
       return done()
@@ -130,7 +129,6 @@ module.exports = (gulp, plugins, sake) => {
 
   // creates a docs issue for the plugin
   gulp.task('github:docs_issue', (done) => {
-
     if (!sake.config.deploy.docs) {
       log.warn(chalk.yellow('No docs repo configured for ' + sake.getPluginName() + ', skipping'))
       return done()
@@ -245,7 +243,7 @@ module.exports = (gulp, plugins, sake) => {
     createMilestones(tuesdays, done)
 
     // helper function to get all tuesdays of a year
-    function getTuesdays(y) {
+    function getTuesdays (y) {
       // ensure year is an integer
       y = parseInt(y, 10)
 
@@ -272,7 +270,7 @@ module.exports = (gulp, plugins, sake) => {
     createMilestones(getMonthlyMilestones(year), done)
 
     // helper to get all months in a year
-    function getMonthlyMilestones(y) {
+    function getMonthlyMilestones (y) {
       // ensure year is an integer
       y = parseInt(y, 10)
 
