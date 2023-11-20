@@ -11,11 +11,11 @@ module.exports = (gulp, plugins, sake) => {
 
     // bail if no scripts to bundle
     if (! scripts || !Array.isArray(scripts) || scripts.length === 0) {
-      log.message('No script dependencies to bundle.')
+      log.info('No script dependencies to bundle.')
       return;
     }
 
-    log.message('Bundling script dependencies.')
+    log.info('Bundling script dependencies.')
 
     // if there are scripts to bundle, make sure the dependencies are installed, or bail on error
     try {
@@ -42,7 +42,7 @@ module.exports = (gulp, plugins, sake) => {
 
       try {
         fs.copyFileSync(sourceFilePath, destinationFilePath);
-        log.message(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
+        log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
       } catch (error) {
         sake.throwError(`Error copying '${file}' from '${packageName}':`, error.message)
       }
