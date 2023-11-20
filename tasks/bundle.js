@@ -38,10 +38,18 @@ module.exports = (gulp, plugins, sake) => {
       }
 
       // copy the specified file to the destination path
+      const destinationFolder = path.join(destination);
       const sourceFilePath = path.join(packagePath, file)
       const destinationFilePath = path.join(destination, file)
 
       try {
+        // create folder if it does not exist
+        if (!fs.existsSync(destinationFolder)) {
+          fs.mkdirSync(destinationFolder, { recursive: true })
+          log.info(`Created destination folder for '${file}: '${destinationFolder}'.`)
+        }
+
+        // copy into destination folder
         fs.copyFileSync(sourceFilePath, destinationFilePath);
         log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
       } catch (error) {
