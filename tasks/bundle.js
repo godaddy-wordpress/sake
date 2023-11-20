@@ -4,7 +4,12 @@ const path = require('path')
 const shell = require('shelljs')
 
 module.exports = (gulp, plugins, sake) => {
-  gulp.task('bundle', gulp.parallel('bundle:scripts'))
+
+  gulp.task('bundle', (done) => {
+    let tasks = ['bundle:scripts']
+
+    gulp.parallel(tasks)(done)
+  })
 
   gulp.task('bundle:scripts', () => {
     const scripts = sake?.config?.bundle?.scripts;
