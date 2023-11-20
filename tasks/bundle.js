@@ -7,7 +7,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('bundle', gulp.parallel('bundle:scripts'))
 
   gulp.task('bundle:scripts', () => {
-    const scripts = sake?.config?.scripts;
+    const scripts = sake?.config?.bundle?.scripts;
 
     // bail if no scripts to bundle
     if (! scripts || !Array.isArray(scripts) || scripts.length === 0) {
