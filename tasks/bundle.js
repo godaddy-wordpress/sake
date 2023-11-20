@@ -1,6 +1,7 @@
 const log = require('fancy-log')
 const fs = require('fs')
 const path = require('path')
+const shell = require('shelljs')
 const execSync = require('child_process')
 
 module.exports = (gulp, plugins, sake) => {
@@ -19,7 +20,7 @@ module.exports = (gulp, plugins, sake) => {
 
     // if there are scripts to bundle, make sure the dependencies are installed, or bail on error
     try {
-      execSync('npm install', { stdio: 'inherit' });
+      shell.exec('npm install', { stdio: 'inherit' });
     } catch (error) {
       sake.throwError('Error during npm install:', error.message)
     }
