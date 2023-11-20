@@ -4,14 +4,9 @@ const path = require('path')
 const execSync = require('child_process')
 
 module.exports = (gulp, plugins, sake) => {
-  gulp.task('bundle', (done) => {
-    let tasks = ['bundle:scripts']
-    gulp.parallel(tasks)(done)
-  })
-}
+  gulp.task('bundle', gulp.parallel('bundle:scripts'))
 
-module.exports = (gulp, plugins, sake) => {
-  gulp.tasks('bundle:scripts', () => {
+  gulp.task('bundle:scripts', () => {
     const scripts = sake?.config?.scripts;
 
     // bail if no scripts to bundle
@@ -47,9 +42,9 @@ module.exports = (gulp, plugins, sake) => {
 
       try {
         fs.copyFileSync(sourceFilePath, destinationFilePath);
-        log.message(`Bundled '${file}' from '${packageName}' to '${destination}'.`);
+        log.message(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
       } catch (error) {
-        sake.throwError(`Error copying '${file}' from '${packageName}':`, error.message);
+        sake.throwError(`Error copying '${file}' from '${packageName}':`, error.message)
       }
     })
   })
