@@ -2,7 +2,6 @@ const log = require('fancy-log')
 const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
-const execSync = require('child_process')
 
 module.exports = (gulp, plugins, sake) => {
   gulp.task('bundle', gulp.parallel('bundle:scripts'))
