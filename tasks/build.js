@@ -4,6 +4,7 @@ module.exports = (gulp, plugins, sake) => {
   // main task for building the plugin:
   // - cleans the build directory
   // - compiles the plugin assets (linting where necessary)
+  // - bundles any external dependencies to the plugin assets
   // - copies plugin files to the build directory
   let tasks = ['clean:build', 'shell:composer_install', 'compile', 'bundle', 'copy:build']
 
