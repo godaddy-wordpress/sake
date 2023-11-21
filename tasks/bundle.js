@@ -15,16 +15,18 @@ module.exports = (gulp, plugins, sake) => {
         shell.exec('npm install', { stdio: 'inherit' })
       } catch (error) {
         sake.throwError(`Error during npm install: ${error.message ?? 'unknown error.'}`)
+        done(error)
       }
     }
 
     gulp.parallel(tasks)(done)
   })
 
-  const processBundle = (bundleType, bundleArray) => {
+  const processBundle = (bundleType, bundleArray, done) => {
     // bail if no items to bundle
     if (!bundleArray || !Array.isArray(bundleArray) || bundleArray.length === 0) {
       log.info(`No external ${bundleType} to bundle.`)
+      done()
       return
     }
 
@@ -40,6 +42,8 @@ module.exports = (gulp, plugins, sake) => {
       // check if the package exists
       if (!fs.existsSync(packagePath)) {
         sake.throwError(`Package '${packageName}' not found in node_modules.`)
+        done(`Package '${packageName}' not found in node_modules.`)
+        return
       }
 
       // copy the specified file to the destination path
@@ -59,19 +63,22 @@ module.exports = (gulp, plugins, sake) => {
         log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
       } catch (error) {
         sake.throwError(`Error copying '${file}' from '${sourceFilePath}' to '${destinationFilePath}': ${error.message ?? 'unknown error.'}`)
+        done(error)
       }
     })
+
+    done()
   }
 
-  gulp.task('bundle:scripts', () => {
+  gulp.task('bundle:scripts', (done) => {
     const bundle = sake?.config?.bundle
     const scripts = bundle?.scripts
-    processBundle('scripts', scripts)
+    processBundle('scripts', scripts, done)
   })
 
-  gulp.task('bundle:styles', () => {
+  gulp.task('bundle:styles', (done) => {
     const bundle = sake?.config?.bundle
     const styles = bundle?.styles
-    processBundle('styles', styles)
+    processBundle('styles', styles, done)
   })
 }
