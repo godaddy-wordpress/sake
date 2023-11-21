@@ -31,7 +31,7 @@ module.exports = (gulp, plugins, sake) => {
 
     // loop through each script and copy it over the designated destination folder in the local plugin file path
     scripts.forEach((script) => {
-      const { package: packageName, file, destination } = script
+      const { source: packageName, file, destination } = script
 
       // fetch the package name from node_modules
       const packagePath = path.join('node_modules', packageName)
