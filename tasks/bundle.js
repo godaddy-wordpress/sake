@@ -6,32 +6,33 @@ const shell = require('shelljs')
 module.exports = (gulp, plugins, sake) => {
 
   gulp.task('bundle', (done) => {
-    let tasks = ['bundle:scripts']
+    let tasks = ['bundle:scripts', 'bundle:styles']
+
+    if (sake?.config?.bundle) {
+      // if there are items to bundle, make sure the dependencies are installed, or bail on error
+      log.info('Installing external dependencies...')
+      try {
+        shell.exec('npm install', { stdio: 'inherit' })
+      } catch (error) {
+        sake.throwError(`Error during npm install: ${error.message ?? 'unknown error.'}`)
+      }
+    }
 
     gulp.parallel(tasks)(done)
   })
 
-  gulp.task('bundle:scripts', () => {
-    const scripts = sake?.config?.bundle?.scripts;
-
-    // bail if no scripts to bundle
-    if (! scripts || !Array.isArray(scripts) || scripts.length === 0) {
-      log.info('No script dependencies to bundle.')
-      return;
+  const processBundle = (bundleType, bundleArray) => {
+    // bail if no items to bundle
+    if (!bundleArray || !Array.isArray(bundleArray) || bundleArray.length === 0) {
+      log.info(`No external ${bundleType} to bundle.`)
+      return
     }
 
-    log.info('Bundling script dependencies.')
+    log.info(`Bundling ${bundleType} dependencies.`)
 
-    // if there are scripts to bundle, make sure the dependencies are installed, or bail on error
-    try {
-      shell.exec('npm install', { stdio: 'inherit' });
-    } catch (error) {
-      sake.throwError('Error during npm install:' + error.message ?? 'unknown error.')
-    }
-
-    // loop through each script and copy it over the designated destination folder in the local plugin file path
-    scripts.forEach((script) => {
-      const { source: packageName, file, destination } = script
+    // loop through each item and copy it over the designated destination folder in the local plugin file path
+    bundleArray.forEach((item) => {
+      const { source: packageName, file, destination } = item
 
       // fetch the package name from node_modules
       const packagePath = path.join('node_modules', packageName)
@@ -42,7 +43,7 @@ module.exports = (gulp, plugins, sake) => {
       }
 
       // copy the specified file to the destination path
-      const destinationFolder = path.join(destination);
+      const destinationFolder = path.join(destination)
       const sourceFilePath = path.join(packagePath, file)
       const destinationFilePath = path.join(destination, file)
 
@@ -54,11 +55,23 @@ module.exports = (gulp, plugins, sake) => {
         }
 
         // copy into destination folder
-        fs.copyFileSync(sourceFilePath, destinationFilePath);
+        fs.copyFileSync(sourceFilePath, destinationFilePath)
         log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
       } catch (error) {
-        sake.throwError(`Error copying '${file}' from '${sourceFilePath}' to '${destinationFilePath}': ` + error.message ?? 'unknown error.')
+        sake.throwError(`Error copying '${file}' from '${sourceFilePath}' to '${destinationFilePath}': ${error.message ?? 'unknown error.'}`)
       }
     })
+  }
+
+  gulp.task('bundle:scripts', () => {
+    const bundle = sake?.config?.bundle
+    const scripts = bundle?.scripts
+    processBundle('scripts', scripts)
+  })
+
+  gulp.task('bundle:styles', () => {
+    const bundle = sake?.config?.bundle
+    const styles = bundle?.styles
+    processBundle('styles', styles)
   })
 }
