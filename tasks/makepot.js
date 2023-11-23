@@ -8,9 +8,7 @@ module.exports = (gulp, plugins, sake) => {
     const domainPath = ( options.domainPath || 'i18n/languages' ) + '/' + sake.config.plugin.id + '.pot'
     const excludedPaths = ['.github/.*', 'lib/.*', 'vendor/.*', 'tests/.*', 'node_modules/.*']
     const excluded = excludedPaths.map((path) => `--exclude="${path}"`).join(' ')
-    const headers = options.reportBugsTo
-      ? `--headers='{"Report-Msgid-Bugs-To": "${options.reportBugsTo}"}'`
-      : '';
+    const headers = options.reportBugsTo ? `--headers='{"Report-Msgid-Bugs-To": "${options.reportBugsTo}"}'` : ''
 
     log.info('Generating POT file...')
 
