@@ -12,7 +12,7 @@ module.exports = (gulp, plugins, sake) => {
 
     log.info('Generating POT file...')
 
-    let result = shell.exec(`wp i18n make-pot . ${domainPath}  ${headers} ${excluded}` )
+    let result = shell.exec(`wp i18n make-pot . ${domainPath}  ${headers} ${excluded}`)
 
     if (result.code !== 0) {
       sake.throwError(`Error while generating POT file: ${result.stderr ?? 'unknown error.'}`)
