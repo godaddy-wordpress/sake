@@ -11,11 +11,12 @@ module.exports = (gulp, plugins, sake) => {
     if (sake?.config?.bundle) {
       // if there are items to bundle, make sure the dependencies are installed, or bail on error
       log.info('Installing external dependencies...')
-      try {
-        shell.exec('npm install', { stdio: 'inherit' })
-      } catch (error) {
-        sake.throwError(`Error during npm install: ${error.message ?? 'unknown error.'}`)
-        done(error)
+
+      let npmInstall = shell.exec('npm install')
+
+      if (npmInstall.code !== 0) {
+        sake.throwError(`Error during npm install: ${result.stderr ?? 'unknown error.'}`)
+        done(result.stderr)
       }
     }
 
