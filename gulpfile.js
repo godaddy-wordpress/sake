@@ -70,7 +70,7 @@ let defaults = {
   tasks: {
     makepot: {
       reportBugsTo: 'https://woocommerce.com/my-account/marketplace-ticket-form/',
-      domainPath: '/i18n/languages'
+      domainPath: 'i18n/languages'
     },
     watch: {
       useBrowserSync: process.env.USE_BROWSERSYNC || false
