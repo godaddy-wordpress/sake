@@ -62,6 +62,9 @@ module.exports = (gulp, plugins, sake) => {
       // skip whitesource files
       `!${sake.config.paths.src}/**/.whitesource`,
 
+      // skip manifest.xml
+      `!${sake.config.paths.src}/manifest.xml`,
+
       // skip sake sake.config
       `!${sake.config.paths.src}/**/sake.config.js`
     ]
