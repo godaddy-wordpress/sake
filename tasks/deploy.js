@@ -178,7 +178,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('get_issues_to_close', (done) => {
     let tasks = ['github:get_rissue']
 
-    if (sake.config.deploy.type == 'wc') {
+    if (sake.config.deploy.type === 'wc') {
       tasks.push('github:get_wc_issues')
     }
 
