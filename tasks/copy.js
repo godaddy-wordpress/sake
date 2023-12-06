@@ -107,14 +107,13 @@ module.exports = (gulp, plugins, sake) => {
     paths = paths.concat([
       // skip misc jilt promotions files
       `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/gulpfile.js`,
-      `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/README.md`,
+      `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/README.md`
     ])
 
     // skip copying composer dev packages
     if (sake.config.composer) {
       if (sake.config.composer['require-dev']) {
         Object.keys(sake.config.composer['require-dev']).forEach((pkg) => {
-
           // skip copying the dev package directory
           let packagePath = path.join(sake.config.paths.vendor, pkg)
 
@@ -147,10 +146,10 @@ module.exports = (gulp, plugins, sake) => {
     }
 
     // skip any custom paths
-    if ( Array.isArray( sake.config.paths.exclude ) && sake.config.paths.exclude.length ) {
-      sake.config.paths.exclude.forEach( (path) => {
-			paths.push( `!${path}{,/**}` )
-        })
+    if (Array.isArray(sake.config.paths.exclude) && sake.config.paths.exclude.length) {
+      sake.config.paths.exclude.forEach((path) => {
+        paths.push(`!${path}{,/**}`)
+      })
     }
 
     return gulp.src(paths, { base: sake.config.paths.src })

@@ -70,7 +70,6 @@
     "lodash": "^4.17.15",
     "minimist": "^1.2.0",
     "node-notifier": "^5.4.3",
-    "node-wp-i18n": "^1.2.1",
     "parse-git-config": "^2.0.3",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.0",
@@ -87,7 +86,7 @@
     "gulp-debug": "^3.2.0",
     "standard": "^11.0.1"
   },
-  "overrides" : {
+  "overrides": {
     "@octokit/rest": {
       "universal-user-agent": "6.0.0"
     }

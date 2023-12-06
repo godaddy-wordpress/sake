@@ -1,7 +1,6 @@
 const path = require('path')
 
 module.exports = (gulp, plugins, sake) => {
-
   // converts CoffeeScripts to ES6 JavaScript without minification or further handling:
   // this command should only be run once when converting an existing plugin CoffeeScript codebase to plain ES6
   gulp.task('decaffeinate', () => {
