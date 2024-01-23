@@ -16,7 +16,6 @@ module.exports = (gulp, plugins, sake) => {
     if (!githubInstances[target]) {
       githubInstances[target] = new GitHub({
         debug: false,
-        authStrategy: createTokenAuth,
         auth: process.env[`SAKE_${target.toUpperCase()}_GITHUB_API_KEY`] || process.env.GITHUB_API_KEY
       })
     }
