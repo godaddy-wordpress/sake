@@ -65,7 +65,7 @@
     "lazypipe": "^1.0.1",
     "lodash": "^4.17.15",
     "minimist": "^1.2.0",
-    "node-notifier": "^5.4.3",
+    "node-notifier": "^9.0.1",
     "parse-git-config": "^2.0.3",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.0",
@@ -85,6 +85,9 @@
   "overrides": {
     "@octokit/rest": {
       "universal-user-agent": "6.0.0"
+    },
+    "gulp-phplint": {
+      "gulp-notify": "4.0.0"
     }
   }
 }
