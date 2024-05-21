@@ -29,7 +29,6 @@
     "autoprefixer": "^8.6.5",
     "axios": "^0.28.0",
     "babel-loader": "^8.0.6",
-    "babel-preset-stage-3": "^6.24.1",
     "browser-sync": "^2.26.7",
     "chalk": "^2.4.1",
     "codename": "0.0.6",
