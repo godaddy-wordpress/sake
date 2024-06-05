@@ -224,7 +224,7 @@ module.exports = (gulp, plugins, sake) => {
     let tasks = []
 
     if (sake.config.deploy.type === 'wc') {
-      tasks.push('deploy_to_wc_repo')
+      log.info(chalk.blue('WooCommerce plugins no longer need to be mirrored to GitHub, skipping deploy to remote repo'))
     } else if (sake.config.deploy.type === 'wp') {
       tasks.push('deploy_to_wp_repo')
     } else {
@@ -233,60 +233,6 @@ module.exports = (gulp, plugins, sake) => {
     }
 
     gulp.series(tasks)(done)
-  })
-
-  /** WooCommerce repo related tasks ****************************************/
-
-  // deploy to WC repo
-  gulp.task('deploy_to_wc_repo', (done) => {
-    validateEnvVariables()
-
-    gulp.series('copy_to_wc_repo', 'shell:git_push_wc_repo')(done)
-  })
-
-  /**
-   * Copy to WC repo
-   *
-   * Helper task which copies files to WC repo (used by update_wc_repo)
-   *
-   * Builds the plugin, pulls chances from the WC repo, cleans the local WC
-   * repo clone, and then copies built plugin to clone
-   */
-  gulp.task('copy_to_wc_repo', (done) => {
-    validateEnvVariables()
-
-    let tasks = [
-      // copy files to build directory
-      'build',
-      // ensure WC repo is up to date
-      'shell:git_pull_wc_repo',
-      // clean the WC plugin dir
-      'clean:wc_repo',
-      // copy files from build to WC repo directory
-      'copy:wc_repo'
-    ]
-
-    // no need to build when part of deploy process
-    if (sake.options.deploy) {
-      tasks.shift()
-    }
-
-    gulp.series(tasks)(done)
-  })
-
-  // TODO: do we need this anymore?
-  /**
-   * Update WC repo
-   *
-   * Builds and copies plugin to WC repo then pushes a general "Updating {plugin name}"
-   * commit. This is not a very useful task as it was created many moons ago to allow
-   * us to quickly fix issues with the deploy (such as extra files, etc). The
-   * task remains for posterity
-   */
-  gulp.task('update_wc_repo', (done) => {
-    validateEnvVariables()
-
-    gulp.series('copy_to_wc_repo', 'shell:git_update_wc_repo')(done)
   })
 
   /** WP.org deploy related tasks ****************************************/
