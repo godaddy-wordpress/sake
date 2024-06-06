@@ -194,6 +194,22 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('deploy_create_releases', (done) => {
     // TODO: consider using async or similar to hide the anonymous tasks from gulp, see: https://github.com/gulpjs/gulp/issues/1143
 
+    let tasks = ['deploy_create_dev_release']
+
+    if (sake.config.deploy.type === 'wc' && sake.config.deploy.production) {
+      tasks = tasks.concat(['deploy_create_wc_release'])
+    }
+
+    return gulp.series()(done)
+  })
+
+  /**
+   * Create release for the dev repo
+   *
+   * This task is especially useful if your deploy failed before the release
+   * creating step or you need to re-create the release for some reason
+   */
+  gulp.task('deploy_create_release', (done) => {
     let tasks = [
       function (cb) {
         sake.options.owner = sake.config.deploy.dev.owner
@@ -204,17 +220,25 @@ module.exports = (gulp, plugins, sake) => {
       'github:create_release'
     ]
 
-    if (sake.config.deploy.type === 'wc' && sake.config.deploy.production) {
-      tasks = tasks.concat([
-        function (cb) {
-          sake.options.owner = sake.config.deploy.production.owner
-          sake.options.repo = sake.config.deploy.production.name
-          sake.options.prefix_release_tag = false
-          cb()
-        },
-        'github:create_release'
-      ])
-    }
+    return gulp.series(tasks)(done)
+  })
+
+  /**
+   * Create release for the WC (production/mirror) repo
+   *
+   * This task is especially useful if your deploy failed before the release
+   * creating step or you need to re-create the release for some reason
+   */
+  gulp.task('deploy_create_wc_release', (done) => {
+    let tasks = [
+      function (cb) {
+        sake.options.owner = sake.config.deploy.production.owner
+        sake.options.repo = sake.config.deploy.production.name
+        sake.options.prefix_release_tag = false
+        cb()
+      },
+      'github:create_release'
+    ]
 
     return gulp.series(tasks)(done)
   })
