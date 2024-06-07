@@ -66,8 +66,6 @@ module.exports = (gulp, plugins, sake) => {
       'deploy:validate_framework_version',
       // grab issues to close with commit
       'github:get_rissue',
-      // git commit & push
-      'shell:git_push_update',
       // rebuild plugin configuration (version number, etc)
       function rebuildPluginConfig (cb) {
         sake.buildPluginConfig()
