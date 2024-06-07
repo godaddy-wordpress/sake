@@ -26,6 +26,8 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/.travis.yml`,
       `!${sake.config.paths.src}/**/phpunit.xml`,
       `!${sake.config.paths.src}/**/phpunit.travis.xml`,
+      `!${sake.config.paths.src}/**/docker-compose*.yml`,
+      `!${sake.config.paths.src}/**/wp-bootstrap.sh`,
       `!${sake.config.paths.src}/phpcs.xml`,
 
       // skip composer and npm files
@@ -48,8 +50,24 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.src}/**/readme.md`,
       `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
 
-      // skip sake sake.config
-      `!${sake.config.paths.src}/**/sake.config.js`
+      // skip tartufo files
+      `!${sake.config.paths.src}/**/tool.tartufo`,
+      `!${sake.config.paths.src}/**/tartufo.toml`,
+      `!${sake.config.paths.src}/**/exclude-patterns.txt`,
+
+      // skip codeowners files
+      `!${sake.config.paths.src}/**/CODEOWNERS`,
+      `!${sake.config.paths.src}/**/codeowners`,
+
+      // skip whitesource files
+      `!${sake.config.paths.src}/**/.whitesource`,
+
+      // skip manifest.xml
+      `!${sake.config.paths.src}/**/manifest.xml`,
+
+      // skip build config files
+      `!${sake.config.paths.src}/**/sake.config.js`,
+      `!${sake.config.paths.src}/**/postcss.config.js`,
     ]
 
     if (sake.config.framework) {
@@ -90,14 +108,13 @@ module.exports = (gulp, plugins, sake) => {
     paths = paths.concat([
       // skip misc jilt promotions files
       `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/gulpfile.js`,
-      `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/README.md`,
+      `!${sake.config.paths.vendor}/skyverge/wc-jilt-promotions/README.md`
     ])
 
     // skip copying composer dev packages
     if (sake.config.composer) {
       if (sake.config.composer['require-dev']) {
         Object.keys(sake.config.composer['require-dev']).forEach((pkg) => {
-
           // skip copying the dev package directory
           let packagePath = path.join(sake.config.paths.vendor, pkg)
 
@@ -130,10 +147,10 @@ module.exports = (gulp, plugins, sake) => {
     }
 
     // skip any custom paths
-    if ( Array.isArray( sake.config.paths.exclude ) && sake.config.paths.exclude.length ) {
-      sake.config.paths.exclude.forEach( (path) => {
-			paths.push( `!${path}{,/**}` )
-        })
+    if (Array.isArray(sake.config.paths.exclude) && sake.config.paths.exclude.length) {
+      sake.config.paths.exclude.forEach((path) => {
+        paths.push(`!${path}{,/**}`)
+      })
     }
 
     return gulp.src(paths, { base: sake.config.paths.src })

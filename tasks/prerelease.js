@@ -4,15 +4,16 @@ module.exports = (gulp, plugins, sake) => {
   // validate env variables before deploying a prerelease
   function validateEnvVariables () {
     let errors = []
+    let prereleasePath = ''
 
-    if (!process.env.DROPBOX_PATH) {
-      errors.push('DROPBOX_PATH not set')
+    if (process.env.SAKE_PRE_RELEASE_PATH) {
+      prereleasePath = sake.resolvePath(process.env.SAKE_PRE_RELEASE_PATH)
+    } else {
+      errors.push('SAKE_PRE_RELEASE_PATH not set')
     }
 
-    let dropboxPath = sake.resolvePath(process.env.DROPBOX_PATH)
-
-    if (!fs.existsSync(dropboxPath)) {
-      errors.push(`DROPBOX_PATH is invalid - the path '${dropboxPath}' does not exist`)
+    if (prereleasePath && !fs.existsSync(prereleasePath)) {
+      errors.push(`SAKE_PRE_RELEASE_PATH is invalid - the path '${prereleasePath}' does not exist`)
     }
 
     if (errors.length) {
@@ -31,5 +32,5 @@ module.exports = (gulp, plugins, sake) => {
     gulp.series('bump', 'zip', 'clean:prerelease', 'copy:prerelease', 'clean:build')(done)
   })
 
-  gulp.task( 'pre', gulp.parallel('prerelease'))
+  gulp.task('pre', gulp.parallel('prerelease'))
 }

@@ -10,13 +10,17 @@ module.exports = (gulp, plugins, sake) => {
 
   // TODO: consider setting these variables in the sake.config on load instead, and validating sake.config vars instead
   // validate env variables before deploy
-  function validateEnvVariables() {
+  function validateEnvVariables () {
     if (validatedEnvVariables) return
 
-    let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME']
+    let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
 
     if (sake.config.deploy.type === 'wc') {
-      variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+      variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      variables = variables.concat(['WP_SVN_USER'])
     }
 
     sake.validateEnvironmentVariables(variables)
@@ -65,7 +69,7 @@ module.exports = (gulp, plugins, sake) => {
       // git commit & push
       'shell:git_push_update',
       // rebuild plugin configuration (version number, etc)
-      function rebuildPluginConfig(cb) {
+      function rebuildPluginConfig (cb) {
         sake.buildPluginConfig()
         cb()
       },
@@ -115,9 +119,13 @@ module.exports = (gulp, plugins, sake) => {
     fs.readFile(`${sake.config.paths.src}/${sake.config.plugin.mainFile}`, 'utf8', (err, data) => {
       if (err) sake.throwError(err)
 
-      let results = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
+      // matches " * Woo: ProductId:ProductKey" in the main plugin file PHPDoc
+      let phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+)/ig)
+      // matches legacy woothemes_queue_update() usage in the main plugin file
+      let phpFuncMatch = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
 
-      if (!results) {
+      // throw an error if no WT keys have been found with either method
+      if (!phpDocMatch && !phpFuncMatch) {
         sake.throwError('WooThemes updater keys for the plugin have not been properly set ;(')
       }
 
@@ -170,7 +178,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('get_issues_to_close', (done) => {
     let tasks = ['github:get_rissue']
 
-    if ('wc' == sake.config.deploy.type) {
+    if (sake.config.deploy.type === 'wc') {
       tasks.push('github:get_wc_issues')
     }
 

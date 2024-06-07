@@ -12,22 +12,22 @@ module.exports = (plugins, sake) => {
   // replace minimum WP version
   pipes.minimum_wp_version = lazypipe()
     .pipe(plugins.replace, /('minimum_wp_version'[\s]*=>[\s]*)'([^']*)'/, (match, m) => `${m}'${sake.options.minimum_wp_version}'`)
-    .pipe(plugins.replace, /Requires at least: .*\n/, () => `Requires at least: ${sake.options.minimum_wp_version}\n`)
+    .pipe(plugins.replace, /Requires at least: .*/, () => `Requires at least: ${sake.options.minimum_wp_version}`)
     .pipe(plugins.replace, /MINIMUM_WP_VERSION = .*\n/, () => `MINIMUM_WP_VERSION = '${sake.options.minimum_wp_version}';\n`)
 
   // replace tested up to WP version
   pipes.tested_up_to_wp_version = lazypipe()
-    .pipe(plugins.replace, /Tested up to: .*\n/, () => `Tested up to: ${sake.options.tested_up_to_wp_version}\n`)
+    .pipe(plugins.replace, /Tested up to: .*/, () => `Tested up to: ${sake.options.tested_up_to_wp_version}`)
 
   // replace minimum WC version
   pipes.minimum_wc_version = lazypipe()
     .pipe(plugins.replace, /('minimum_wc_version'[\s]*=>[\s]*)'([^']*)'/, (match, m) => `${m}'${sake.options.minimum_wc_version}'`)
-    .pipe(plugins.replace, /WC requires at least: .*\n/, () => `WC requires at least: ${sake.options.minimum_wc_version}\n`)
+    .pipe(plugins.replace, /WC requires at least: .*/, () => `WC requires at least: ${sake.options.minimum_wc_version}`)
     .pipe(plugins.replace, /MINIMUM_WC_VERSION = .*\n/, () => `MINIMUM_WC_VERSION = '${sake.options.minimum_wc_version}';\n`)
 
   // replace tested up to WC version
   pipes.tested_up_to_wc_version = lazypipe()
-    .pipe(plugins.replace, /WC tested up to: .*\n/, () => `WC tested up to: ${sake.options.tested_up_to_wc_version}\n`)
+    .pipe(plugins.replace, /WC tested up to: .*/, () => `WC tested up to: ${sake.options.tested_up_to_wc_version}`)
 
   // replace FW version
   pipes.framework_version = lazypipe()

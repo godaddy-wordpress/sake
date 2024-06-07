@@ -1,6 +1,7 @@
 const webpack = require('webpack-stream')
 const fs = require('fs')
 const path = require('path')
+const sass = require('gulp-sass')(require('sass'))
 
 module.exports = (gulp, plugins, sake) => {
   const pipes = require('../pipes/scripts.js')(plugins, sake)
@@ -51,6 +52,7 @@ module.exports = (gulp, plugins, sake) => {
       .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
   })
 
+  // this task is specific for plugins that add one or more self-contained Gutenberg blocks in their assets to be transpiled from ES6
   gulp.task('compile:blocks', () => {
     const i18nPath = `${process.cwd()}/i18n/languages/blocks/`
     const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
@@ -111,7 +113,7 @@ module.exports = (gulp, plugins, sake) => {
       `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
     ])
       .pipe(plugins.sourcemaps.init())
-      .pipe(plugins.sass({ outputStyle: 'nested' }))
+      .pipe(sass({ outputStyle: 'expanded' }))
       .pipe(plugins.postcss(cssPlugins))
       .pipe(plugins.rename({ suffix: '.min' }))
       // ensure admin/ and frontend/ are removed from the source paths

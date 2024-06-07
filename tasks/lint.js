@@ -5,7 +5,6 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('lint', gulp.parallel('lint:php', 'lint:scripts', 'lint:styles'))
 
   gulp.task('lint:php', (done) => {
-
     let paths = [
       `${sake.config.paths.src}/**/*.php`,
       `!${sake.config.paths.vendor}/**/*.php`,

@@ -2,7 +2,9 @@
 
 #### SkyVerge WordPress and WooCommerce plugin build & deploy tool
 
-Requires node 8.9.4+
+Requires:
+* node 8.9.4+
+* [npx](https://www.npmjs.com/package/npx)
 
 ### Installation:
 
