@@ -66,6 +66,7 @@ module.exports = (gulp, plugins, sake) => {
       return gulp.src(sake.config.paths.assetPaths.blockSources)
         .pipe(plugins.sourcemaps.init())
         .pipe(webpack({
+          mode: 'production',
           entry: `${blockPath}/${blockSrc[0]}`,
           output: {
             filename: path.basename(blockSrc[0], '.js') + '.min.js'
