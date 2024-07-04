@@ -80,7 +80,7 @@
     "strip-ansi": "^4.0.0",
     "underscore.string": "^3.3.4",
     "undertaker-forward-reference": "^1.0.2",
-    "webpack-stream": "^5.2.1"
+    "webpack-stream": "^7.0.0"
   },
   "devDependencies": {
     "gulp-debug": "^3.2.0",
