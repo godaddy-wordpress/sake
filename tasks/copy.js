@@ -1,4 +1,5 @@
 const path = require('path')
+const semver = require('semver')
 
 module.exports = (gulp, plugins, sake) => {
   // copy files from source to build
@@ -128,7 +129,11 @@ module.exports = (gulp, plugins, sake) => {
       paths.push(`!${sake.config.paths.vendor}/bin{,/**}`)
 
       // skip composer autoloader, unless required
-      if (!sake.config.autoload && sake.config.paths.vendor) {
+      if (
+        semver.lt(sake.getRequiredFrameworkVersion(), '5.14.0') && // autoloading is required since FW v5.14.0
+        !sake.config.autoload &&
+        sake.config.paths.vendor
+      ) {
         paths = paths.concat([
           `!${sake.config.paths.vendor}/composer{,/**}`,
           `!${sake.config.paths.vendor}/autoload.php`
