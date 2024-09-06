@@ -1,4 +1,5 @@
 const path = require('path')
+const semver = require('semver')
 
 module.exports = (gulp, plugins, sake) => {
   // copy files from source to build
@@ -75,8 +76,7 @@ module.exports = (gulp, plugins, sake) => {
       paths = paths.concat([
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/*`,
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/grunt{,/**}`,
-        `${sake.config.paths.src}/${sake.config.paths.framework.base}/license.txt`,
-        `!${sake.config.paths.src}/${sake.config.paths.framework.base}/woocommerce/payment-gateway/templates{,/**}`
+        `${sake.config.paths.src}/${sake.config.paths.framework.base}/license.txt`
       ])
 
       if (sake.config.framework === 'v5') {
@@ -99,10 +99,6 @@ module.exports = (gulp, plugins, sake) => {
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.general.css}/**/*.scss`,
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.gateway.css}/**/*.scss`
       ])
-
-      if (!sake.isFrameworkedPaymentGateway()) {
-        paths.push(`!${sake.config.paths.src}/${sake.config.paths.framework.base}/woocommerce/payment-gateway{,/**}`)
-      }
     }
 
     paths = paths.concat([
@@ -133,7 +129,7 @@ module.exports = (gulp, plugins, sake) => {
       paths.push(`!${sake.config.paths.vendor}/bin{,/**}`)
 
       // skip composer autoloader, unless required
-      if (!sake.config.autoload && sake.config.paths.vendor) {
+      if (!sake.config.autoload) {
         paths = paths.concat([
           `!${sake.config.paths.vendor}/composer{,/**}`,
           `!${sake.config.paths.vendor}/autoload.php`
