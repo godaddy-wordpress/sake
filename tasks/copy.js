@@ -75,8 +75,7 @@ module.exports = (gulp, plugins, sake) => {
       paths = paths.concat([
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/*`,
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/grunt{,/**}`,
-        `${sake.config.paths.src}/${sake.config.paths.framework.base}/license.txt`,
-        `!${sake.config.paths.src}/${sake.config.paths.framework.base}/woocommerce/payment-gateway/templates{,/**}`
+        `${sake.config.paths.src}/${sake.config.paths.framework.base}/license.txt`
       ])
 
       if (sake.config.framework === 'v5') {
