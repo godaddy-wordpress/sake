@@ -129,11 +129,7 @@ module.exports = (gulp, plugins, sake) => {
       paths.push(`!${sake.config.paths.vendor}/bin{,/**}`)
 
       // skip composer autoloader, unless required
-      if (
-        semver.lt(sake.getRequiredFrameworkVersion(), '5.14.0') && // autoloading is required since FW v5.14.0
-        !sake.config.autoload &&
-        sake.config.paths.vendor
-      ) {
+      if (!sake.config.autoload) {
         paths = paths.concat([
           `!${sake.config.paths.vendor}/composer{,/**}`,
           `!${sake.config.paths.vendor}/autoload.php`
