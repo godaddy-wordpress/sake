@@ -98,10 +98,6 @@ module.exports = (gulp, plugins, sake) => {
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.general.css}/**/*.scss`,
         `!${sake.config.paths.src}/${sake.config.paths.framework.base}/${sake.config.paths.framework.gateway.css}/**/*.scss`
       ])
-
-      if (!sake.isFrameworkedPaymentGateway()) {
-        paths.push(`!${sake.config.paths.src}/${sake.config.paths.framework.base}/woocommerce/payment-gateway{,/**}`)
-      }
     }
 
     paths = paths.concat([
