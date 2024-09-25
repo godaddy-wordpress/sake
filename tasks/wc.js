@@ -39,6 +39,8 @@ module.exports = (gulp, plugins, sake) => {
           console.debug(res.data)
         }
 
+        // NOTE: when we get this response code, the HTTP status is `400` --  does axios throw an exception for that or
+        // will we still end up in this `then()` block? Test this!!
         if (res.data.code && res.data.code === 'submission_runner_no_deploy_in_progress') {
           log.info('No previous upload in queue')
           return done()
