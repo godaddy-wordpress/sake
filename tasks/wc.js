@@ -1,22 +1,21 @@
 const axios = require('axios')
 const log = require('fancy-log')
 const path = require('path')
-const fs = require('fs')
 const semver = require('semver')
 
 module.exports = (gulp, plugins, sake) => {
-  const wcRoot = 'https://woocommerce.com/wp-json/wccom/product-deploy/v1.0'
+  const wcRoot = 'https://woocommerce.com/wp-json/wc/submission/runner/v1'
 
   let apiOptions = {
     auth: {
-      username: process.env.WC_CONSUMER_KEY,
-      password: process.env.WC_CONSUMER_SECRET
-    },
-    json: true
+      username: process.env.WC_USERNAME,
+      password: process.env.WC_APPLICATION_PASSWORD,
+      product_id: sake.config.deploy.wooId
+    }
   }
 
   let getApiURL = (endpoint) => {
-    return `${wcRoot}/products/${sake.config.deploy.wooId}/${endpoint}`
+    return `${wcRoot}/product/${endpoint}`
   }
 
   let formatError = (err) => {
@@ -27,20 +26,20 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('wc:validate', done => {
     log.info('Making sure plugin is deployable...')
 
-    let url = getApiURL('queue-item')
+    let url = getApiURL('deploy/status')
 
     if (sake.options.debug) {
       log.info('GET: ', url)
     }
 
-    axios.get(url, apiOptions)
+    axios.post(url, apiOptions)
       .then(res => {
         if (sake.options.debug) {
           log.info('Response:')
           console.debug(res.data)
         }
 
-        if (res.data.code && res.data.code === 'wccom_rest_no_queue_item') {
+        if (res.data.code && res.data.code === 'submission_runner_no_deploy_in_progress') {
           log.info('No previous upload in queue')
           return done()
         }
@@ -49,49 +48,11 @@ module.exports = (gulp, plugins, sake) => {
           throw `Unexpected response code from WC API (${res.data.code})`
         }
 
-        if (res.data.queue_item_version && semver.gte(res.data.queue_item_version, sake.getPluginVersion())) {
+        if (res.data.version && semver.gte(res.data.version, sake.getPluginVersion())) {
           throw `Queued version for plugin is already higher than or equal to ${sake.getPluginVersion()}`
         }
 
         log.info('Plugin can be deployed')
-
-        done()
-      })
-      .catch(err => {
-        sake.throwDeferredError(formatError(err))
-      })
-  })
-
-  // get the upload url for the plugin
-  gulp.task('wc:init', done => {
-    sake.options.wc_upload_url = null
-
-    log.info('Getting plugin upload URL...')
-
-    let url = getApiURL('init')
-
-    if (sake.options.debug) {
-      log.info('POST: ', url)
-    }
-
-    axios.post(url, null, apiOptions)
-      .then(res => {
-        if (sake.options.debug) {
-          log.info('Response:')
-          console.debug(res.data)
-        }
-
-        if (res.data.code) {
-          throw `Unexpected response code from WC API (${res.data.code})`
-        }
-
-        if (!res.data.upload_url) {
-          throw `WC API did not return a upload URL`
-        }
-
-        sake.options.wc_upload_url = res.data.upload_url
-
-        log.info('Received upload URL (%s)', res.data.upload_url)
 
         done()
       })
@@ -107,86 +68,40 @@ module.exports = (gulp, plugins, sake) => {
 
     log.info('Uploading plugin to woocommerce.com...')
 
-    let url = sake.options.wc_upload_url
+    let url = getApiURL('deploy')
 
     if (sake.options.debug) {
       log.info('POST: ', url)
       log.info('Using ZIP file: %s as %s', zipPath, `${sake.config.plugin.id}.zip`)
     }
 
-    // Using request module here because it looks like axios does not really support
-    // uploads in node, yet: https://github.com/axios/axios/issues/2
-    require('request').post({
-      url: url,
-      formData: {
-        file: {
-          value: fs.createReadStream(zipPath),
-          options: {
-            filename: `${sake.config.plugin.id}.zip`,
-            contentType: 'application/zip'
-          }
-        }
-      },
-      json: true
-    }, (err, res, body) => {
-      if (err) {
-        throw `Unexpected error when uploading (${err})`
-      }
+    let apiUploadOptions = apiOptions;
+    apiUploadOptions.file = zipPath;
+    apiUploadOptions.version = version;
 
-      if (sake.options.debug) {
-        log.info('Response:')
-        console.debug(body)
-      }
-
-      if (body.code) {
-        throw `Unexpected response code from WC API (${body.code})`
-      }
-
-      if (!body.queue_item_id || !body.success) {
-        throw `WC API did not return a queue item id or successful response (${body.message})`
-      }
-
-      sake.options.wc_upload_queue_item_id = body.queue_item_id
-
-      log.info('Plugin successfully uploaded')
-
-      done()
-    })
-  })
-
-  // internal task that handles notifying Woo that the upload has finished
-  gulp.task('wc:notify', (done) => {
-    log.info('Notifying Woo that the plugin has been uploaded...')
-
-    let url = getApiURL('queue-item')
-
-    if (sake.options.debug) {
-      log.info('PATCH: ', url)
-    }
-
-    axios.patch(url, {
-      queue_item_id: sake.options.wc_upload_queue_item_id,
-      queue_item_version: sake.getPluginVersion()
-    }, apiOptions)
+    axios.post(url, apiUploadOptions)
       .then(res => {
         if (sake.options.debug) {
-          log.info('Response:')
-          console.debug(res.data)
+          log.info('Response:');
+          console.debug(res.data);
         }
 
-        if (res.data.code) {
-          throw `Unexpected response code from WC API (${res.data.code})`
+        if (! res.data.status) {
+          throw `WC API did not return a deployment status`
         }
 
-        log.info('Woo has been notified!')
+        if (res.data.status === 'failed') {
+          throw `Deployment has failed`
+        }
+
+        log.info(`Plugin deployment created with status ${res.data.status}`)
+
+        // @TODO if status is "pending-deploy" or "queued", do we want to poll it until successful? :thinking:
 
         done()
-      })
-      .catch(err => {
-        sake.throwDeferredError(formatError(err))
       })
   })
 
   // the main task to deploy woocommerce.com plugins
-  gulp.task('wc:deploy', gulp.series('wc:validate', 'wc:init', 'wc:upload', 'wc:notify'))
+  gulp.task('wc:deploy', gulp.series('wc:validate', 'wc:upload', 'wc:notify'))
 }
