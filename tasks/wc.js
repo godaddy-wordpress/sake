@@ -30,11 +30,15 @@ module.exports = (gulp, plugins, sake) => {
       log.info('GET: ', url)
     }
 
+    // record whether we've logged the response, to avoid logging it in both the `then()` and `catch()` blocks
+    let hasLoggedResponse = false;
+
     axios.post(url, apiOptions)
       .then(res => {
-        if (sake.options.debug) {
+        if (sake.options.debug && ! hasLoggedResponse) {
           log.info('Response:')
           console.debug(res.data)
+          hasLoggedResponse = true;
         }
 
         /*
@@ -56,6 +60,12 @@ module.exports = (gulp, plugins, sake) => {
         done()
       })
       .catch(err => {
+        if (sake.options.debug && err.response && ! hasLoggedResponse) {
+          log.info('Response:')
+          console.debug(err.response.data)
+          hasLoggedResponse = true;
+        }
+
         // NOTE: if there's no deployment in progress then it's a 400 status code, which is why we end up in this catch block!
         if (err.response && err.response.data.code === 'submission_runner_no_deploy_in_progress') {
           log.info('No previous upload in queue')
@@ -75,6 +85,9 @@ module.exports = (gulp, plugins, sake) => {
 
     let url = getApiURL('deploy')
 
+    // record whether we've logged the response, to avoid logging it in both the `then()` and `catch()` blocks
+    let hasLoggedResponse = false;
+
     if (sake.options.debug) {
       log.info('POST: ', url)
       log.info('Using ZIP file: %s as %s', zipPath, `${sake.config.plugin.id}.zip`)
@@ -86,9 +99,10 @@ module.exports = (gulp, plugins, sake) => {
 
     axios.post(url, apiUploadOptions)
       .then(res => {
-        if (sake.options.debug) {
+        if (sake.options.debug && ! hasLoggedResponse) {
           log.info('Response:');
           console.debug(res.data);
+          hasLoggedResponse = true;
         }
 
         if (! res.data.status) {
@@ -104,6 +118,15 @@ module.exports = (gulp, plugins, sake) => {
         // @TODO if status is "pending-deploy" or "queued", do we want to poll it until successful? :thinking:
 
         done()
+      })
+      .catch(err => {
+        if (sake.options.debug && err.response && ! hasLoggedResponse) {
+          log.info('Response:')
+          console.debug(err.response.data)
+          hasLoggedResponse = true;
+        }
+
+        throw err;
       })
   })
 
