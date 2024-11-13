@@ -7,11 +7,9 @@ module.exports = (gulp, plugins, sake) => {
   const wcRoot = 'https://woocommerce.com/wp-json/wc/submission/runner/v1'
 
   let apiOptions = {
-    auth: {
-      username: process.env.WC_USERNAME,
-      password: process.env.WC_APPLICATION_PASSWORD,
-      product_id: sake.config.deploy.wooId
-    }
+    username: process.env.WC_USERNAME,
+    password: process.env.WC_APPLICATION_PASSWORD,
+    product_id: sake.config.deploy.wooId
   }
 
   let getApiURL = (endpoint) => {
@@ -39,12 +37,11 @@ module.exports = (gulp, plugins, sake) => {
           console.debug(res.data)
         }
 
-        // NOTE: when we get this response code, the HTTP status is `400` --  does axios throw an exception for that or
-        // will we still end up in this `then()` block? Test this!!
-        if (res.data.code && res.data.code === 'submission_runner_no_deploy_in_progress') {
-          log.info('No previous upload in queue')
-          return done()
-        }
+        /*
+         * Note: We'll only end up here if there was a previous deployment in progress. If there's no deployment at
+         * all then we'll end up in the `catch()` block because Woo sends back a 400 status code for that, which is
+         * actually an error state.
+         */
 
         if (res.data.code) {
           throw `Unexpected response code from WC API (${res.data.code})`
@@ -59,6 +56,12 @@ module.exports = (gulp, plugins, sake) => {
         done()
       })
       .catch(err => {
+        // NOTE: if there's no deployment in progress then it's a 400 status code, which is why we end up in this catch block!
+        if (err.response && err.response.data.code === 'submission_runner_no_deploy_in_progress') {
+          log.info('No previous upload in queue')
+          return done()
+        }
+
         sake.throwDeferredError(formatError(err))
       })
   })
