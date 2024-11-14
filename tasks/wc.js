@@ -135,5 +135,5 @@ module.exports = (gulp, plugins, sake) => {
   })
 
   // the main task to deploy woocommerce.com plugins
-  gulp.task('wc:deploy', gulp.series('wc:validate', 'wc:upload', 'wc:notify'))
+  gulp.task('wc:deploy', gulp.series('wc:validate', 'wc:upload'))
 }
