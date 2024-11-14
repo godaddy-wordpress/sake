@@ -72,7 +72,6 @@
     "node-notifier": "^5.4.3",
     "parse-git-config": "^2.0.3",
     "parse-github-url": "^1.0.2",
-    "request": "^2.88.0",
     "resolve-bin": "^0.4.0",
     "sass": "^1.49.0",
     "semver": "^5.7.1",
