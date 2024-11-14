@@ -1,6 +1,8 @@
 const axios = require('axios')
 const log = require('fancy-log')
 const path = require('path')
+const fs = require('fs')
+const FormData = require('form-data');
 const semver = require('semver')
 
 module.exports = (gulp, plugins, sake) => {
@@ -93,11 +95,19 @@ module.exports = (gulp, plugins, sake) => {
       log.info('Using ZIP file: %s as %s', zipPath, `${sake.config.plugin.id}.zip`)
     }
 
-    let apiUploadOptions = apiOptions;
-    apiUploadOptions.file = zipPath;
-    apiUploadOptions.version = version;
+    const formData = new FormData();
 
-    axios.post(url, apiUploadOptions)
+    // add all API options to the form
+    Object.keys(apiOptions)
+      .forEach(key => formData.append(key, apiOptions[key]));
+
+    // add file data
+    formData.append('file', fs.createReadStream(zipPath));
+    formData.append('version', version);
+
+    axios.post(url, formData, {
+      headers: formData.getHeaders()
+    })
       .then(res => {
         if (sake.options.debug && ! hasLoggedResponse) {
           log.info('Response:');
@@ -105,17 +115,11 @@ module.exports = (gulp, plugins, sake) => {
           hasLoggedResponse = true;
         }
 
-        if (! res.data.status) {
-          throw `WC API did not return a deployment status`
+        if (! res.data.success) {
+          throw `WC API did not return a deployment status or deployment has failed`
         }
 
-        if (res.data.status === 'failed') {
-          throw `Deployment has failed`
-        }
-
-        log.info(`Plugin deployment created with status ${res.data.status}`)
-
-        // @TODO if status is "pending-deploy" or "queued", do we want to poll it until successful? :thinking:
+        log.info('Plugin deployment created successfully')
 
         done()
       })
