@@ -97,6 +97,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('deploy:preflight', (done) => {
     let tasks = [
       'shell:git_ensure_clean_working_copy',
+      'validate:readme_headers',
       'lint:scripts',
       'lint:styles'
     ]
