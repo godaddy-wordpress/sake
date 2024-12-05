@@ -22,8 +22,7 @@ $ npm update skyverge/sake
 > Sake is currently not versioned, but a specific commit may be provided when installing, such as `skyverge/sake#0d5ec6622a6845f695d9e8ed04f4db08bd0e4986`.
 
 > [!IMPORTANT]
-> Since commit [18cc1f6](https://github.com/godaddy-wordpress/sake/commit/18cc1f611af69e9d38d4b0904a41556f6719fbfe), the WooCommerce deployment process updated.
-> Refer to [Setting up your environment](https://github.com/godaddy-wordpress/sake/wiki/Plugin-Deployment#setting-up-your-environment) section for the revised prerequisites.
+> Refer to the [Setting up your environment](https://github.com/godaddy-wordpress/sake/wiki/Plugin-Deployment#setting-up-your-environment) section for the revised prerequisites, notably replacement of now-unused `WC_CONSUMER_KEY` and `WC_CONSUMER_SECRET` variables with new required `WC_USERNAME` and `WC_APPLICATION_PASSWORD` variables.
 
 
 ## Running tasks
