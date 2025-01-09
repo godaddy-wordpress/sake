@@ -1,6 +1,5 @@
 const path = require('path')
 const semver = require('semver')
-const log = require('fancy-log')
 
 module.exports = (gulp, plugins, sake) => {
   // copy files from source to build
