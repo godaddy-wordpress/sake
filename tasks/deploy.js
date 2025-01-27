@@ -41,6 +41,7 @@ module.exports = (gulp, plugins, sake) => {
 
     let tasks = [
       // preflight checks, will fail the deploy on errors
+      'prompt:tested_release_zip',
       'deploy:preflight',
       // ensure version is bumped
       'bump',
