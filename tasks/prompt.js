@@ -81,6 +81,21 @@ module.exports = (gulp, plugins, sake) => {
     })
   })
 
+  // internal task for prompting whether the release has been tested
+  gulp.task('prompt:tested_release_zip', (done) => {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'tested_release_zip',
+      message: 'Has the generated zip file for this release been tested?'
+    }]).then((answers) => {
+      if (answers.tested_release_zip) {
+        done()
+      } else {
+        sake.throwError('Run npx sake zip to generate a zip of this release and test it on a WordPress installation.')
+      }
+    })
+  })
+
   function filterIncrement (value) {
     if (value[1] === 'custom') {
       return 'custom'
