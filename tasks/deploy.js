@@ -41,6 +41,7 @@ module.exports = (gulp, plugins, sake) => {
 
     let tasks = [
       // preflight checks, will fail the deploy on errors
+      'prompt:tested_release_zip',
       'deploy:preflight',
       // ensure version is bumped
       'bump',
@@ -65,16 +66,14 @@ module.exports = (gulp, plugins, sake) => {
       // ensure the required framework version is installed
       'deploy:validate_framework_version',
       // grab issues to close with commit
-      'get_issues_to_close',
-      // git commit & push
-      'shell:git_push_update',
+      'github:get_rissue',
       // rebuild plugin configuration (version number, etc)
       function rebuildPluginConfig (cb) {
         sake.buildPluginConfig()
         cb()
       },
-      // deploy to 3rd party repo
-      'deploy_to_production_repo',
+      // git commit & push
+      'shell:git_push_update',
       // create the zip, which will be attached to the releases
       'compress',
       // create releases, attaching the zip
@@ -83,6 +82,10 @@ module.exports = (gulp, plugins, sake) => {
 
     if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
       tasks.push('prompt:wc_upload')
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      tasks.push('deploy_to_wp_repo')
     }
 
     // finally, create a docs issue, if necessary
@@ -95,6 +98,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('deploy:preflight', (done) => {
     let tasks = [
       'shell:git_ensure_clean_working_copy',
+      'validate:readme_headers',
       'lint:scripts',
       'lint:styles'
     ]
@@ -203,18 +207,6 @@ module.exports = (gulp, plugins, sake) => {
       },
       'github:create_release'
     ]
-
-    if (sake.config.deploy.type === 'wc' && sake.config.deploy.production) {
-      tasks = tasks.concat([
-        function (cb) {
-          sake.options.owner = sake.config.deploy.production.owner
-          sake.options.repo = sake.config.deploy.production.name
-          sake.options.prefix_release_tag = false
-          cb()
-        },
-        'github:create_release'
-      ])
-    }
 
     return gulp.series(tasks)(done)
   })

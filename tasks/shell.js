@@ -95,7 +95,7 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('shell:git_push_update', (done) => {
     let command = [
       'git add -A',
-      'git commit -m "' + sake.config.plugin.name + ': ' + sake.getVersionBump() + ' Versioning"' + (sake.options.release_issue_to_close ? ' -m "Closes #' + sake.options.release_issue_to_close + '"' : ''),
+      'git commit -m "' + sake.config.plugin.name + ': ' + sake.getPluginVersion() + ' Versioning"' + (sake.options.release_issue_to_close ? ' -m "Closes #' + sake.options.release_issue_to_close + '"' : ''),
       'git push',
       'echo git up to date!'
     ].join(' && ')
@@ -152,7 +152,7 @@ module.exports = (gulp, plugins, sake) => {
       let command = [
         'cd ' + sake.getProductionRepoPath(),
         'git add -A',
-        'git commit -m "Update ' + sake.config.plugin.name + ' to ' + sake.getVersionBump() + '"' + closeIssues,
+        'git commit -m "Update ' + sake.config.plugin.name + ' to ' + sake.getPluginVersion() + '"' + closeIssues,
         'git push'
       ].join(' && ')
 
@@ -183,6 +183,15 @@ module.exports = (gulp, plugins, sake) => {
   // apply latest stash
   gulp.task('shell:git_stash_apply', (done) => {
     exec('git stash apply', done)
+  })
+
+  gulp.task('shell:composer_status', (done) => {
+    if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
+      exec('composer status -v', done)
+    } else {
+      log.info('No composer.json found, skipping composer status')
+      done()
+    }
   })
 
   gulp.task('shell:composer_install', (done) => {
