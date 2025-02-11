@@ -61,7 +61,7 @@ module.exports = (gulp, plugins, sake) => {
     }) : false
 
     if (!blockSrc || blockSrc[0].length <= 0) {
-      return gulp.src(sake.config.paths.assetPaths.blockSources)
+      return Promise.resolve()
     } else {
       return gulp.src(sake.config.paths.assetPaths.blockSources)
         .pipe(plugins.sourcemaps.init())
