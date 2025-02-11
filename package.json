@@ -87,7 +87,7 @@
       "universal-user-agent": "6.0.0"
     },
     "gulp-phplint": {
-      "gulp-notify": "4.0.0"
+      "gulp-notify": "5.0.0"
     }
   }
 }
