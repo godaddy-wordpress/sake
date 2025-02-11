@@ -10,7 +10,7 @@ module.exports = (plugins, sake) => {
   // 3. We need to tell Babel to find the preset from this project, not from the current working directory,
   // see https://github.com/babel/babel-loader/issues/299#issuecomment-259713477.
   pipes.compileJs = lazypipe()
-    .pipe(plugins.babel, { presets: ['babel-preset-env', 'babel-preset-stage-3', 'babel-preset-es2015', 'babel-preset-react'].map(require.resolve) })
+    .pipe(plugins.babel, { presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve) })
     .pipe(() => {
       // see https://github.com/OverZealous/lazypipe#using-with-more-complex-function-arguments-such-as-gulp-if
       return plugins.if(sake.options.minify, plugins.uglify())
