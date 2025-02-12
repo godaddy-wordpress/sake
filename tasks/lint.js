@@ -1,5 +1,6 @@
 const path = require('path')
 const dottie = require('dottie')
+const fs = require('fs')
 
 module.exports = (gulp, plugins, sake) => {
   gulp.task('lint', gulp.parallel('lint:php', 'lint:scripts', 'lint:styles'))
@@ -38,6 +39,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint coffee
   gulp.task('lint:coffee', (done) => {
+    if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
+      return Promise.resolve()
+    }
+
     let coffeeLintFile = sake.options['coffeelint-file'] ? path.join(process.cwd(), sake.options['coffeelint-file']) : path.join(__dirname, '../lib/lintfiles/coffeelint.json')
 
     return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
@@ -50,6 +55,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint plain JS
   gulp.task('lint:js', () => {
+    if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
+      return Promise.resolve()
+    }
+
     // use WordPress standards - overrideable by individual plugins that provide a .eslintrc file
     // see https://github.com/WordPress-Coding-Standards/eslint-config-wordpress/blob/master/index.js
     let esLintFile = sake.options['eslint-configFile'] ? path.join(process.cwd(), sake.options['eslint-configFile']) : path.join(__dirname, '../lib/lintfiles/.eslintrc')
@@ -68,6 +77,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint SCSS
   gulp.task('lint:scss', (done) => {
+    if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
+      return Promise.resolve()
+    }
+
     return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
       .pipe(plugins.sassLint())
       .pipe(plugins.sassLint.failOnError()) // fail task on errors

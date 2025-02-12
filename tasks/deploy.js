@@ -151,23 +151,47 @@ module.exports = (gulp, plugins, sake) => {
     const filterChangelog = plugins.filter('**/{readme.md,readme.txt,changelog.txt}', { restore: true })
     const date = dateFormat(new Date(), 'yyyy.mm.dd')
 
-    return gulp.src([
+    let paths = [
       `${sake.config.paths.src}/**/*.php`,
       `${sake.config.paths.src}/readme.md`,
       `${sake.config.paths.src}/readme.txt`,
       `${sake.config.paths.src}/changelog.txt`,
-      `${sake.config.paths.assetPaths.js}/**/*.{coffee,js}`,
-      `!${sake.config.paths.assetPaths.js}/**/*.min.js`,
-      `${sake.config.paths.assetPaths.css}/**/*.scss`,
-      `${sake.config.paths.assetPaths.css}/**/*.css`,
-      `!${sake.config.paths.src}/lib/**`,
-      `!${sake.config.paths.src}/vendor/**`,
-      `!${sake.config.paths.src}/tests/**`,
-      `!${sake.config.paths.src}/node_modules/**`,
       `!${sake.config.paths.src}/*.json`,
       `!${sake.config.paths.src}/*.xml`,
       `!${sake.config.paths.src}/*.yml`
-    ], { base: './', allowEmpty: true })
+    ]
+
+    if (fs.existsSync(sake.config.paths.assetPaths.js)) {
+      paths.concat([
+        `${sake.config.paths.assetPaths.js}/**/*.{coffee,js}`,
+        `!${sake.config.paths.assetPaths.js}/**/*.min.js`,
+      ])
+    }
+
+    if (fs.existsSync(sake.config.paths.assetPaths.css)) {
+      paths.concat([
+        `${sake.config.paths.assetPaths.css}/**/*.scss`,
+        `${sake.config.paths.assetPaths.css}/**/*.css`,
+      ])
+    }
+
+    if (fs.existsSync(`!${sake.config.paths.src}/lib`)) {
+      paths.push(`!${sake.config.paths.src}/lib/**`)
+    }
+
+    if (fs.existsSync(`!${sake.config.paths.src}/vendor`)) {
+      paths.push(`!${sake.config.paths.src}/vendor/**`)
+    }
+
+    if (fs.existsSync(`!${sake.config.paths.src}/tests`)) {
+      paths.push(`!${sake.config.paths.src}/tests/**`)
+    }
+
+    if (fs.existsSync(`!${sake.config.paths.src}/node_modules`)) {
+      paths.push(`!${sake.config.paths.src}/node_modules/**`)
+    }
+
+    return gulp.src(paths, { base: './', allowEmpty: true })
       // unlike gulp-replace, gulp-replace-task supports multiple replacements
       .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
       .pipe(filterChangelog)
