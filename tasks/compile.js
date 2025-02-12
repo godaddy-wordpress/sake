@@ -30,6 +30,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // compile, transpile and minify coffee files
   gulp.task('compile:coffee', () => {
+    if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
+      return Promise.resolve()
+    }
+
     return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
       // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
       .pipe(plugins.sourcemaps.init())
@@ -43,6 +47,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // transpile and minify js files
   gulp.task('compile:js', () => {
+    if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
+      return Promise.resolve()
+    }
+
     return gulp.src(sake.config.paths.assetPaths.javascriptSources)
       // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
       .pipe(plugins.sourcemaps.init())
@@ -103,6 +111,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // compile SCSS to CSS
   gulp.task('compile:scss', () => {
+    if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
+      return Promise.resolve()
+    }
+
     let cssPlugins = [require('autoprefixer')()]
 
     if (sake.options.minify) {
