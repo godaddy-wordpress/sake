@@ -36,10 +36,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // delete prerelease
   gulp.task('clean:prerelease', () => {
-    return gulp.src([
+    return del([
       sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
       sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
-    ], defaultOptions).pipe(plugins.clean({ force: true }))
+    ])
   })
 
   // clear wp repo trunk
