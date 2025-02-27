@@ -9,6 +9,9 @@ module.exports = (gulp, plugins, sake) => {
     let paths = [
       `${sake.config.paths.src}/**/*`,
 
+      // skip the directory we're building everything into!
+      `!${sake.config.paths.build}{,/**}`,
+
       // skip .map files
       `!${sake.config.paths.src}/${sake.config.paths.js}/**/*.map`,
       `!${sake.config.paths.src}/${sake.config.paths.css}/**/*.map`,
@@ -149,7 +152,7 @@ module.exports = (gulp, plugins, sake) => {
       })
     }
 
-    return gulp.src(paths, { base: sake.config.paths.src })
+    return gulp.src(paths, { base: sake.config.paths.src, allowEmpty: true })
       .pipe(filter)
       .pipe(plugins.replace(/\/\*# sourceMappingURL=.*?\*\/$/mg, '')) // remove source mapping references - TODO: consider skipping sourcemaps in compilers instead when running build/deploy tasks
       .pipe(plugins.replace('\n', '')) // remove an extra line added by libsass/node-sass
