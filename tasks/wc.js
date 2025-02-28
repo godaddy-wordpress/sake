@@ -1,9 +1,9 @@
-const axios = require('axios')
-const log = require('fancy-log')
-const path = require('path')
-const fs = require('fs')
-const FormData = require('form-data');
-const semver = require('semver')
+import axios from 'axios'
+import log from 'fancy-log'
+import path from 'node:path'
+import fs from 'node:fs'
+import FormData from 'form-data'
+import semver from 'semver'
 
 module.exports = (gulp, plugins, sake) => {
   const wcRoot = 'https://woocommerce.com/wp-json/wc/submission/runner/v1'

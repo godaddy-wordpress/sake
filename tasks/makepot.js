@@ -1,5 +1,5 @@
-const log = require('fancy-log')
-const shell = require('shelljs')
+import log from 'fancy-log'
+import shell from 'shelljs'
 
 // generate POT files using wp cli
 module.exports = (gulp, plugins, sake) => {

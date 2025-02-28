@@ -1,4 +1,4 @@
-const lazypipe = require('lazypipe')
+import lazypipe from 'lazypipe';
 
 module.exports = (plugins, sake) => {
   const pipes = {}

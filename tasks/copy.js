@@ -1,5 +1,4 @@
-const path = require('path')
-const semver = require('semver')
+import path from 'node:path';
 
 module.exports = (gulp, plugins, sake) => {
   // copy files from source to build

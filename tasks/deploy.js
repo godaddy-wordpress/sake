@@ -1,9 +1,9 @@
-const fs = require('fs')
-const log = require('fancy-log')
-const dateFormat = require('dateformat')
-const _ = require('lodash')
-const chalk = require('chalk')
-const axios = require('axios')
+import fs from 'node:fs';
+import dateFormat from 'dateformat';
+import _ from 'lodash';
+import axios from 'axios';
+import log from 'fancy-log';
+import chalk from 'chalk';
 
 module.exports = (gulp, plugins, sake) => {
   let validatedEnvVariables = false

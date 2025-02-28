@@ -1,4 +1,4 @@
-const log = require('fancy-log')
+import log from 'fancy-log'
 
 // watch files for changes and compile assets necessary
 module.exports = (gulp, plugins, sake) => {

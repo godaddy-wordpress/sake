@@ -1,19 +1,23 @@
-'use strict'
-
-const gulp = require('gulp')
-const path = require('path')
-const fs = require('fs')
-const minimist = require('minimist')
-const log = require('fancy-log')
-const _ = require('lodash')
-const ForwardReference = require('undertaker-forward-reference')
+import gulp from 'gulp'
+import path from 'node:path'
+import fs from 'node:fs'
+import minimist from 'minimist'
+import log from 'fancy-log'
+import _ from 'lodash'
+import ForwardReference from 'undertaker-forward-reference'
+import dotenv from 'dotenv'
+import sakePlugin from './lib/sake'
+import gulpPlugins from 'gulp-load-plugins'
+import notifier from 'node-notifier'
+import stripAnsi from 'strip-ansi'
+import browserSync from 'browser-sync'
 
 // local .env file, overriding any global env variables
 let parentEnvPath = path.join('..', '.env')
 let envPath = fs.existsSync('.env') ? '.env' : (fs.existsSync(parentEnvPath) ? parentEnvPath : null)
 
 if (envPath) {
-  let result = require('dotenv').config({ path: envPath })
+  let result = dotenv.config({ path: envPath })
 
   log.warn(`Loading ENV variables from ${path.join(process.cwd(), envPath)}`)
 
@@ -25,7 +29,7 @@ if (envPath) {
 // development .env file, overriding any global env variables, or repo/plugin specific variables
 let devEnv = path.join(__dirname, '.env')
 if (fs.existsSync(devEnv)) {
-  let result = require('dotenv').config({path: devEnv})
+  let result = dotenv.config({path: devEnv})
 
   log.warn('LOADING DEVELOPMENT ENV VARIABLES FROM ' + devEnv)
 
@@ -125,28 +129,26 @@ let options = minimist(process.argv.slice(2), {
   }
 })
 
-const sake = require('./lib/sake')(config, options)
+const sake = sakePlugin(config, options)
 
 sake.initConfig()
 
-let plugins = require('gulp-load-plugins')()
+let plugins = gulpPlugins()
 
 // Attach browsersync as a plugin - not really a plugin, but it helps to
 // pass around the browsersync instance between tasks. Unfortunately, we
 // always have to load and create an instance of it, because gulp-if does not
 // support lazy evaluation yet: https://github.com/robrich/gulp-if/issues/75
-plugins.browserSync = require('browser-sync').create()
+plugins.browserSync = browserSync.create()
 
 // load gulp plugins and tasks
-require('fs').readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
+fs.readdirSync(path.join(__dirname, 'tasks')).forEach((file) => {
   require(path.join(__dirname, 'tasks', file))(gulp, plugins, sake)
 })
 
 gulp.task('default', gulp.series('compile'))
 
 // show notification on task errors
-const notifier = require('node-notifier')
-const stripAnsi = require('strip-ansi')
 let loggedErrors = []
 
 gulp.on('error', (event) => {

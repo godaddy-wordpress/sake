@@ -1,6 +1,6 @@
-const path = require('path')
-const dottie = require('dottie')
-const fs = require('fs')
+import path from 'node:path'
+import dottie from 'dottie'
+import fs from 'node:fs'
 
 module.exports = (gulp, plugins, sake) => {
   gulp.task('lint', gulp.parallel('lint:php', 'lint:scripts', 'lint:styles'))
