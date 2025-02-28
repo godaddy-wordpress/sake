@@ -1,4 +1,4 @@
-const fs = require('fs')
+import fs from 'node:fs'
 
 module.exports = (gulp, plugins, sake) => {
   // validate env variables before deploying a prerelease

@@ -1,6 +1,6 @@
-const fs = require('fs')
-const path = require('path')
-const dottie = require('dottie')
+import fs from 'node:fs'
+import path from 'node:path'
+import dottie from 'dottie'
 
 module.exports = (gulp, plugins, sake) => {
   // reload the framework version after updating the framework

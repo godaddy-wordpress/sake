@@ -1,8 +1,8 @@
-const inquirer = require('inquirer')
-const semver = require('semver')
-const log = require('fancy-log')
-const chalk = require('chalk')
-const _ = require('lodash')
+import inquirer from 'inquirer'
+import semver from 'semver'
+import log from 'fancy-log'
+import chalk from 'chalk'
+import _ from 'lodash'
 
 module.exports = (gulp, plugins, sake) => {
   // internal task for prompting the deploy version

@@ -1,10 +1,15 @@
-const webpack = require('webpack-stream')
-const fs = require('fs')
-const path = require('path')
-const sass = require('gulp-sass')(require('sass'))
+import webpack from 'webpack-stream';
+import fs from 'node:fs';
+import path from 'node:path';
+import dartSaas from 'sass';
+import gulpSaas from 'gulp-sass';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
+import scripts from '../pipes/scripts.js';
+const sass = gulpSaas(dartSaas);
 
 module.exports = (gulp, plugins, sake) => {
-  const pipes = require('../pipes/scripts.js')(plugins, sake)
+  const pipes = scripts(plugins, sake)
 
   // compile plugin assets
   gulp.task('compile', (done) => {
@@ -115,10 +120,10 @@ module.exports = (gulp, plugins, sake) => {
       return Promise.resolve()
     }
 
-    let cssPlugins = [require('autoprefixer')()]
+    let cssPlugins = [autoprefixer()]
 
     if (sake.options.minify) {
-      cssPlugins.push(require('cssnano')({ zindex: false }))
+      cssPlugins.push(cssnano({ zindex: false }))
     }
 
     return gulp.src([

@@ -1,4 +1,4 @@
-const path = require('path')
+import path from 'node:path';
 
 module.exports = (gulp, plugins, sake) => {
   // converts CoffeeScripts to ES6 JavaScript without minification or further handling:

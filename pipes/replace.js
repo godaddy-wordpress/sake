@@ -1,4 +1,4 @@
-const lazypipe = require('lazypipe')
+import lazypipe from 'lazypipe';
 
 // these pipes are not meant to be reusable - rather, they existy so that the bump:minreqs task would
 // be easier to maintain without wrapping each individual replacement in gulp-if

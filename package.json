@@ -5,6 +5,7 @@
   "homepage": "https://www.skyverge.com/",
   "license": "GPL-3.0",
   "description": "SkyVerge WP/WC plugin build & deploy tool, a.k.a SkyMake",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/skyverge/sake.git"
@@ -30,10 +31,10 @@
     "axios": "^1.7.9",
     "babel-loader": "^8.0.6",
     "browser-sync": "^3.0.3",
-    "chalk": "^4.0.0",
+    "chalk": "^5.4.1",
     "codename": "0.0.6",
     "cssnano": "^7.0.6",
-    "dateformat": "^4.6.3",
+    "dateformat": "^5.0.3",
     "del": "^6.1.1",
     "dotenv": "^16.4.7",
     "dottie": "^2.0.6",
@@ -48,7 +49,7 @@
     "gulp-eslint": "^4.0.2",
     "gulp-filter": "^5.1.0",
     "gulp-if": "^2.0.2",
-    "gulp-imagemin": "^6.2.0",
+    "gulp-imagemin": "^9.1.0",
     "gulp-load-plugins": "^2.0.7",
     "gulp-phplint": "^0.9.0",
     "gulp-postcss": "^10.0.0",
@@ -73,7 +74,7 @@
     "sass": "^1.83.4",
     "semver": "^7.7.1",
     "shelljs": "^0.8.5",
-    "strip-ansi": "^4.0.0",
+    "strip-ansi": "^7.1.0",
     "underscore.string": "^3.3.4",
     "undertaker-forward-reference": "^1.0.2",
     "webpack-stream": "^7.0.0"

@@ -1,5 +1,5 @@
-const fs = require('fs')
-const log = require('fancy-log')
+import fs from 'node:fs';
+import log from 'fancy-log';
 
 module.exports = (gulp, plugins, sake) => {
   // optimize images

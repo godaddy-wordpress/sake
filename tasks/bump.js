@@ -1,5 +1,7 @@
+import replace from '../pipes/replace.js';
+
 module.exports = (gulp, plugins, sake) => {
-  const pipes = require('../pipes/replace.js')(plugins, sake)
+  const pipes = replace(plugins, sake)
 
   // bumps the version in the main plugin file to match changelog.txt
   gulp.task('bump', () => {

@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash';
 
 module.exports = (gulp, plugins, sake) => {
   // main task for building the plugin:

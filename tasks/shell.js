@@ -1,8 +1,8 @@
-const fs = require('fs')
-const path = require('path')
-const log = require('fancy-log')
-const shell = require('shelljs')
-const _str = require('underscore.string')
+import fs from 'node:fs'
+import path from 'node:path'
+import log from 'fancy-log'
+import shell from 'shelljs'
+import _str from 'underscore.string'
 
 module.exports = (gulp, plugins, sake) => {
   const awk = process.platform === 'win32' ? 'gawk' : 'awk'

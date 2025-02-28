@@ -1,5 +1,5 @@
-const path = require('path')
-const del = require('del')
+import path from 'node:path';
+import del from 'del';
 
 module.exports = (gulp, plugins, sake) => {
   let defaultOptions = { read: false, allowEmpty: true }

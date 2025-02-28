@@ -1,7 +1,7 @@
-const log = require('fancy-log')
-const fs = require('fs')
-const path = require('path')
-const shell = require('shelljs')
+import log from 'fancy-log';
+import fs from 'node:fs';
+import path from 'node:path';
+import shell from 'shelljs';
 
 module.exports = (gulp, plugins, sake) => {
 

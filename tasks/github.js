@@ -1,12 +1,12 @@
-const { Octokit: GitHub } = require('@octokit/rest')
-const inquirer = require('inquirer')
-const fs = require('fs')
-const path = require('path')
-const async = require('async')
-const chalk = require('chalk')
-const codename = require('codename')()
-const dateFormat = require('dateformat')
-const log = require('fancy-log')
+import { Octokit as GitHub } from '@octokit/rest';
+import inquirer from 'inquirer';
+import fs from 'node:fs';
+import path from 'node:path';
+import async from 'async';
+import chalk from 'chalk';
+import codename from 'codename'; // @TODO check this? old was: const codename = require('codename')()
+import dateFormat from 'dateformat';
+import log from 'fancy-log';
 
 module.exports = (gulp, plugins, sake) => {
   let githubInstances = {}
