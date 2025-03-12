@@ -1,6 +1,10 @@
 #!/usr/bin/env node
-const { spawn } = require('child_process')
-const path = require('path')
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import resolve from 'resolve-bin'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * `sake` is simply a nice wrapper around `gulp`, designed to simplify using gulp
@@ -17,7 +21,7 @@ const path = require('path')
 // The concat portion passes in any optional CLI args as well as the gulpfile from sake and
 // current workind directory.
 const args = [
-  require('resolve-bin').sync('gulp')
+  resolve.sync('gulp')
 ].concat(process.argv.splice(2).concat([
   '--gulpfile', path.join(__dirname, '../gulpfile.js'),
   '--cwd', process.cwd()
