@@ -50,7 +50,7 @@
     "gulp-filter": "^5.1.0",
     "gulp-if": "^2.0.2",
     "gulp-imagemin": "^9.1.0",
-    "gulp-load-plugins": "^2.0.7",
+    "gulp-load-plugins": "^2.0.8",
     "gulp-phplint": "^0.9.0",
     "gulp-postcss": "^10.0.0",
     "gulp-rename": "^1.4.0",
