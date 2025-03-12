@@ -1,6 +1,6 @@
 import lazypipe from 'lazypipe';
 
-module.exports = (plugins, sake) => {
+export default function scripts(plugins, sake) {
   const pipes = {}
 
   // transpile, minify and write sourcemaps
