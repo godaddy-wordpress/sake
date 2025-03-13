@@ -72,3 +72,4 @@ gulp.on('error', (event) => {
 
 export * from './tasks/bump.js'
 export * from './tasks/validate.js'
+export * from './tasks/wc.js'
