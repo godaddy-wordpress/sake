@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import log from 'fancy-log';
 import imagemin from 'gulp-imagemin'
 import * as gulp from 'gulp'
-import * as gulpif from 'gulp-if'
+import gulpif from 'gulp-if'
 import sake from '../lib/sake.js'
 import browserSync from 'browser-sync'
 
