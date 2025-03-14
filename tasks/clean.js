@@ -5,82 +5,82 @@ import sake from '../lib/sake.js'
 /**
  * Clean dev directory from map files
  */
-const cleanDev = (done) => {
+const cleanDevTask = (done) => {
   return del([
     `${sake.config.paths.src}/${sake.config.paths.assets}/**/*.map`
   ])
 }
-cleanDev.displayName = 'clean:dev'
+cleanDevTask.displayName = 'clean:dev'
 
 /**
  * Clean composer packages
  */
-const cleanComposer = (done) => {
+const cleanComposerTask = (done) => {
   return del([
     `${sake.config.paths.vendor}`
   ])
 }
-cleanComposer.displayName = 'clean:composer'
+cleanComposerTask.displayName = 'clean:composer'
 
 /**
  * Clean/empty the build directory
  */
-const cleanBuild = (done) => {
+const cleanBuildTask = (done) => {
   return del([
     `${sake.config.paths.build}/${sake.config.plugin.id}`,
     `${sake.config.paths.build}/${sake.config.plugin.id}.*.zip`
   ])
 }
-cleanBuild.displayName = 'clean:build'
+cleanBuildTask.displayName = 'clean:build'
 
 /**
  * Clean the WooCommerce repo directory
  * This will automatically exclude any dotfiles, such as the .git directory
  */
-const cleanWcRepo = (done) => {
+const cleanWcRepoTask = (done) => {
   return del([
     sake.getProductionRepoPath() + '**/*'
   ])
 }
-cleanWcRepo.displayName = 'clean:wc_repo'
+cleanWcRepoTask.displayName = 'clean:wc_repo'
 
 /**
  * Delete prerelease
  */
-const cleanPrerelease = (done) => {
+const cleanPrereleaseTask = (done) => {
   return del([
     sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
     sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
   ])
 }
-cleanPrerelease.displayName = 'clean:prerelease'
+cleanPrereleaseTask.displayName = 'clean:prerelease'
 
 /**
  * Clear WP repo trunk
  */
-const cleanWpTrunk = (done) => {
+const cleanWpTrunkTask = (done) => {
   return del([
     path.join(sake.getProductionRepoPath(), 'trunk')
   ])
 }
-cleanWpTrunk.displayName = 'clean:wp_trunk'
+cleanWpTrunkTask.displayName = 'clean:wp_trunk'
 
 /**
  * Clear WP repo assets
  */
-const cleanWpAssets = (done) => {
+const cleanWpAssetsTask = (done) => {
   return del([
     path.join(sake.getProductionRepoPath(), 'assets')
   ])
 }
-cleanWpAssets.displayName = 'clean:wp_assets'
+cleanWpAssetsTask.displayName = 'clean:wp_assets'
 
 export {
-  cleanDev,
-  cleanComposer,
-  cleanBuild,
-  cleanWcRepo,
-  cleanPrerelease,
-  cleanWpTrunk,
-  cleanWpAssets
+  cleanDevTask,
+  cleanComposerTask,
+  cleanBuildTask,
+  cleanWcRepoTask,
+  cleanPrereleaseTask,
+  cleanWpTrunkTask,
+  cleanWpAssetsTask
 }

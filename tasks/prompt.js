@@ -38,7 +38,7 @@ function getDefault () {
 /**
  * Internal task for prompting the deploy action
  */
-const promptDeploy = (done) => {
+const promptDeployTask = (done) => {
   let currentVersion = sake.getPluginVersion()
 
   inquirer.prompt([
@@ -96,12 +96,12 @@ const promptDeploy = (done) => {
     done()
   })
 }
-promptDeploy.displayName = 'prompt:deploy'
+promptDeployTask.displayName = 'prompt:deploy'
 
 /**
  * Internal task for prompting whether to upload the plugin to WooCommerce
  */
-const promptWcUpload = (done) => {
+const promptWcUploadTask = (done) => {
   inquirer.prompt([{
     type: 'confirm',
     name: 'upload_to_wc',
@@ -115,12 +115,12 @@ const promptWcUpload = (done) => {
     }
   })
 }
-promptWcUpload.displayName = 'prompt:wc_upload'
+promptWcUploadTask.displayName = 'prompt:wc_upload'
 
 /**
  * Internal task for prompting whether the release has been tested
  */
-const promptTestedReleaseZip = (done) => {
+const promptTestedReleaseZipTask = (done) => {
   inquirer.prompt([{
     type: 'confirm',
     name: 'tested_release_zip',
@@ -133,10 +133,10 @@ const promptTestedReleaseZip = (done) => {
     }
   })
 }
-promptTestedReleaseZip.displayName = 'prompt:tested_release_zip'
+promptTestedReleaseZipTask.displayName = 'prompt:tested_release_zip'
 
 export {
-  promptDeploy,
-  promptWcUpload,
-  promptTestedReleaseZip
+  promptDeployTask,
+  promptWcUploadTask,
+  promptTestedReleaseZipTask
 }
