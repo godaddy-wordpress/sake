@@ -4,141 +4,170 @@ import path from 'node:path';
 import dartSaas from 'sass';
 import gulpSaas from 'gulp-sass';
 import autoprefixer from 'autoprefixer';
-import cssnano from 'cssnano';
-import scripts from '../pipes/scripts.js';
+import gulp from 'gulp'
+import gulpif from 'gulp-if'
+import coffee from 'gulp-coffee'
+import sourcemaps from 'gulp-sourcemaps'
+import cssnano from 'cssnano'
+import postcss from 'gulp-postcss'
+import browserSync from 'browser-sync'
+import { scriptPipes } from '../pipes/scripts.js';
+import sake from '../lib/sake.js'
+import rename from 'gulp-rename'
+import { lintPhp } from './lint.js'
+import { minifyImages } from './imagemin.js'
+import { makepot } from './makepot.js'
+import { styles } from './styles.js'
 const sass = gulpSaas(dartSaas);
 
-module.exports = (gulp, plugins, sake) => {
-  const pipes = scripts(plugins, sake)
+/************************** Scripts */
 
-  // compile plugin assets
-  gulp.task('compile', (done) => {
-    // default compile tasks
-    let tasks = ['lint:php', 'scripts', 'styles', 'imagemin']
+/**
+ * Compile, transpile, and minify coffee scripts
+ */
+const compileCoffee = (done) => {
+  if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
+    return Promise.resolve()
+  }
 
-    // unless exclusively told not to, generate the POT file as well
-    if (!sake.options.skip_pot) {
-      tasks.push('makepot')
-    }
+  return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
+    .pipe(sourcemaps.init())
+    // compile coffee files to JS
+    .pipe(coffee({ bare: false }))
+    // transpile & minify, write sourcemaps
+    .pipe(scriptPipes().compileJs())
+    .pipe(gulp.dest(sake.config.paths.assetPaths.js))
+    .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
+}
+compileCoffee.displayName = 'compile:coffee'
 
-    gulp.parallel(tasks)(done)
-  })
+/**
+ * Transpile and minify JS files
+ */
+const compileJs = (done) => {
+  if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
+    return Promise.resolve()
+  }
 
-  /** Scripts */
+  return gulp.src(sake.config.paths.assetPaths.javascriptSources)
+    // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
+    .pipe(sourcemaps.init())
+    // transpile & minify, write sourcemaps
+    .pipe(scriptPipes().compileJs())
+    .pipe(gulp.dest(sake.config.paths.assetPaths.js))
+    .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
+}
+compileJs.displayName = 'compile:js'
 
-  // the main task to compile scripts
-  gulp.task('compile:scripts', gulp.parallel('compile:coffee', 'compile:js', 'compile:blocks'))
+/**
+ * This task is specific for plugins that add one or more self-contained Gutenberg blocks in their assets to be transpiled from ES6
+ */
+const compileBlocks = (done) => {
+  const i18nPath = `${process.cwd()}/i18n/languages/blocks/`
+  const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
+  const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
+    return file.match(/.*\.js$/)
+  }) : false
 
-  // Note: ideally, we would only open a single stream of the script files, linting and compiling in the same
-  // stream/task, but unfortunately it looks like this is not possible, ast least not when reporting the
-  // lint errors - it results in no more files being passed down the stream, even if there were no lint errors. {IT 2018-03-14}
-
-  // compile, transpile and minify coffee files
-  gulp.task('compile:coffee', () => {
-    if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
-      return Promise.resolve()
-    }
-
-    return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
-      // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
-      .pipe(plugins.sourcemaps.init())
-      // compile coffee files to JS
-      .pipe(plugins.coffee({ bare: false }))
-      // transpile & minify, write sourcemaps
-      .pipe(pipes.compileJs())
-      .pipe(gulp.dest(sake.config.paths.assetPaths.js))
-      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
-  })
-
-  // transpile and minify js files
-  gulp.task('compile:js', () => {
-    if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
-      return Promise.resolve()
-    }
-
-    return gulp.src(sake.config.paths.assetPaths.javascriptSources)
-      // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
-      .pipe(plugins.sourcemaps.init())
-      // transpile & minify, write sourcemaps
-      .pipe(pipes.compileJs())
-      .pipe(gulp.dest(sake.config.paths.assetPaths.js))
-      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
-  })
-
-  // this task is specific for plugins that add one or more self-contained Gutenberg blocks in their assets to be transpiled from ES6
-  gulp.task('compile:blocks', () => {
-    const i18nPath = `${process.cwd()}/i18n/languages/blocks/`
-    const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
-    const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
-      return file.match(/.*\.js$/)
-    }) : false
-
-    if (!blockSrc || blockSrc[0].length <= 0) {
-      return Promise.resolve()
-    } else {
-      return gulp.src(sake.config.paths.assetPaths.blockSources)
-        .pipe(plugins.sourcemaps.init())
-        .pipe(webpack({
-          mode: 'production',
-          entry: `${blockPath}/${blockSrc[0]}`,
-          output: {
-            filename: path.basename(blockSrc[0], '.js') + '.min.js'
-          },
-          externals: {
-            'react': 'React',
-            'react-dom': 'ReactDOM'
-          },
-          module: {
-            rules: [{
-              test: /\.js$/,
-              exclude: /node_modules/,
-              use: {
-                loader: 'babel-loader',
-                options: {
-                  presets: ['@babel/preset-env', '@babel/preset-react'],
-                  plugins: [
-                    ['@wordpress/babel-plugin-makepot', { 'output': `${i18nPath}${blockSrc[0].replace('.js', '.pot')}` }]
-                  ]
-                }
+  if (!blockSrc || blockSrc[0].length <= 0) {
+    return Promise.resolve()
+  } else {
+    return gulp.src(sake.config.paths.assetPaths.blockSources)
+      .pipe(sourcemaps.init())
+      .pipe(webpack({
+        mode: 'production',
+        entry: `${blockPath}/${blockSrc[0]}`,
+        output: {
+          filename: path.basename(blockSrc[0], '.js') + '.min.js'
+        },
+        externals: {
+          'react': 'React',
+          'react-dom': 'ReactDOM'
+        },
+        module: {
+          rules: [{
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env', '@babel/preset-react'],
+                plugins: [
+                  ['@wordpress/babel-plugin-makepot', { 'output': `${i18nPath}${blockSrc[0].replace('.js', '.pot')}` }]
+                ]
               }
-            }]
-          }
-        }))
-        .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/`))
-        .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream.apply({ match: '**/*.js' })))
-    }
-  })
+            }
+          }]
+        }
+      }))
+      .pipe(gulp.dest(`${sake.config.paths.assetPaths.js}/blocks/`))
+      .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
+  }
+}
+compileBlocks.displayName = 'compile:blocks'
 
-  /** Styles */
+/************************** Styles */
 
-  // main task for compiling styles
-  gulp.task('compile:styles', gulp.parallel('compile:scss'))
+/**
+ * Compile SCSS to CSS
+ */
+const compileScss = (done) => {
+  if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
+    return Promise.resolve()
+  }
 
-  // compile SCSS to CSS
-  gulp.task('compile:scss', () => {
-    if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
-      return Promise.resolve()
-    }
+  let cssPlugins = [autoprefixer()]
 
-    let cssPlugins = [autoprefixer()]
+  if (sake.options.minify) {
+    cssPlugins.push(cssnano({ zindex: false }))
+  }
 
-    if (sake.options.minify) {
-      cssPlugins.push(cssnano({ zindex: false }))
-    }
+  return gulp.src([
+    `${sake.config.paths.assetPaths.css}/**/*.scss`,
+    `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
+  ])
+    .pipe(sourcemaps.init())
+    .pipe(sass({ outputStyle: 'expanded' }))
+    .pipe(postcss(cssPlugins))
+    .pipe(rename({ suffix: '.min' }))
+    // ensure admin/ and frontend/ are removed from the source paths
+    // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
+    .pipe(sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
+    .pipe(sourcemaps.write('.', { includeContent: false }))
+    .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
+    .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream({match: '**/*.css'})))
+}
+compileScss.displayName = 'compile:scss'
 
-    return gulp.src([
-      `${sake.config.paths.assetPaths.css}/**/*.scss`,
-      `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
-    ])
-      .pipe(plugins.sourcemaps.init())
-      .pipe(sass({ outputStyle: 'expanded' }))
-      .pipe(plugins.postcss(cssPlugins))
-      .pipe(plugins.rename({ suffix: '.min' }))
-      // ensure admin/ and frontend/ are removed from the source paths
-      // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-      .pipe(plugins.sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
-      .pipe(plugins.sourcemaps.write('.', { includeContent: false }))
-      .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
-      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
-  })
+/************************** Parallels */
+
+// The main task to compile scripts
+const compileScripts = gulp.parallel(compileCoffee, compileJs, compileBlocks)
+compileScripts.displayName = 'compile:scripts'
+
+// The main task to compile styles
+const compileStyles = gulp.parallel(compileScss)
+compileStyles.displayName = 'compile:styles'
+
+// Compile all plugin assets
+const compile = (done) => {
+  // default compile tasks
+  let tasks = [lintPhp, 'scripts', styles, minifyImages] // @TODO replace `scripts`
+
+  // unless exclusively told not to, generate the POT file as well
+  if (!sake.options.skip_pot) {
+    tasks.push(makepot)
+  }
+
+  gulp.parallel(tasks)(done)
+}
+
+export {
+  compileCoffee,
+  compileJs,
+  compileBlocks,
+  compileScss,
+  compileScripts,
+  compileStyles,
+  compile
 }

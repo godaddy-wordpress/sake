@@ -1,6 +1,14 @@
 import lazypipe from 'lazypipe';
+import babel from 'gulp-babel'
+import gulpif from 'gulp-if'
+import uglify from 'gulp-uglify'
+import rename from 'gulp-rename'
+import sourcemaps from 'gulp-sourcemaps'
+import sake from '../lib/sake.js'
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
-export default function scripts(plugins, sake) {
+export function scriptPipes() {
   const pipes = {}
 
   // transpile, minify and write sourcemaps
@@ -10,16 +18,16 @@ export default function scripts(plugins, sake) {
   // 3. We need to tell Babel to find the preset from this project, not from the current working directory,
   // see https://github.com/babel/babel-loader/issues/299#issuecomment-259713477.
   pipes.compileJs = lazypipe()
-    .pipe(plugins.babel, { presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve) })
+    .pipe(babel, { presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve) })
     .pipe(() => {
       // see https://github.com/OverZealous/lazypipe#using-with-more-complex-function-arguments-such-as-gulp-if
-      return plugins.if(sake.options.minify, plugins.uglify())
+      return gulpif(sake.options.minify, uglify())
     })
-    .pipe(plugins.rename, { suffix: '.min' })
+    .pipe(rename, { suffix: '.min' })
     // ensure admin/ and frontend/ are removed from the source paths
     // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-    .pipe(plugins.sourcemaps.mapSources, (sourcePath) => '../' + sourcePath)
-    .pipe(plugins.sourcemaps.write, '.', { includeContent: false })
+    .pipe(sourcemaps.mapSources, (sourcePath) => '../' + sourcePath)
+    .pipe(sourcemaps.write, '.', { includeContent: false })
 
   return pipes
 }
