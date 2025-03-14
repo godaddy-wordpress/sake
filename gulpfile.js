@@ -64,6 +64,7 @@ gulp.on('error', (event) => {
 /************** Task Exports */
 
 export * from './tasks/bump.js'
+export * from './tasks/clean.js'
 export * from './tasks/config.js'
 export * from './tasks/imagemin.js'
 export * from './tasks/decaffeinate.js'
