@@ -63,15 +63,18 @@ gulp.on('error', (event) => {
 
 /************** Task Exports */
 
+export * from './tasks/build.js'
 export * from './tasks/bump.js'
 export * from './tasks/clean.js'
 export * from './tasks/compile.js'
 export * from './tasks/config.js'
+export * from './tasks/copy.js'
 export * from './tasks/imagemin.js'
 export * from './tasks/decaffeinate.js'
 export * from './tasks/github.js'
 export * from './tasks/lint.js'
 export * from './tasks/makepot.js'
+export * from './tasks/prompt.js'
 export * from './tasks/scripts.js'
 export * from './tasks/shell.js'
 export * from './tasks/styles.js'
