@@ -7,7 +7,7 @@ import sake from '../lib/sake.js'
 /**
  * Bumps the version in the main plugin file to match changelog.txt
  */
-const bump = (done) => {
+const bumpTask = (done) => {
   let pluginFiles = [`${sake.config.paths.src}/${sake.config.plugin.mainFile}`]
 
   // also include the main Plugin class file
@@ -20,11 +20,12 @@ const bump = (done) => {
     .pipe(replace(/const VERSION = '[0-9]*.[0-9]*.[0-9]*(-[a-z]+.[0-9]+)*';/, () => "const VERSION = '" + sake.getPluginVersion() + "';"))
     .pipe(gulp.dest(sake.config.paths.src))
 }
+bumpTask.displayName = 'bump'
 
 /**
  * Bumps the minimum requirements for the plugin.
  */
-const bumpMinReqs = (done) => {
+const bumpMinReqsTask = (done) => {
   // helper to determine if a number is an integer
   let isInt = (n) => {
     return n % 1 === 0
@@ -49,20 +50,20 @@ const bumpMinReqs = (done) => {
     .pipe(gulpif(Boolean(sake.options.backwards_compatible && sake.config.framework === 'v4'), sakeReplace.replaceBackwardsCompatibleVersion()))
     .pipe(gulp.dest(sake.config.paths.src))
 }
-bumpMinReqs.displayName = 'bump:minreqs'
+bumpMinReqsTask.displayName = 'bump:minreqs'
 
 /**
  * Bumps the v5 framework version in plugin files
  */
-const bumpFrameworkVersion = (done) => {
+const bumpFrameworkVersionTask = (done) => {
   return gulp.src([`${sake.config.paths.src}/**/*.php`, `!${sake.config.paths.src}/${sake.config.paths.framework.base}`])
     .pipe(gulpif(Boolean(sake.options.framework_version), sakeReplace.replaceFrameworkVersion()))
     .pipe(gulp.dest(sake.config.paths.src))
 }
-bumpFrameworkVersion.displayName = 'bump:framework_version'
+bumpFrameworkVersionTask.displayName = 'bump:framework_version'
 
 export {
-  bump,
-  bumpMinReqs,
-  bumpFrameworkVersion
+  bumpTask,
+  bumpMinReqsTask,
+  bumpFrameworkVersionTask
 }
