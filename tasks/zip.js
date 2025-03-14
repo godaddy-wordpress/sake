@@ -1,8 +1,9 @@
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import zip from 'gulp-zip'
+import { buildTask } from './build.js'
 
-const compress = (done) => {
+const compressTask = (done) => {
   let zipDest = sake.options.zipDest || sake.config.paths.build
   let zipFileName = sake.config.plugin.id + '.' + sake.getPluginVersion() + '.zip'
 
@@ -15,11 +16,12 @@ const compress = (done) => {
     .pipe(zip(zipFileName))
     .pipe(gulp.dest(sake.config.paths.zipDest))
 }
+compressTask.displayName = 'compress'
 
-const buildAndZip = gulp.series('build', compress) // @TODO replace "build"
+const buildAndZip = gulp.series(buildTask, compressTask)
 buildAndZip.displayName = 'zip'
 
 export {
-  compress,
+  compressTask,
   buildAndZip
 }

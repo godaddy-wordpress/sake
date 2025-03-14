@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import log from 'fancy-log'
 import sake from '../lib/sake.js'
 
-const validateReadmeHeaders = (done) => {
+const validateReadmeHeadersTask = (done) => {
   fs.readFile(`${sake.config.paths.src}/readme.txt`, 'utf8', (err, data) => {
     if (err) sake.throwError(err)
 
@@ -29,8 +29,8 @@ const validateReadmeHeaders = (done) => {
   })
 }
 
-validateReadmeHeaders.displayName = 'validate:readme_headers'
+validateReadmeHeadersTask.displayName = 'validate:readme_headers'
 
 export {
-  validateReadmeHeaders
+  validateReadmeHeadersTask
 }

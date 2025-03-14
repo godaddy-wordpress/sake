@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const lintPhp = (done) => {
+const lintPhpTask = (done) => {
   let paths = [
     `${sake.config.paths.src}/**/*.php`,
     `!${sake.config.paths.vendor}/**/*.php`,
@@ -39,9 +39,9 @@ const lintPhp = (done) => {
       }
     }))
 }
-lintPhp.displayName = 'lint:php'
+lintPhpTask.displayName = 'lint:php'
 
-const lintCoffee = (done) => {
+const lintCoffeeTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -55,9 +55,9 @@ const lintCoffee = (done) => {
     .on('end', done)
     .on('error', done)
 }
-lintCoffee.displayName = 'lint:coffee'
+lintCoffeeTask.displayName = 'lint:coffee'
 
-const lintJs = (done) => {
+const lintJsTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -74,9 +74,9 @@ const lintJs = (done) => {
     .pipe(eslint(esLintOptions))
     .pipe(eslint.format('table'))
 }
-lintJs.displayName = 'lint:js'
+lintJsTask.displayName = 'lint:js'
 
-const lintScss = (done) => {
+const lintScssTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
     return Promise.resolve()
   }
@@ -88,24 +88,25 @@ const lintScss = (done) => {
     .on('end', done)
     .on('error', done)
 }
-lintScss.displayName = 'lint:scss'
+lintScssTask.displayName = 'lint:scss'
 
 // the main task to lint scripts
-const lintScripts = gulp.parallel(lintCoffee, lintJs)
-lintScripts.displayName = 'lint:scripts'
+const lintScriptsTask = gulp.parallel(lintCoffeeTask, lintJsTask)
+lintScriptsTask.displayName = 'lint:scripts'
 
 // the main task to lint styles
-const lintStyles = gulp.parallel(lintScss)
-lintStyles.displayName = 'lint:styles'
+const lintStylesTask = gulp.parallel(lintScssTask)
+lintStylesTask.displayName = 'lint:styles'
 
-const lint = gulp.parallel(lintPhp, lintScripts, lintStyles)
+const lintTask = gulp.parallel(lintPhpTask, lintScriptsTask, lintStylesTask)
+lintTask.displayName = 'lint'
 
 export {
-  lint,
-  lintScripts,
-  lintPhp,
-  lintCoffee,
-  lintJs,
-  lintScss,
-  lintStyles
+  lintTask,
+  lintScriptsTask,
+  lintPhpTask,
+  lintCoffeeTask,
+  lintJsTask,
+  lintScssTask,
+  lintStylesTask
 }

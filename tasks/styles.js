@@ -1,13 +1,13 @@
 import gulp from 'gulp'
 import sake from '../lib/sake.js'
-import { lintStyles } from './lint.js'
+import { lintStylesTask } from './lint.js'
 import { compileStyles } from './compile.js'
 
 const styles = (done) => {
-  let tasks = [lintStyles, compileStyles]
+  let tasks = [lintStylesTask, compileStyles]
 
   // don't lint styles if they have already been linted, unless we're watching
-  if (!sake.isWatching && gulp.lastRun(lintStyles)) {
+  if (!sake.isWatching && gulp.lastRun(lintStylesTask)) {
     tasks.shift()
   }
 

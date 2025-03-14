@@ -14,7 +14,7 @@ import browserSync from 'browser-sync'
 import { scriptPipes } from '../pipes/scripts.js';
 import sake from '../lib/sake.js'
 import rename from 'gulp-rename'
-import { lintPhp } from './lint.js'
+import { lintPhpTask } from './lint.js'
 import { minifyImages } from './imagemin.js'
 import { makepot } from './makepot.js'
 import { styles } from './styles.js'
@@ -152,7 +152,7 @@ compileStyles.displayName = 'compile:styles'
 // Compile all plugin assets
 const compile = (done) => {
   // default compile tasks
-  let tasks = [lintPhp, 'scripts', styles, minifyImages] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
+  let tasks = [lintPhpTask, 'scripts', styles, minifyImages] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
 
   // unless exclusively told not to, generate the POT file as well
   if (!sake.options.skip_pot) {
