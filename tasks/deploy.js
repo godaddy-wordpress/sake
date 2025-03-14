@@ -4,138 +4,169 @@ import _ from 'lodash';
 import axios from 'axios';
 import log from 'fancy-log';
 import chalk from 'chalk';
+import sake from '../lib/sake.js'
+import gulp from 'gulp'
+import { promptDeployTask, promptTestedReleaseZipTask, promptWcUploadTask } from './prompt.js'
+import { bumpMinReqsTask, bumpTask } from './bump.js'
+import { cleanPrereleaseTask } from './clean.js'
+import { buildTask } from './build.js'
+import { gitHubCreateDocsIssueTask, gitHubGetReleaseIssueTask } from './github.js'
+import { shellGitEnsureCleanWorkingCopyTask, shellGitPushUpdateTask } from './shell.js'
+import { compressTask } from './zip.js'
+import { validateReadmeHeadersTask } from './validate.js'
+import { lintScriptsTask, lintStylesTask } from './lint.js'
 
-module.exports = (gulp, plugins, sake) => {
-  let validatedEnvVariables = false
+let validatedEnvVariables = false
 
-  // TODO: consider setting these variables in the sake.config on load instead, and validating sake.config vars instead
-  // validate env variables before deploy
-  function validateEnvVariables () {
-    if (validatedEnvVariables) return
+// TODO: consider setting these variables in the sake.config on load instead, and validating sake.config vars instead
+// validate env variables before deploy
+function validateEnvVariables () {
+  if (validatedEnvVariables) return
 
-    let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
+  let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
 
-    if (sake.config.deploy.type === 'wc') {
-      variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
-    }
-
-    if (sake.config.deploy.type === 'wp') {
-      variables = variables.concat(['WP_SVN_USER'])
-    }
-
-    sake.validateEnvironmentVariables(variables)
+  if (sake.config.deploy.type === 'wc') {
+    variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
   }
 
-  // deploy the plugin
-  gulp.task('deploy', (done) => {
-    validateEnvVariables()
+  if (sake.config.deploy.type === 'wp') {
+    variables = variables.concat(['WP_SVN_USER'])
+  }
 
-    if (!sake.isDeployable()) {
-      sake.throwError('Plugin is not deployable: \n * ' + sake.getChangelogErrors().join('\n * '))
-    }
+  sake.validateEnvironmentVariables(variables)
+}
 
-    // indicate that we are deploying
-    sake.options.deploy = true
-    // ensure scripts and styles are minified
-    sake.options.minify = true
+/**
+ * Deploy the plugin
+ */
+const deployTask = (done) => {
+  validateEnvVariables()
 
-    let tasks = [
-      // preflight checks, will fail the deploy on errors
-      'prompt:tested_release_zip',
-      'deploy:preflight',
-      // ensure version is bumped
-      'bump',
-      // fetch the latest WP/WC versions & bump the "tested up to" values
-      'fetch_latest_wp_wc_versions',
-      'bump:minreqs',
-      // prompt for the version to deploy as
-      'prompt:deploy',
-      function (cb) {
-        if (sake.options.version === 'skip') {
-          log.error(chalk.red('Deploy skipped!'))
-          return done()
-        }
-        cb()
-      },
-      // replace version number & date
-      'replace:version',
-      // delete prerelease, if any
-      'clean:prerelease',
-      // build the plugin - compiles and copies to build dir
-      'build',
-      // ensure the required framework version is installed
-      'deploy:validate_framework_version',
-      // grab issues to close with commit
-      'github:get_rissue',
-      // rebuild plugin configuration (version number, etc)
-      function rebuildPluginConfig (cb) {
-        sake.buildPluginConfig()
-        cb()
-      },
-      // git commit & push
-      'shell:git_push_update',
-      // create the zip, which will be attached to the releases
-      'compress',
-      // create releases, attaching the zip
-      'deploy_create_releases'
-    ]
+  if (!sake.isDeployable()) {
+    sake.throwError('Plugin is not deployable: \n * ' + sake.getChangelogErrors().join('\n * '))
+  }
 
-    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
-      tasks.push('prompt:wc_upload')
-    }
+  // indicate that we are deploying
+  sake.options.deploy = true
+  // ensure scripts and styles are minified
+  sake.options.minify = true
 
-    if (sake.config.deploy.type === 'wp') {
-      tasks.push('deploy_to_wp_repo')
-    }
+  let tasks = [
+    // preflight checks, will fail the deploy on errors
+    promptTestedReleaseZipTask,
+    'deploy:preflight',
+    // ensure version is bumped
+    bumpTask,
+    // fetch the latest WP/WC versions & bump the "tested up to" values
+    'fetch_latest_wp_wc_versions',
+    bumpMinReqsTask,
+    // prompt for the version to deploy as
+    promptDeployTask,
+    function (cb) {
+      if (sake.options.version === 'skip') {
+        log.error(chalk.red('Deploy skipped!'))
+        return done()
+      }
+      cb()
+    },
+    // replace version number & date
+    'replace:version',
+    // delete prerelease, if any
+    cleanPrereleaseTask,
+    // build the plugin - compiles and copies to build dir
+    buildTask,
+    // ensure the required framework version is installed
+    deployValidateFrameworkVersionTask,
+    // grab issues to close with commit
+    gitHubGetReleaseIssueTask,
+    // rebuild plugin configuration (version number, etc)
+    function rebuildPluginConfig (cb) {
+      sake.buildPluginConfig()
+      cb()
+    },
+    // git commit & push
+    shellGitPushUpdateTask,
+    // create the zip, which will be attached to the releases
+    compressTask,
+    // create releases, attaching the zip
+    'deploy_create_releases'
+  ]
 
-    // finally, create a docs issue, if necessary
-    tasks.push('github:docs_issue')
+  if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+    tasks.push(promptWcUploadTask)
+  }
 
-    return gulp.series(tasks)(done)
-  })
+  if (sake.config.deploy.type === 'wp') {
+    tasks.push('deploy_to_wp_repo')
+  }
 
-  // run deploy preflight checks
-  gulp.task('deploy:preflight', (done) => {
-    let tasks = [
-      'shell:git_ensure_clean_working_copy',
-      'validate:readme_headers',
-      'lint:scripts',
-      'lint:styles'
-    ]
+  // finally, create a docs issue, if necessary
+  tasks.push(gitHubCreateDocsIssueTask)
 
-    if (sake.config.deploy.type === 'wc') {
-      tasks.unshift('search:wt_update_key')
-    }
+  return gulp.series(tasks)(done)
+}
+deployTask.displayName = 'deploy'
 
-    gulp.parallel(tasks)(done)
-  })
+/**
+ * Run deploy preflight checks
+ */
+const deployPreflightTask = (done) => {
+  let tasks = [
+    shellGitEnsureCleanWorkingCopyTask,
+    validateReadmeHeadersTask,
+    lintScriptsTask,
+    lintStylesTask
+  ]
 
-  gulp.task('deploy:validate_framework_version', (done) => {
-    if (sake.config.framework === 'v5' && sake.getFrameworkVersion() !== sake.getRequiredFrameworkVersion()) {
-      sake.throwError('Required framework version in composer.json (' + sake.getRequiredFrameworkVersion() + ') and installed framework version (' + sake.getFrameworkVersion() + ') do not match. Halting deploy.')
+  if (sake.config.deploy.type === 'wc') {
+    tasks.unshift(searchWtUpdateKeyTask)
+  }
+
+  gulp.parallel(tasks)(done)
+}
+deployPreflightTask.displayName = 'deploy:preflight'
+
+const deployValidateFrameworkVersionTask = (done) => {
+  if (sake.config.framework === 'v5' && sake.getFrameworkVersion() !== sake.getRequiredFrameworkVersion()) {
+    sake.throwError('Required framework version in composer.json (' + sake.getRequiredFrameworkVersion() + ') and installed framework version (' + sake.getFrameworkVersion() + ') do not match. Halting deploy.')
+  }
+
+  done()
+}
+deployValidateFrameworkVersionTask.displayName = 'deploy:validate_framework_version'
+
+/**
+ * Internal task for making sure the WT updater keys have been set
+ */
+const searchWtUpdateKeyTask = (done) => {
+  fs.readFile(`${sake.config.paths.src}/${sake.config.plugin.mainFile}`, 'utf8', (err, data) => {
+    if (err) sake.throwError(err)
+
+    // matches " * Woo: ProductId:ProductKey" in the main plugin file PHPDoc
+    const phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+)/ig)
+    // matches legacy woothemes_queue_update() usage in the main plugin file
+    const phpFuncMatch = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
+
+    // throw an error if no WT keys have been found with either method
+    if (!phpDocMatch && !phpFuncMatch) {
+      sake.throwError('WooThemes updater keys for the plugin have not been properly set ;(')
     }
 
     done()
   })
+}
+searchWtUpdateKeyTask.displayName = 'search:wt_update_key'
 
-  // internal task for making sure the WT updater keys have been set
-  gulp.task('search:wt_update_key', (done) => {
-    fs.readFile(`${sake.config.paths.src}/${sake.config.plugin.mainFile}`, 'utf8', (err, data) => {
-      if (err) sake.throwError(err)
+export {
+  deployTask,
+  deployPreflightTask,
+  deployValidateFrameworkVersionTask,
+  searchWtUpdateKeyTask
+}
 
-      // matches " * Woo: ProductId:ProductKey" in the main plugin file PHPDoc
-      let phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+)/ig)
-      // matches legacy woothemes_queue_update() usage in the main plugin file
-      let phpFuncMatch = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
+module.exports = (gulp, plugins, sake) => {
 
-      // throw an error if no WT keys have been found with either method
-      if (!phpDocMatch && !phpFuncMatch) {
-        sake.throwError('WooThemes updater keys for the plugin have not been properly set ;(')
-      }
 
-      done()
-    })
-  })
 
   // internal task for replacing version and date when deploying
   gulp.task('replace:version', () => {
