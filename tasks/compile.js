@@ -152,7 +152,7 @@ compileStyles.displayName = 'compile:styles'
 // Compile all plugin assets
 const compile = (done) => {
   // default compile tasks
-  let tasks = [lintPhp, 'scripts', styles, minifyImages] // @TODO replace `scripts`
+  let tasks = [lintPhp, 'scripts', styles, minifyImages] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
 
   // unless exclusively told not to, generate the POT file as well
   if (!sake.options.skip_pot) {
