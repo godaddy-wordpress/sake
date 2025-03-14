@@ -23,7 +23,7 @@ let getGithub = (target = 'dev') => {
   return githubInstances[target]
 }
 
-const gitHubGetReleaseIssue = (done) => {
+const gitHubGetReleaseIssueTask = (done) => {
   let owner = sake.config.deploy.dev.owner
   let repo = sake.config.deploy.dev.name
   let github = getGithub('dev')
@@ -77,9 +77,9 @@ const gitHubGetReleaseIssue = (done) => {
     done()
   })
 }
-gitHubGetReleaseIssue.displayName = 'github:get_rissue'
+gitHubGetReleaseIssueTask.displayName = 'github:get_rissue'
 
-const gitHubGetWcIssues = (done) => {
+const gitHubGetWcIssuesTask = (done) => {
   if (!sake.config.deploy.production) {
     log.warn(chalk.yellow('No WC (production) repo configured for ' + sake.getPluginName() + ', skipping'))
     return done()
@@ -125,12 +125,12 @@ const gitHubGetWcIssues = (done) => {
       done()
     })
 }
-gitHubGetWcIssues.displayName = 'github:get_wc_issues'
+gitHubGetWcIssuesTask.displayName = 'github:get_wc_issues'
 
 /**
  * Creates a docs issue for the plugin
  */
-const gitHubCreateDocsIssue = (done) => {
+const gitHubCreateDocsIssueTask = (done) => {
   if (! sake.config.deploy.docs) {
     log.warn(chalk.yellow('No docs repo configured for ' + sake.getPluginName() + ', skipping'))
     return done()
@@ -178,12 +178,12 @@ const gitHubCreateDocsIssue = (done) => {
     }
   })
 }
-gitHubCreateDocsIssue.displayName = 'github:docs_issue'
+gitHubCreateDocsIssueTask.displayName = 'github:docs_issue'
 
 /**
  * Creates a release for the plugin, attaching the build zip to it
  */
-const gitHubCreateRelease = (done) => {
+const gitHubCreateReleaseTask = (done) => {
   let owner = sake.options.owner
   let repo = sake.options.repo || sake.config.plugin.id
 
@@ -239,12 +239,12 @@ const gitHubCreateRelease = (done) => {
 
   gulp.series(tasks)(done)
 }
-gitHubCreateRelease.displayName = 'github:create_release'
+gitHubCreateReleaseTask.displayName = 'github:create_release'
 
 /**
  * Create release milestones for each Tuesday
  */
-const gitHubCreateReleaseMilestones = (done) => {
+const gitHubCreateReleaseMilestonesTask = (done) => {
   let year = sake.options.year || new Date().getFullYear()
   let tuesdays = getTuesdays(year)
 
@@ -270,12 +270,12 @@ const gitHubCreateReleaseMilestones = (done) => {
     return tuesdays
   }
 }
-gitHubCreateReleaseMilestones.displayName = 'github:create_release_milestones'
+gitHubCreateReleaseMilestonesTask.displayName = 'github:create_release_milestones'
 
 /**
  * Create monthly milestones
  */
-const gitHubCreateMonthMilestones = (done) => {
+const gitHubCreateMonthMilestonesTask = (done) => {
   let year = sake.options.year || new Date().getFullYear()
 
   createMilestones(getMonthlyMilestones(year), done)
@@ -295,7 +295,7 @@ const gitHubCreateMonthMilestones = (done) => {
     return months
   }
 }
-gitHubCreateMonthMilestones.displayName = 'github:create_month_milestones'
+gitHubCreateMonthMilestonesTask.displayName = 'github:create_month_milestones'
 
 // create a milestone for each date passed in
 const createMilestones = (milestones, done) => {
@@ -333,10 +333,10 @@ const createMilestones = (milestones, done) => {
 }
 
 export {
-  gitHubGetReleaseIssue,
-  gitHubGetWcIssues,
-  gitHubCreateDocsIssue,
-  gitHubCreateRelease,
-  gitHubCreateReleaseMilestones,
-  gitHubCreateMonthMilestones
+  gitHubGetReleaseIssueTask,
+  gitHubGetWcIssuesTask,
+  gitHubCreateDocsIssueTask,
+  gitHubCreateReleaseTask,
+  gitHubCreateReleaseMilestonesTask,
+  gitHubCreateMonthMilestonesTask
 }
