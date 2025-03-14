@@ -46,12 +46,6 @@ let plugins = gulpPlugins({
   config: path.resolve(__dirname, 'package.json')
 })
 
-// Attach browsersync as a plugin - not really a plugin, but it helps to
-// pass around the browsersync instance between tasks. Unfortunately, we
-// always have to load and create an instance of it, because gulp-if does not
-// support lazy evaluation yet: https://github.com/robrich/gulp-if/issues/75
-plugins.browserSync = browserSync.create()
-
 // show notification on task errors
 let loggedErrors = []
 
@@ -75,6 +69,7 @@ export * from './tasks/config.js'
 export * from './tasks/imagemin.js'
 export * from './tasks/lint.js'
 export * from './tasks/shell.js'
+export * from './tasks/styles.js'
 export * from './tasks/validate.js'
 export * from './tasks/watch.js'
 export * from './tasks/wc.js'
