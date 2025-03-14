@@ -2,7 +2,7 @@ import _ from 'lodash';
 import gulp from 'gulp'
 import sake from '../lib/sake.js'
 import { cleanBuildTask, cleanComposerTask } from './clean.js'
-import { shellComposerInstall, shellComposerStatus } from './shell.js'
+import { shellComposerInstallTask, shellComposerStatusTask } from './shell.js'
 import { compile } from './compile.js'
 import { copyBuild } from './copy.js'
 
@@ -13,16 +13,17 @@ import { copyBuild } from './copy.js'
  *  - Bundles any external dependencies to the plugin assets
  *  - Copies plugin files to the build directory
  */
-const build = (done) => {
-  let tasks = [cleanBuildTask, shellComposerStatus, cleanComposerTask, shellComposerInstall, compile, 'bundle', copyBuild] // @TODO replace remaining
+const buildTask = (done) => {
+  let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, 'bundle', copyBuild] // @TODO replace remaining
 
   if (sake.options['skip-composer']) {
-    tasks = _.without(tasks, shellComposerStatus, cleanComposerTask, shellComposerInstall)
+    tasks = _.without(tasks, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask)
   }
 
   return gulp.series(tasks)
 }
+buildTask.displayName = 'build'
 
 export {
-  build
+  buildTask
 }

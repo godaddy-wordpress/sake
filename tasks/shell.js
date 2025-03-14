@@ -24,7 +24,7 @@ const exec = (command, opts, done) => {
 /**
  * Update framework subtree
  */
-const shellUpdateFramework = (done) => {
+const shellUpdateFrameworkTask = (done) => {
   if (!sake.config.framework) {
     sake.throwError('Not a frameworked plugin, aborting')
   }
@@ -57,12 +57,12 @@ const shellUpdateFramework = (done) => {
 
   exec(command, done)
 }
-shellUpdateFramework.displayName = 'shell:update_framework'
+shellUpdateFrameworkTask.displayName = 'shell:update_framework'
 
 /**
  * Commit framework update
  */
-const shellUpdateFrameworkCommit = (done) => {
+const shellUpdateFrameworkCommitTask = (done) => {
   let frameworkPath = path.join(process.cwd(), sake.config.paths.src, sake.config.paths.framework.base)
   let command = ''
 
@@ -81,12 +81,12 @@ const shellUpdateFrameworkCommit = (done) => {
 
   exec(command, done)
 }
-shellUpdateFrameworkCommit.displayName = 'shell:update_framework_commit'
+shellUpdateFrameworkCommitTask.displayName = 'shell:update_framework_commit'
 
 /**
  * Ensure the working copy (git tree) has no uncommitted changes
  */
-const shellGitEnsureCleanWorkingCopy = (done) => {
+const shellGitEnsureCleanWorkingCopyTask = (done) => {
   let command = [
     'git diff-index --quiet HEAD'
   ].join(' && ')
@@ -99,12 +99,12 @@ const shellGitEnsureCleanWorkingCopy = (done) => {
     })
   })
 }
-shellGitEnsureCleanWorkingCopy.displayName = 'shell:git_ensure_clean_working_copy'
+shellGitEnsureCleanWorkingCopyTask.displayName = 'shell:git_ensure_clean_working_copy'
 
 /**
  * Commit and push update
  */
-const shellGitPushUpdate = (done) => {
+const shellGitPushUpdateTask = (done) => {
   const command = [
     'git add -A',
     'git commit -m "' + sake.config.plugin.name + ': ' + sake.getPluginVersion() + ' Versioning"' + (sake.options.release_issue_to_close ? ' -m "Closes #' + sake.options.release_issue_to_close + '"' : ''),
@@ -114,13 +114,13 @@ const shellGitPushUpdate = (done) => {
 
   exec(command, done)
 }
-shellGitPushUpdate.displayName = 'shell:git_push_update'
+shellGitPushUpdateTask.displayName = 'shell:git_push_update'
 
 /**
  * Pull updates from WC repo, or clone repo, if deploying for the first time
  * @deprecated We no longer use WC mirror repos
  */
-const shellGitPullWcRepo = (done) => {
+const shellGitPullWcRepoTask = (done) => {
   let command = []
 
   if (!fs.existsSync(sake.getProductionRepoPath())) {
@@ -152,13 +152,13 @@ const shellGitPullWcRepo = (done) => {
     }
   })
 }
-shellGitPullWcRepo.displayName = 'shell:git_pull_wc_repo'
+shellGitPullWcRepoTask.displayName = 'shell:git_pull_wc_repo'
 
 /**
  * Commit and push update to WC repo
  * @deprecated We no longer use WC mirror repos
  */
-const shellGitPushWcRepo = (done) => {
+const shellGitPushWcRepoTask = (done) => {
   let closeIssues = ''
 
   if (sake.options.wc_issues_to_close) {
@@ -179,13 +179,13 @@ const shellGitPushWcRepo = (done) => {
     exec(command, done)
   })
 }
-shellGitPushWcRepo.displayName = 'shell:git_push_wc_repo'
+shellGitPushWcRepoTask.displayName = 'shell:git_push_wc_repo'
 
 /**
  * Commit and push update to WC repo, version 2
  * @deprecated We no longer use WooCommerce mirror repos
  */
-const shellGitUpdateWcRepo = (done) => {
+const shellGitUpdateWcRepoTask = (done) => {
   let command = [
     'cd ' + sake.getProductionRepoPath(),
     'git pull',
@@ -197,25 +197,25 @@ const shellGitUpdateWcRepo = (done) => {
 
   exec(command, done)
 }
-shellGitUpdateWcRepo.displayName = 'shell:git_update_wc_repo'
+shellGitUpdateWcRepoTask.displayName = 'shell:git_update_wc_repo'
 
 /**
  * Stash uncommitted changes
  */
-const shellGitStash = (done) => {
+const shellGitStashTask = (done) => {
   exec('git stash', done)
 }
-shellGitStash.displayName = 'shell:git_stash'
+shellGitStashTask.displayName = 'shell:git_stash'
 
 /**
  * Apply latest stash
  */
-const shellGitStashApply = (done) => {
+const shellGitStashApplyTask = (done) => {
   exec('git stash apply', done)
 }
-shellGitStashApply.displayName = 'shell:git_stash_apply'
+shellGitStashApplyTask.displayName = 'shell:git_stash_apply'
 
-const shellComposerStatus = (done) => {
+const shellComposerStatusTask = (done) => {
   if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
     exec('composer status -v', done)
   } else {
@@ -223,9 +223,9 @@ const shellComposerStatus = (done) => {
     done()
   }
 }
-shellComposerStatus.displayName = 'shell:composer_status'
+shellComposerStatusTask.displayName = 'shell:composer_status'
 
-const shellComposerInstall = (done) => {
+const shellComposerInstallTask = (done) => {
   if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
     exec('composer install --no-dev', done)
   } else {
@@ -233,9 +233,9 @@ const shellComposerInstall = (done) => {
     done()
   }
 }
-shellComposerInstall.displayName = 'shell:composer_install'
+shellComposerInstallTask.displayName = 'shell:composer_install'
 
-const shellComposerUpdate = (done) => {
+const shellComposerUpdateTask = (done) => {
   if (fs.existsSync(path.join(process.cwd(), 'composer.json'))) {
     exec('composer update --no-dev', done)
   } else {
@@ -243,9 +243,9 @@ const shellComposerUpdate = (done) => {
     done()
   }
 }
-shellComposerUpdate.displayName = 'shell:composer_update'
+shellComposerUpdateTask.displayName = 'shell:composer_update'
 
-const shellSvnCheckout = (done) => {
+const shellSvnCheckoutTask = (done) => {
   // ensure that the tmp dir exists
   if (!fs.existsSync(sake.config.paths.tmp)) {
     shell.mkdir('-p', sake.config.paths.tmp)
@@ -255,9 +255,9 @@ const shellSvnCheckout = (done) => {
 
   exec(command, done)
 }
-shellSvnCheckout.displayName = 'shell:svn_checkout'
+shellSvnCheckoutTask.displayName = 'shell:svn_checkout'
 
-const shellSvnCommitTrunk = (done) => {
+const shellSvnCommitTrunkTask = (done) => {
   const commitMsg = 'Committing ' + sake.getPluginVersion() + ' to trunk'
 
   let command = [
@@ -269,9 +269,9 @@ const shellSvnCommitTrunk = (done) => {
 
   exec(command, done)
 }
-shellSvnCommitTrunk.displayName = 'shell:svn_commit_trunk'
+shellSvnCommitTrunkTask.displayName = 'shell:svn_commit_trunk'
 
-const shellSvnCommitTag = (done) => {
+const shellSvnCommitTagTask = (done) => {
   const commitMsg = 'Tagging ' + sake.getPluginVersion()
 
   let command = [
@@ -282,9 +282,9 @@ const shellSvnCommitTag = (done) => {
 
   exec(command, done)
 }
-shellSvnCommitTag.displayName = 'shell:svn_commit_tag'
+shellSvnCommitTagTask.displayName = 'shell:svn_commit_tag'
 
-const shellSvnCommitAssets = (done) => {
+const shellSvnCommitAssetsTask = (done) => {
   const commitMsg = 'Committing assets for ' + sake.getPluginVersion()
 
   let command = [
@@ -296,23 +296,23 @@ const shellSvnCommitAssets = (done) => {
 
   exec(command, done)
 }
-shellSvnCommitAssets.displayName = 'shell:svn_commit_assets'
+shellSvnCommitAssetsTask.displayName = 'shell:svn_commit_assets'
 
 export {
-  shellUpdateFramework,
-  shellUpdateFrameworkCommit,
-  shellGitEnsureCleanWorkingCopy,
-  shellGitPushUpdate,
-  shellGitPullWcRepo,
-  shellGitPushWcRepo,
-  shellGitUpdateWcRepo,
-  shellGitStash,
-  shellGitStashApply,
-  shellComposerStatus,
-  shellComposerInstall,
-  shellComposerUpdate,
-  shellSvnCheckout,
-  shellSvnCommitTrunk,
-  shellSvnCommitTag,
-  shellSvnCommitAssets
+  shellUpdateFrameworkTask,
+  shellUpdateFrameworkCommitTask,
+  shellGitEnsureCleanWorkingCopyTask,
+  shellGitPushUpdateTask,
+  shellGitPullWcRepoTask,
+  shellGitPushWcRepoTask,
+  shellGitUpdateWcRepoTask,
+  shellGitStashTask,
+  shellGitStashApplyTask,
+  shellComposerStatusTask,
+  shellComposerInstallTask,
+  shellComposerUpdateTask,
+  shellSvnCheckoutTask,
+  shellSvnCommitTrunkTask,
+  shellSvnCommitTagTask,
+  shellSvnCommitAssetsTask
 }
