@@ -7,7 +7,6 @@ import dotenv from 'dotenv'
 import gulpPlugins from 'gulp-load-plugins'
 import notifier from 'node-notifier'
 import stripAnsi from 'strip-ansi'
-import browserSync from 'browser-sync'
 import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,6 +66,7 @@ gulp.on('error', (event) => {
 export * from './tasks/bump.js'
 export * from './tasks/config.js'
 export * from './tasks/imagemin.js'
+export * from './tasks/decaffeinate.js'
 export * from './tasks/lint.js'
 export * from './tasks/makepot.js'
 export * from './tasks/shell.js'
