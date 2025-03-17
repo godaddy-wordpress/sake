@@ -26,7 +26,7 @@ let formatError = (err) => {
 /**
  * Internal task to validate whether the plugin can be deployed to WooCommerce.com
  */
-const wcValidate = (done) => {
+const wcValidateTask = (done) => {
   log.info('Making sure plugin is deployable...')
 
   let url = getApiURL('deploy/status')
@@ -81,12 +81,12 @@ const wcValidate = (done) => {
     })
 }
 
-wcValidate.displayName = 'wc:validate'
+wcValidateTask.displayName = 'wc:validate'
 
 /**
  * Internal task the handles the zip file upload
  */
-const wcUpload = (done) => {
+const wcUploadTask = (done) => {
   let version = sake.getPluginVersion()
   let zipPath = path.join(process.cwd(), sake.config.paths.build, `${sake.config.plugin.id}.${version}.zip`)
 
@@ -141,16 +141,16 @@ const wcUpload = (done) => {
     })
 }
 
-wcUpload.displayName = 'wc:upload'
+wcUploadTask.displayName = 'wc:upload'
 
 /**
  * The main task to deploy woocommerce.com plugins
  */
-const wcDeploy = gulpSeries(wcValidate, wcUpload)
-wcDeploy.displayName = 'wc:deploy'
+const wcDeployTask = gulpSeries(wcValidateTask, wcUploadTask)
+wcDeployTask.displayName = 'wc:deploy'
 
 export {
-  wcValidate,
-  wcUpload,
-  wcDeploy
+  wcValidateTask,
+  wcUploadTask,
+  wcDeployTask
 }

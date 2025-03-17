@@ -8,7 +8,7 @@ import gulpFilter from 'gulp-filter'
 /**
  * Copy files from source to build
  */
-const copyBuild = (done) => {
+const copyBuildTask = (done) => {
   const filter = gulpFilter(['**/*.min.css', '**/*.min.js'], { restore: true })
 
   let paths = [
@@ -164,12 +164,12 @@ const copyBuild = (done) => {
     .pipe(filter.restore)
     .pipe(gulp.dest(`${sake.config.paths.build}/${sake.config.plugin.id}`))
 }
-copyBuild.displayName = 'copy:build'
+copyBuildTask.displayName = 'copy:build'
 
 /**
  * Copy plugin zip and changelog to prereleases folder
  */
-const copyPrerelease = (done) => {
+const copyPrereleaseTask = (done) => {
   let filename = sake.config.deploy.type === 'wp' ? 'readme' : 'changelog'
 
   const filter = gulpFilter([`**/${filename}.txt`], { restore: true })
@@ -182,45 +182,45 @@ const copyPrerelease = (done) => {
     .pipe(filter.restore)
     .pipe(gulp.dest(sake.getPrereleasesPath()))
 }
-copyPrerelease.displayName = 'copy:prerelease'
+copyPrereleaseTask.displayName = 'copy:prerelease'
 
 /**
  * Copy files from build to WC repo folder
  */
-const copyWcRepo = (done) => {
+const copyWcRepoTask = (done) => {
   return gulp.src(`${sake.config.paths.build}/${sake.config.plugin.id}/**/*`).pipe(gulp.dest(sake.getProductionRepoPath()))
 }
-copyWcRepo.displayName = 'copy:wc_repo'
+copyWcRepoTask.displayName = 'copy:wc_repo'
 
 /**
  * Copy files from build to WP trunk folder
  */
-const copyWpTrunk = (done) => {
+const copyWpTrunkTask = (done) => {
   return gulp.src(`${sake.config.paths.build}/${sake.config.plugin.id}/**/*`).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'trunk')))
 }
-copyWpTrunk.displayName = 'copy:wp_trunk'
+copyWpTrunkTask.displayName = 'copy:wp_trunk'
 
 /**
  * Copy files from build to WP assets folder
  */
-const copyWpAssets = (done) => {
+const copyWpAssetsTask = (done) => {
   return gulp.src(`${sake.config.paths.wpAssets}/**/*`).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'assets')))
 }
-copyWpAssets.displayName = 'copy:wp_assets'
+copyWpAssetsTask.displayName = 'copy:wp_assets'
 
 /**
  * Copy files from WP trunk to tag
  */
-const copyWpTag = (done) => {
+const copyWpTagTask = (done) => {
   return gulp.src(path.join(sake.getProductionRepoPath(), 'trunk/**/*')).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'tags', sake.getPluginVersion())))
 }
-copyWpTag.displayName = 'copy:wp_tag'
+copyWpTagTask.displayName = 'copy:wp_tag'
 
 export {
-  copyBuild,
-  copyPrerelease,
-  copyWcRepo,
-  copyWpTrunk,
-  copyWpAssets,
-  copyWpTag
+  copyBuildTask,
+  copyPrereleaseTask,
+  copyWcRepoTask,
+  copyWpTrunkTask,
+  copyWpAssetsTask,
+  copyWpTagTask
 }

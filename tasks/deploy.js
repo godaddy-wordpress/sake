@@ -6,15 +6,33 @@ import log from 'fancy-log';
 import chalk from 'chalk';
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
+import filter from 'gulp-filter'
+import replace from 'gulp-replace'
+import replaceTask from 'gulp-replace-task'
 import { promptDeployTask, promptTestedReleaseZipTask, promptWcUploadTask } from './prompt.js'
 import { bumpMinReqsTask, bumpTask } from './bump.js'
-import { cleanPrereleaseTask } from './clean.js'
+import { cleanPrereleaseTask, cleanWcRepoTask, cleanWpAssetsTask, cleanWpTrunkTask } from './clean.js'
 import { buildTask } from './build.js'
-import { gitHubCreateDocsIssueTask, gitHubGetReleaseIssueTask } from './github.js'
-import { shellGitEnsureCleanWorkingCopyTask, shellGitPushUpdateTask } from './shell.js'
+import {
+  gitHubCreateDocsIssueTask,
+  gitHubCreateReleaseTask,
+  gitHubGetReleaseIssueTask,
+  gitHubGetWcIssuesTask
+} from './github.js'
+import {
+  shellGitEnsureCleanWorkingCopyTask,
+  shellGitPullWcRepoTask,
+  shellGitPushUpdateTask,
+  shellGitPushWcRepoTask,
+  shellGitUpdateWcRepoTask, shellSvnCheckoutTask,
+  shellSvnCommitAssetsTask,
+  shellSvnCommitTagTask,
+  shellSvnCommitTrunkTask
+} from './shell.js'
 import { compressTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
+import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
 
 let validatedEnvVariables = false
 
@@ -54,11 +72,11 @@ const deployTask = (done) => {
   let tasks = [
     // preflight checks, will fail the deploy on errors
     promptTestedReleaseZipTask,
-    'deploy:preflight',
+    deployPreflightTask,
     // ensure version is bumped
     bumpTask,
     // fetch the latest WP/WC versions & bump the "tested up to" values
-    'fetch_latest_wp_wc_versions',
+    fetchLatestWpWcVersionsTask,
     bumpMinReqsTask,
     // prompt for the version to deploy as
     promptDeployTask,
@@ -70,7 +88,7 @@ const deployTask = (done) => {
       cb()
     },
     // replace version number & date
-    'replace:version',
+    replaceVersionTask,
     // delete prerelease, if any
     cleanPrereleaseTask,
     // build the plugin - compiles and copies to build dir
@@ -89,7 +107,7 @@ const deployTask = (done) => {
     // create the zip, which will be attached to the releases
     compressTask,
     // create releases, attaching the zip
-    'deploy_create_releases'
+    deployCreateReleasesTask,
   ]
 
   if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
@@ -97,7 +115,7 @@ const deployTask = (done) => {
   }
 
   if (sake.config.deploy.type === 'wp') {
-    tasks.push('deploy_to_wp_repo')
+    tasks.push(deployToWpRepoTask)
   }
 
   // finally, create a docs issue, if necessary
@@ -157,260 +175,286 @@ const searchWtUpdateKeyTask = (done) => {
 }
 searchWtUpdateKeyTask.displayName = 'search:wt_update_key'
 
+/**
+ * Internal task for replacing the version and date when deploying
+ */
+const replaceVersionTask = (done) => {
+  if (!sake.getVersionBump()) {
+    sake.throwError('No version replacement specified')
+  }
+
+  const versions = sake.getPrereleaseVersions(sake.getPluginVersion())
+  const versionReplacements = versions.map(version => {
+    return { match: version, replacement: () => sake.getVersionBump() }
+  })
+
+  const filterChangelog = filter('**/{readme.md,readme.txt,changelog.txt}', { restore: true })
+  const date = dateFormat(new Date(), 'yyyy.mm.dd')
+
+  let paths = [
+    `${sake.config.paths.src}/**/*.php`,
+    `${sake.config.paths.src}/readme.md`,
+    `${sake.config.paths.src}/readme.txt`,
+    `${sake.config.paths.src}/changelog.txt`,
+    `!${sake.config.paths.src}/*.json`,
+    `!${sake.config.paths.src}/*.xml`,
+    `!${sake.config.paths.src}/*.yml`
+  ]
+
+  if (fs.existsSync(sake.config.paths.assetPaths.js)) {
+    paths.concat([
+      `${sake.config.paths.assetPaths.js}/**/*.{coffee,js}`,
+      `!${sake.config.paths.assetPaths.js}/**/*.min.js`,
+    ])
+  }
+
+  if (fs.existsSync(sake.config.paths.assetPaths.css)) {
+    paths.concat([
+      `${sake.config.paths.assetPaths.css}/**/*.scss`,
+      `${sake.config.paths.assetPaths.css}/**/*.css`,
+    ])
+  }
+
+  if (fs.existsSync(`!${sake.config.paths.src}/lib`)) {
+    paths.push(`!${sake.config.paths.src}/lib/**`)
+  }
+
+  if (fs.existsSync(`!${sake.config.paths.src}/vendor`)) {
+    paths.push(`!${sake.config.paths.src}/vendor/**`)
+  }
+
+  if (fs.existsSync(`!${sake.config.paths.src}/tests`)) {
+    paths.push(`!${sake.config.paths.src}/tests/**`)
+  }
+
+  if (fs.existsSync(`!${sake.config.paths.src}/node_modules`)) {
+    paths.push(`!${sake.config.paths.src}/node_modules/**`)
+  }
+
+  return gulp.src(paths, { base: './', allowEmpty: true })
+    // unlike gulp-replace, gulp-replace-task supports multiple replacements
+    .pipe(replaceTask({ patterns: versionReplacements, usePrefix: false }))
+    .pipe(filterChangelog)
+    .pipe(replace(/[0-9]+\.nn\.nn/, date))
+    .pipe(filterChangelog.restore)
+    .pipe(gulp.dest('./'))
+}
+replaceVersionTask.displayName = 'replace:version'
+
+/**
+ * Grab any issues to close with the deploy
+ */
+const getIssuesToCloseTask = (done) => {
+  let tasks = [gitHubGetReleaseIssueTask]
+
+  if (sake.config.deploy.type === 'wc') {
+    tasks.push(gitHubGetWcIssuesTask)
+  }
+
+  gulp.series(tasks)(done)
+}
+getIssuesToCloseTask.displayName = 'get_issues_to_close'
+
+/**
+ * Create releases for a deploy
+ *
+ * This task is especially useful if your deploy failed before the release
+ * creating step or you need to re-create the releases for some reason
+ */
+const deployCreateReleasesTask = (done) => {
+  // TODO: consider using async or similar to hide the anonymous tasks from gulp, see: https://github.com/gulpjs/gulp/issues/1143
+
+  let tasks = [
+    function (cb) {
+      sake.options.owner = sake.config.deploy.dev.owner
+      sake.options.repo = sake.config.deploy.dev.name
+      sake.options.prefix_release_tag = sake.config.multiPluginRepo
+      cb()
+    },
+    gitHubCreateReleaseTask
+  ]
+
+  return gulp.series(tasks)(done)
+}
+deployCreateReleasesTask.displayName = 'deploy_create_releases'
+
+/**
+ * Main task for deploying the plugin after build to the production repo
+ * @deprecated
+ */
+const deployToProductionRepoTask = (done) => {
+  let tasks = []
+
+  if (sake.config.deploy.type === 'wc') {
+    tasks.push(deployToWcRepoTask)
+  } else if (sake.config.deploy.type === 'wp') {
+    tasks.push(deployToWpRepoTask)
+  } else {
+    log.warn(chalk.yellow('No deploy type set, skipping deploy to remote repo'))
+    return done()
+  }
+
+  gulp.series(tasks)(done)
+}
+deployToProductionRepoTask.displayName = 'deploy_to_production_repo'
+
+/** WooCommerce repo related tasks ****************************************/
+
+/**
+ * Deploy to WC repo
+ * @deprecated
+ */
+const deployToWcRepoTask = (done) => {
+  validateEnvVariables()
+
+  gulp.series(copyToWcRepoTask, shellGitPushWcRepoTask)(done)
+}
+deployToWcRepoTask.displayName = 'deploy_to_wc_repo'
+
+/**
+ * Copy to WC repo
+ *
+ * Helper task which copies files to WC repo (used by {@see updateWcRepoTask()})
+ *
+ * Builds the plugin, pulls chances from the WC repo, cleans the local WC
+ * repo clone, and then copies built plugin to clone
+ * @deprecated
+ */
+const copyToWcRepoTask = (done) => {
+  validateEnvVariables()
+
+  let tasks = [
+    // copy files to build directory
+    buildTask,
+    // ensure WC repo is up to date
+    shellGitPullWcRepoTask,
+    // clean the WC plugin dir
+    cleanWcRepoTask,
+    // copy files from build to WC repo directory
+    copyWcRepoTask,
+  ]
+
+  // no need to build when part of deploy process
+  if (sake.options.deploy) {
+    tasks.shift()
+  }
+
+  gulp.series(tasks)(done)
+}
+copyToWcRepoTask.displayName = 'copy_to_wc_repo'
+
+/**
+ * @TODO: do we need this anymore?
+ *
+ * Update WC repo
+ *
+ * Builds and copies plugin to WC repo then pushes a general "Updating {plugin name}"
+ * commit. This is not a very useful task as it was created many moons ago to allow
+ * us to quickly fix issues with the deploy (such as extra files, etc). The
+ * task remains for posterity
+ * @deprecated
+ */
+const updateWcRepoTask = (done) => {
+  validateEnvVariables()
+
+  gulp.series(copyToWcRepoTask, shellGitUpdateWcRepoTask)(done)
+}
+updateWcRepoTask.displayName = 'update_wc_repo'
+
+/** WP.org deploy related tasks ****************************************/
+
+const deployToWpRepoTask = (done) => {
+  let tasks = [copyToWpRepoTask, shellSvnCommitTrunkTask]
+
+  sake.options = _.merge({
+    deployTag: true,
+    deployAssets: true
+  }, sake.options)
+
+  if (sake.options.deployTag) {
+    tasks.push(copyWpTagTask)
+    tasks.push(shellSvnCommitTagTask)
+  }
+
+  if (sake.options.deployAssets) {
+    tasks.push(cleanWpAssetsTask)
+    tasks.push(copyWpAssetsTask)
+    tasks.push(shellSvnCommitAssetsTask)
+  }
+
+  gulp.series(tasks)(done)
+}
+deployToWpRepoTask.displayName = 'deploy_to_wp_repo'
+
+const copyToWpRepoTask = (done) => {
+  let tasks = [
+    // copy files to build directory
+    buildTask,
+    // ensure WP repo is up to date
+    shellSvnCheckoutTask,
+    // clean the WC plugin dir
+    cleanWpTrunkTask,
+    // copy files from build to WP repo directory
+    copyWpTrunkTask
+  ]
+
+  // no need to build when part of deploy process
+  if (sake.options.deploy) {
+    tasks.shift()
+  }
+
+  gulp.series(tasks)(done)
+}
+copyToWpRepoTask.displayName = 'copy_to_wp_repo'
+
+const fetchLatestWpWcVersionsTask = (done) => {
+  log.info('Fetching latest WP and WC versions')
+
+  let requests = []
+
+  // only fetch the latest if a version is specified
+  // this allows us to set to a version that isn't yet released
+  if (!sake.options.tested_up_to_wp_version) {
+    requests.push(
+      axios.get('https://api.wordpress.org/core/version-check/1.7/')
+        .then(res => {
+          sake.options.tested_up_to_wp_version = res.data.offers[0].version
+        })
+    )
+  }
+
+  if (sake.config.platform === 'wc' && !sake.options.tested_up_to_wc_version) {
+    requests.push(
+      axios.get('https://api.wordpress.org/plugins/info/1.0/woocommerce.json')
+        .then(res => {
+          if (res.data.error) {
+            throw res.data.error
+          }
+
+          sake.options.tested_up_to_wc_version = res.data.version
+        })
+    )
+  }
+
+  axios.all(requests)
+    .then(() => done())
+    .catch(err => sake.throwDeferredError('An error occurred when fetching latest WP / WC versions: ' + err.toString()))
+}
+fetchLatestWpWcVersionsTask.displayName = 'fetch_latest_wp_wc_versions'
+
 export {
   deployTask,
   deployPreflightTask,
   deployValidateFrameworkVersionTask,
-  searchWtUpdateKeyTask
-}
-
-module.exports = (gulp, plugins, sake) => {
-
-
-
-  // internal task for replacing version and date when deploying
-  gulp.task('replace:version', () => {
-    if (!sake.getVersionBump()) {
-      sake.throwError('No version replacement specified')
-    }
-
-    const versions = sake.getPrereleaseVersions(sake.getPluginVersion())
-    const versionReplacements = versions.map(version => {
-      return { match: version, replacement: () => sake.getVersionBump() }
-    })
-
-    const filterChangelog = plugins.filter('**/{readme.md,readme.txt,changelog.txt}', { restore: true })
-    const date = dateFormat(new Date(), 'yyyy.mm.dd')
-
-    let paths = [
-      `${sake.config.paths.src}/**/*.php`,
-      `${sake.config.paths.src}/readme.md`,
-      `${sake.config.paths.src}/readme.txt`,
-      `${sake.config.paths.src}/changelog.txt`,
-      `!${sake.config.paths.src}/*.json`,
-      `!${sake.config.paths.src}/*.xml`,
-      `!${sake.config.paths.src}/*.yml`
-    ]
-
-    if (fs.existsSync(sake.config.paths.assetPaths.js)) {
-      paths.concat([
-        `${sake.config.paths.assetPaths.js}/**/*.{coffee,js}`,
-        `!${sake.config.paths.assetPaths.js}/**/*.min.js`,
-      ])
-    }
-
-    if (fs.existsSync(sake.config.paths.assetPaths.css)) {
-      paths.concat([
-        `${sake.config.paths.assetPaths.css}/**/*.scss`,
-        `${sake.config.paths.assetPaths.css}/**/*.css`,
-      ])
-    }
-
-    if (fs.existsSync(`!${sake.config.paths.src}/lib`)) {
-      paths.push(`!${sake.config.paths.src}/lib/**`)
-    }
-
-    if (fs.existsSync(`!${sake.config.paths.src}/vendor`)) {
-      paths.push(`!${sake.config.paths.src}/vendor/**`)
-    }
-
-    if (fs.existsSync(`!${sake.config.paths.src}/tests`)) {
-      paths.push(`!${sake.config.paths.src}/tests/**`)
-    }
-
-    if (fs.existsSync(`!${sake.config.paths.src}/node_modules`)) {
-      paths.push(`!${sake.config.paths.src}/node_modules/**`)
-    }
-
-    return gulp.src(paths, { base: './', allowEmpty: true })
-      // unlike gulp-replace, gulp-replace-task supports multiple replacements
-      .pipe(plugins.replaceTask({ patterns: versionReplacements, usePrefix: false }))
-      .pipe(filterChangelog)
-      .pipe(plugins.replace(/[0-9]+\.nn\.nn/, date))
-      .pipe(filterChangelog.restore)
-      .pipe(gulp.dest('./'))
-  })
-
-  /**
-   * Grab any issues to close with the deploy
-   */
-  gulp.task('get_issues_to_close', (done) => {
-    let tasks = ['github:get_rissue']
-
-    if (sake.config.deploy.type === 'wc') {
-      tasks.push('github:get_wc_issues')
-    }
-
-    gulp.series(tasks)(done)
-  })
-
-  /**
-   * Create releases for a deploy
-   *
-   * This task is especially useful if your deploy failed before the release
-   * creating step or you need to re-create the releases for some reason
-   */
-  gulp.task('deploy_create_releases', (done) => {
-    // TODO: consider using async or similar to hide the anonymous tasks from gulp, see: https://github.com/gulpjs/gulp/issues/1143
-
-    let tasks = [
-      function (cb) {
-        sake.options.owner = sake.config.deploy.dev.owner
-        sake.options.repo = sake.config.deploy.dev.name
-        sake.options.prefix_release_tag = sake.config.multiPluginRepo
-        cb()
-      },
-      'github:create_release'
-    ]
-
-    return gulp.series(tasks)(done)
-  })
-
-  // main task for deploying the plugin after build to the production repo
-  gulp.task('deploy_to_production_repo', (done) => {
-    let tasks = []
-
-    if (sake.config.deploy.type === 'wc') {
-      tasks.push('deploy_to_wc_repo')
-    } else if (sake.config.deploy.type === 'wp') {
-      tasks.push('deploy_to_wp_repo')
-    } else {
-      log.warn(chalk.yellow('No deploy type set, skipping deploy to remote repo'))
-      return done()
-    }
-
-    gulp.series(tasks)(done)
-  })
-
-  /** WooCommerce repo related tasks ****************************************/
-
-  // deploy to WC repo
-  gulp.task('deploy_to_wc_repo', (done) => {
-    validateEnvVariables()
-
-    gulp.series('copy_to_wc_repo', 'shell:git_push_wc_repo')(done)
-  })
-
-  /**
-   * Copy to WC repo
-   *
-   * Helper task which copies files to WC repo (used by update_wc_repo)
-   *
-   * Builds the plugin, pulls chances from the WC repo, cleans the local WC
-   * repo clone, and then copies built plugin to clone
-   */
-  gulp.task('copy_to_wc_repo', (done) => {
-    validateEnvVariables()
-
-    let tasks = [
-      // copy files to build directory
-      'build',
-      // ensure WC repo is up to date
-      'shell:git_pull_wc_repo',
-      // clean the WC plugin dir
-      'clean:wc_repo',
-      // copy files from build to WC repo directory
-      'copy:wc_repo'
-    ]
-
-    // no need to build when part of deploy process
-    if (sake.options.deploy) {
-      tasks.shift()
-    }
-
-    gulp.series(tasks)(done)
-  })
-
-  // TODO: do we need this anymore?
-  /**
-   * Update WC repo
-   *
-   * Builds and copies plugin to WC repo then pushes a general "Updating {plugin name}"
-   * commit. This is not a very useful task as it was created many moons ago to allow
-   * us to quickly fix issues with the deploy (such as extra files, etc). The
-   * task remains for posterity
-   */
-  gulp.task('update_wc_repo', (done) => {
-    validateEnvVariables()
-
-    gulp.series('copy_to_wc_repo', 'shell:git_update_wc_repo')(done)
-  })
-
-  /** WP.org deploy related tasks ****************************************/
-
-  gulp.task('deploy_to_wp_repo', (done) => {
-    let tasks = ['copy_to_wp_repo', 'shell:svn_commit_trunk']
-
-    sake.options = _.merge({
-      deployTag: true,
-      deployAssets: true
-    }, sake.options)
-
-    if (sake.options.deployTag) {
-      tasks.push('copy:wp_tag')
-      tasks.push('shell:svn_commit_tag')
-    }
-
-    if (sake.options.deployAssets) {
-      tasks.push('clean:wp_assets')
-      tasks.push('copy:wp_assets')
-      tasks.push('shell:svn_commit_assets')
-    }
-
-    gulp.series(tasks)(done)
-  })
-
-  gulp.task('copy_to_wp_repo', (done) => {
-    let tasks = [
-      // copy files to build directory
-      'build',
-      // ensure WP repo is up to date
-      'shell:svn_checkout',
-      // clean the WC plugin dir
-      'clean:wp_trunk',
-      // copy files from build to WP repo directory
-      'copy:wp_trunk'
-    ]
-
-    // no need to build when part of deploy process
-    if (sake.options.deploy) {
-      tasks.shift()
-    }
-
-    gulp.series(tasks)(done)
-  })
-
-  gulp.task('fetch_latest_wp_wc_versions', (done) => {
-    log.info('Fetching latest WP and WC versions')
-
-    let requests = []
-
-    // only fetch the latest if a version is specified
-    // this allows us to set to a version that isn't yet released
-    if (!sake.options.tested_up_to_wp_version) {
-      requests.push(
-        axios.get('https://api.wordpress.org/core/version-check/1.7/')
-          .then(res => {
-            sake.options.tested_up_to_wp_version = res.data.offers[0].version
-          })
-      )
-    }
-
-    if (sake.config.platform === 'wc' && !sake.options.tested_up_to_wc_version) {
-      requests.push(
-        axios.get('https://api.wordpress.org/plugins/info/1.0/woocommerce.json')
-          .then(res => {
-            if (res.data.error) {
-              throw res.data.error
-            }
-
-            sake.options.tested_up_to_wc_version = res.data.version
-          })
-      )
-    }
-
-    axios.all(requests)
-      .then(() => done())
-      .catch(err => sake.throwDeferredError('An error occurred when fetching latest WP / WC versions: ' + err.toString()))
-  })
+  searchWtUpdateKeyTask,
+  replaceVersionTask,
+  getIssuesToCloseTask,
+  deployCreateReleasesTask,
+  deployToProductionRepoTask,
+  deployToWcRepoTask,
+  copyToWcRepoTask,
+  updateWcRepoTask,
+  deployToWpRepoTask,
+  copyToWpRepoTask,
+  fetchLatestWpWcVersionsTask
 }

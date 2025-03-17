@@ -5,7 +5,7 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
-import { wcDeploy } from './wc.js'
+import { wcDeployTask } from './wc.js'
 
 function filterIncrement (value) {
   if (value[1] === 'custom') {
@@ -108,7 +108,7 @@ const promptWcUploadTask = (done) => {
     message: 'Upload plugin to WooCommerce.com?'
   }]).then((answers) => {
     if (answers.upload_to_wc) {
-      gulp.series(wcDeploy)(done)
+      gulp.series(wcDeployTask)(done)
     } else {
       log.error(chalk.red('Skipped uploading to WooCommerce.com'))
       done()

@@ -4,7 +4,7 @@ import sake from '../lib/sake.js'
 import { cleanBuildTask, cleanComposerTask } from './clean.js'
 import { shellComposerInstallTask, shellComposerStatusTask } from './shell.js'
 import { compile } from './compile.js'
-import { copyBuild } from './copy.js'
+import { copyBuildTask } from './copy.js'
 
 /**
  * The main task for building the plugin:
@@ -14,7 +14,7 @@ import { copyBuild } from './copy.js'
  *  - Copies plugin files to the build directory
  */
 const buildTask = (done) => {
-  let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, 'bundle', copyBuild] // @TODO replace remaining
+  let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, 'bundle', copyBuildTask] // @TODO replace remaining
 
   if (sake.options['skip-composer']) {
     tasks = _.without(tasks, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask)
