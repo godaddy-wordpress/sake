@@ -1,7 +1,7 @@
 import webpack from 'webpack-stream';
 import fs from 'node:fs';
 import path from 'node:path';
-import dartSaas from 'sass';
+import * as dartSaas from 'sass';
 import gulpSaas from 'gulp-sass';
 import autoprefixer from 'autoprefixer';
 import gulp from 'gulp'
