@@ -29,7 +29,7 @@ import {
   shellSvnCommitTagTask,
   shellSvnCommitTrunkTask
 } from './shell.js'
-import { compressTask } from './zip.js'
+import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
@@ -105,7 +105,7 @@ const deployTask = (done) => {
     // git commit & push
     shellGitPushUpdateTask,
     // create the zip, which will be attached to the releases
-    compressTask,
+    zipTask,
     // create releases, attaching the zip
     deployCreateReleasesTask,
   ]
