@@ -15,8 +15,8 @@ import { scriptPipes } from '../pipes/scripts.js';
 import sake from '../lib/sake.js'
 import rename from 'gulp-rename'
 import { lintPhpTask } from './lint.js'
-import { minifyImages } from './imagemin.js'
-import { makepot } from './makepot.js'
+import { minifyImagesTask } from './imagemin.js'
+import { makepotTask } from './makepot.js'
 import { styles } from './styles.js'
 const sass = gulpSaas(dartSaas);
 
@@ -25,7 +25,7 @@ const sass = gulpSaas(dartSaas);
 /**
  * Compile, transpile, and minify coffee scripts
  */
-const compileCoffee = (done) => {
+const compileCoffeeTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -39,12 +39,12 @@ const compileCoffee = (done) => {
     .pipe(gulp.dest(sake.config.paths.assetPaths.js))
     .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
 }
-compileCoffee.displayName = 'compile:coffee'
+compileCoffeeTask.displayName = 'compile:coffee'
 
 /**
  * Transpile and minify JS files
  */
-const compileJs = (done) => {
+const compileJsTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -57,12 +57,12 @@ const compileJs = (done) => {
     .pipe(gulp.dest(sake.config.paths.assetPaths.js))
     .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
 }
-compileJs.displayName = 'compile:js'
+compileJsTask.displayName = 'compile:js'
 
 /**
  * This task is specific for plugins that add one or more self-contained Gutenberg blocks in their assets to be transpiled from ES6
  */
-const compileBlocks = (done) => {
+const compileBlocksTask = (done) => {
   const i18nPath = `${process.cwd()}/i18n/languages/blocks/`
   const blockPath = `${sake.config.paths.assetPaths.js}/blocks/src/`
   const blockSrc = fs.existsSync(blockPath) ? fs.readdirSync(blockPath).filter(function (file) {
@@ -104,14 +104,14 @@ const compileBlocks = (done) => {
       .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
   }
 }
-compileBlocks.displayName = 'compile:blocks'
+compileBlocksTask.displayName = 'compile:blocks'
 
 /************************** Styles */
 
 /**
  * Compile SCSS to CSS
  */
-const compileScss = (done) => {
+const compileScssTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
     return Promise.resolve()
   }
@@ -137,36 +137,36 @@ const compileScss = (done) => {
     .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
     .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream({match: '**/*.css'})))
 }
-compileScss.displayName = 'compile:scss'
+compileScssTask.displayName = 'compile:scss'
 
 /************************** Parallels */
 
 // The main task to compile scripts
-const compileScripts = gulp.parallel(compileCoffee, compileJs, compileBlocks)
+const compileScripts = gulp.parallel(compileCoffeeTask, compileJsTask, compileBlocksTask)
 compileScripts.displayName = 'compile:scripts'
 
 // The main task to compile styles
-const compileStyles = gulp.parallel(compileScss)
+const compileStyles = gulp.parallel(compileScssTask)
 compileStyles.displayName = 'compile:styles'
 
 // Compile all plugin assets
 const compile = (done) => {
   // default compile tasks
-  let tasks = [lintPhpTask, 'scripts', styles, minifyImages] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
+  let tasks = [lintPhpTask, 'scripts', styles, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
 
   // unless exclusively told not to, generate the POT file as well
   if (!sake.options.skip_pot) {
-    tasks.push(makepot)
+    tasks.push(makepotTask)
   }
 
   gulp.parallel(tasks)(done)
 }
 
 export {
-  compileCoffee,
-  compileJs,
-  compileBlocks,
-  compileScss,
+  compileCoffeeTask,
+  compileJsTask,
+  compileBlocksTask,
+  compileScssTask,
   compileScripts,
   compileStyles,
   compile

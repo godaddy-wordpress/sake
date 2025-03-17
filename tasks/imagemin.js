@@ -6,7 +6,7 @@ import gulpif from 'gulp-if'
 import sake from '../lib/sake.js'
 import browserSync from 'browser-sync'
 
-const minifyImages = (done) => {
+const minifyImagesTask = (done) => {
   if (! fs.existsSync(sake.config.paths.assetPaths.images)) {
     log.info(`The directory ${sake.config.paths.assetPaths.images} does not exist.`)
     return Promise.resolve()
@@ -18,8 +18,8 @@ const minifyImages = (done) => {
     .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream()))
 }
 
-minifyImages.displayName = 'imagemin'
+minifyImagesTask.displayName = 'imagemin'
 
 export {
-  minifyImages
+  minifyImagesTask
 }

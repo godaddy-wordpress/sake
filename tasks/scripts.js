@@ -1,6 +1,6 @@
 import gulp from 'gulp'
 import { lintCoffeeTask, lintJsTask, lintScriptsTask } from './lint.js'
-import { compileBlocks, compileCoffee, compileJs, compileScripts } from './compile.js'
+import { compileBlocksTask, compileCoffeeTask, compileJsTask, compileScripts } from './compile.js'
 import sake from '../lib/sake.js'
 
 /**
@@ -16,16 +16,17 @@ const scripts = (done) => {
 
   gulp.series(tasks)(done)
 }
+scripts.displayName = 'scripts'
 
 /** type-specific script tasks - lints and then compiles */
 
-const scriptsCoffee = gulp.series(lintCoffeeTask, compileCoffee)
+const scriptsCoffee = gulp.series(lintCoffeeTask, compileCoffeeTask)
 scriptsCoffee.displayName = 'scripts:coffee'
 
-const scriptsJs = gulp.series(lintJsTask, compileJs)
+const scriptsJs = gulp.series(lintJsTask, compileJsTask)
 scriptsJs.displayName = 'scripts:js'
 
-const scriptsBlocks = gulp.series(compileBlocks)
+const scriptsBlocks = gulp.series(compileBlocksTask)
 scriptsBlocks.displayName = 'compile:blocks'
 
 export {

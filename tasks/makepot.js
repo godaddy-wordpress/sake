@@ -2,7 +2,7 @@ import log from 'fancy-log'
 import shell from 'shelljs'
 import sake from '../lib/sake.js'
 
-const makepot = (done) => {
+const makepotTask = (done) => {
   const options = sake.config.tasks.makepot
   const domainPath = ( options.domainPath || 'i18n/languages' ) + '/' + sake.config.plugin.id + '.pot'
   const excludedPaths = ['.github/.*', 'lib/.*', 'vendor/.*', 'tests/.*', 'node_modules/.*']
@@ -22,7 +22,8 @@ const makepot = (done) => {
     done()
   }
 }
+makepotTask.displayName = 'makepot'
 
 export {
-  makepot
+  makepotTask
 }

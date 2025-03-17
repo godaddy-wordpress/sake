@@ -5,6 +5,7 @@ import { cleanBuildTask, cleanComposerTask } from './clean.js'
 import { shellComposerInstallTask, shellComposerStatusTask } from './shell.js'
 import { compile } from './compile.js'
 import { copyBuildTask } from './copy.js'
+import { bundleTask } from './bundle.js'
 
 /**
  * The main task for building the plugin:
@@ -14,7 +15,7 @@ import { copyBuildTask } from './copy.js'
  *  - Copies plugin files to the build directory
  */
 const buildTask = (done) => {
-  let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, 'bundle', copyBuildTask] // @TODO replace remaining
+  let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, bundleTask, copyBuildTask]
 
   if (sake.options['skip-composer']) {
     tasks = _.without(tasks, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask)
