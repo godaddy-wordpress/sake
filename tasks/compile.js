@@ -17,7 +17,7 @@ import rename from 'gulp-rename'
 import { lintPhpTask } from './lint.js'
 import { minifyImagesTask } from './imagemin.js'
 import { makepotTask } from './makepot.js'
-import { styles } from './styles.js'
+import { stylesTask } from './styles.js'
 const sass = gulpSaas(dartSaas);
 
 /************************** Scripts */
@@ -152,7 +152,7 @@ compileStyles.displayName = 'compile:styles'
 // Compile all plugin assets
 const compile = (done) => {
   // default compile tasks
-  let tasks = [lintPhpTask, 'scripts', styles, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
+  let tasks = [lintPhpTask, 'scripts', stylesTask, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
 
   // unless exclusively told not to, generate the POT file as well
   if (!sake.options.skip_pot) {

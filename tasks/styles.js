@@ -3,7 +3,7 @@ import sake from '../lib/sake.js'
 import { lintStylesTask } from './lint.js'
 import { compileStyles } from './compile.js'
 
-const styles = (done) => {
+const stylesTask = (done) => {
   let tasks = [lintStylesTask, compileStyles]
 
   // don't lint styles if they have already been linted, unless we're watching
@@ -13,7 +13,8 @@ const styles = (done) => {
 
   gulp.series(tasks)(done)
 }
+stylesTask.displayName = 'styles'
 
 export {
-  styles
+  stylesTask
 }

@@ -3,7 +3,7 @@ import browserSync from 'browser-sync'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 
-const watch = (done) => {
+const watchTask = (done) => {
   // start browsersync if enabled
   if (sake.config.tasks.watch.useBrowserSync) {
     let port = null
@@ -41,7 +41,8 @@ const watch = (done) => {
   // gulp.watch(`${sake.config.paths.assetPaths.images}/**.*{png,jpg,gif,svg}`, gulp.parallel('imagemin'))
   // TODO: should we also watch for changes in PHP files and regenerate POT files and reload the browser?
 }
+watchTask.displayName = 'watch'
 
 export {
-  watch
+  watchTask
 }

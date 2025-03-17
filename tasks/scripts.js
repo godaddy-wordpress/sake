@@ -6,7 +6,7 @@ import sake from '../lib/sake.js'
 /**
  * The main task
  */
-const scripts = (done) => {
+const scriptsTask = (done) => {
   let tasks = [lintScriptsTask, compileScripts]
 
   // don't lint styles if they have already been linted, unless we're watching
@@ -16,7 +16,7 @@ const scripts = (done) => {
 
   gulp.series(tasks)(done)
 }
-scripts.displayName = 'scripts'
+scriptsTask.displayName = 'scripts'
 
 /** type-specific script tasks - lints and then compiles */
 
@@ -30,7 +30,7 @@ const scriptsBlocks = gulp.series(compileBlocksTask)
 scriptsBlocks.displayName = 'compile:blocks'
 
 export {
-  scripts,
+  scriptsTask,
   scriptsCoffee,
   scriptsJs,
   scriptsBlocks
