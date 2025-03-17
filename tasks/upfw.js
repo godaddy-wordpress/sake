@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import dottie from 'dottie'
-import sake from '../lib/sake'
+import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import { bumpFrameworkVersionTask, bumpMinReqsTask } from './bump.js'
 import { shellComposerUpdateTask, shellUpdateFrameworkCommitTask, shellUpdateFrameworkTask } from './shell.js'
