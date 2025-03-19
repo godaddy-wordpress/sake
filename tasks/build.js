@@ -14,15 +14,14 @@ import { bundleTask } from './bundle.js'
  *  - Bundles any external dependencies to the plugin assets
  *  - Copies plugin files to the build directory
  */
-const buildTask = (done) => {
-  let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, bundleTask, copyBuildTask]
 
-  if (sake.options['skip-composer']) {
-    tasks = _.without(tasks, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask)
-  }
+let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, bundleTask, copyBuildTask]
 
-  return gulp.series(tasks)
+if (sake.options['skip-composer']) {
+  tasks = _.without(tasks, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask)
 }
+
+const buildTask = gulp.series(tasks)
 buildTask.displayName = 'build'
 
 export {
