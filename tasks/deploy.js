@@ -33,7 +33,7 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
-import { isNonInteractive } from '../helpers/arguments.js'
+import { hasGitRelease, isNonInteractive } from '../helpers/arguments.js'
 
 let validatedEnvVariables = false
 
@@ -96,7 +96,7 @@ const deployTask = (done) => {
     },
     // replace version number & date
     function (cb) {
-      if (! isNonInteractive()) {
+      if (! hasGitRelease()) {
         return replaceVersionTask()
       } else {
         return cb()
@@ -117,7 +117,7 @@ const deployTask = (done) => {
     },
     // git commit & push
     function (cb) {
-      if (! isNonInteractive()) {
+      if (! hasGitRelease()) {
         return shellGitPushUpdateTask()
       } else {
         return cb()
@@ -125,7 +125,7 @@ const deployTask = (done) => {
     },
     // create the zip, which will be attached to the releases
     zipTask,
-    // create releases, attaching the zip
+    // create the release if it doesn't already exist, and attach the zip
     deployCreateReleasesTask,
   ]
 
