@@ -61,7 +61,9 @@ cleanPrereleaseTask.displayName = 'clean:prerelease'
 const cleanWpTrunkTask = (done) => {
   return del([
     path.join(sake.getProductionRepoPath(), 'trunk')
-  ])
+  ], {
+    force: true // required to allow deleting outside of current working directory
+  })
 }
 cleanWpTrunkTask.displayName = 'clean:wp_trunk'
 
@@ -71,7 +73,9 @@ cleanWpTrunkTask.displayName = 'clean:wp_trunk'
 const cleanWpAssetsTask = (done) => {
   return del([
     path.join(sake.getProductionRepoPath(), 'assets')
-  ])
+  ], {
+    force: true // required to allow deleting outside of current working directory
+  })
 }
 cleanWpAssetsTask.displayName = 'clean:wp_assets'
 
