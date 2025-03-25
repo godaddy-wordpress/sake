@@ -17,7 +17,7 @@ import {
   gitHubCreateDocsIssueTask,
   gitHubCreateReleaseTask,
   gitHubGetReleaseIssueTask,
-  gitHubGetWcIssuesTask
+  gitHubGetWcIssuesTask, gitHubUploadZipToReleaseTask
 } from './github.js'
 import {
   shellGitEnsureCleanWorkingCopyTask,
@@ -33,6 +33,7 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
+import { isNonInteractive } from '../helpers/arguments.js'
 
 let validatedEnvVariables = false
 
@@ -79,7 +80,13 @@ const deployTask = (done) => {
     fetchLatestWpWcVersionsTask,
     bumpMinReqsTask,
     // prompt for the version to deploy as
-    promptDeployTask,
+    function (cb) {
+      if (! isNonInteractive()) {
+        return promptDeployTask()
+      } else {
+        return cb()
+      }
+    },
     function (cb) {
       if (sake.options.version === 'skip') {
         log.error(chalk.red('Deploy skipped!'))
@@ -88,7 +95,13 @@ const deployTask = (done) => {
       cb()
     },
     // replace version number & date
-    replaceVersionTask,
+    function (cb) {
+      if (! isNonInteractive()) {
+        return replaceVersionTask()
+      } else {
+        return cb()
+      }
+    },
     // delete prerelease, if any
     cleanPrereleaseTask,
     // build the plugin - compiles and copies to build dir
@@ -103,7 +116,13 @@ const deployTask = (done) => {
       cb()
     },
     // git commit & push
-    shellGitPushUpdateTask,
+    function (cb) {
+      if (! isNonInteractive()) {
+        return shellGitPushUpdateTask()
+      } else {
+        return cb()
+      }
+    },
     // create the zip, which will be attached to the releases
     zipTask,
     // create releases, attaching the zip
@@ -270,9 +289,14 @@ const deployCreateReleasesTask = (done) => {
       sake.options.repo = sake.config.deploy.dev.name
       sake.options.prefix_release_tag = sake.config.multiPluginRepo
       cb()
-    },
-    gitHubCreateReleaseTask
+    }
   ]
+
+  if (isNonInteractive()) {
+    tasks.push(gitHubUploadZipToReleaseTask)
+  } else {
+    tasks.push(gitHubCreateReleaseTask)
+  }
 
   return gulp.series(tasks)(done)
 }
