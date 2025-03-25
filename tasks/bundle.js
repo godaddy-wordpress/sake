@@ -1,85 +1,91 @@
-const log = require('fancy-log')
-const fs = require('fs')
-const path = require('path')
-const shell = require('shelljs')
+import log from 'fancy-log'
+import fs from 'node:fs'
+import path from 'node:path'
+import shell from 'shelljs'
+import sake from '../lib/sake.js'
+import gulp from 'gulp'
 
-module.exports = (gulp, plugins, sake) => {
+const processBundle = (bundleType, bundleArray, done) => {
+  // bail if no items to bundle
+  if (!bundleArray || !Array.isArray(bundleArray) || bundleArray.length === 0) {
+    log.info(`No external ${bundleType} to bundle.`)
+    done()
+    return
+  }
 
-  gulp.task('bundle', (done) => {
-    let tasks = ['bundle:scripts', 'bundle:styles']
+  log.info(`Bundling ${bundleType} dependencies.`)
 
-    if (sake?.config?.bundle) {
-      // if there are items to bundle, make sure the dependencies are installed, or bail on error
-      log.info('Installing external dependencies...')
+  // loop through each item and copy it over the designated destination folder in the local plugin file path
+  bundleArray.forEach((item) => {
+    const { source: packageName, file, destination } = item
 
-      let npmInstall = shell.exec('npm install')
+    // fetch the package name from node_modules
+    const packagePath = path.join('node_modules', packageName)
 
-      if (npmInstall.code !== 0) {
-        sake.throwError(`Error during npm install: ${result.stderr ?? 'unknown error.'}`)
-        done(result.stderr)
-      }
-    }
-
-    gulp.parallel(tasks)(done)
-  })
-
-  const processBundle = (bundleType, bundleArray, done) => {
-    // bail if no items to bundle
-    if (!bundleArray || !Array.isArray(bundleArray) || bundleArray.length === 0) {
-      log.info(`No external ${bundleType} to bundle.`)
-      done()
+    // check if the package exists
+    if (!fs.existsSync(packagePath)) {
+      sake.throwError(`Package '${packageName}' not found in node_modules.`)
+      done(`Package '${packageName}' not found in node_modules.`)
       return
     }
 
-    log.info(`Bundling ${bundleType} dependencies.`)
+    // copy the specified file to the destination path
+    const destinationFolder = path.join(destination)
+    const sourceFilePath = path.join(packagePath, file)
+    const destinationFilePath = path.join(destination, file)
 
-    // loop through each item and copy it over the designated destination folder in the local plugin file path
-    bundleArray.forEach((item) => {
-      const { source: packageName, file, destination } = item
-
-      // fetch the package name from node_modules
-      const packagePath = path.join('node_modules', packageName)
-
-      // check if the package exists
-      if (!fs.existsSync(packagePath)) {
-        sake.throwError(`Package '${packageName}' not found in node_modules.`)
-        done(`Package '${packageName}' not found in node_modules.`)
-        return
+    try {
+      // create folder if it does not exist
+      if (!fs.existsSync(destinationFolder)) {
+        fs.mkdirSync(destinationFolder, { recursive: true })
+        log.info(`Created destination folder for '${file}: '${destinationFolder}'.`)
       }
 
-      // copy the specified file to the destination path
-      const destinationFolder = path.join(destination)
-      const sourceFilePath = path.join(packagePath, file)
-      const destinationFilePath = path.join(destination, file)
+      // copy into destination folder
+      fs.copyFileSync(sourceFilePath, destinationFilePath)
+      log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
+    } catch (error) {
+      sake.throwError(`Error copying '${file}' from '${sourceFilePath}' to '${destinationFilePath}': ${error.message ?? 'unknown error.'}`)
+      done(error)
+    }
+  })
 
-      try {
-        // create folder if it does not exist
-        if (!fs.existsSync(destinationFolder)) {
-          fs.mkdirSync(destinationFolder, { recursive: true })
-          log.info(`Created destination folder for '${file}: '${destinationFolder}'.`)
-        }
+  done()
+}
 
-        // copy into destination folder
-        fs.copyFileSync(sourceFilePath, destinationFilePath)
-        log.info(`Bundled '${file}' from '${packageName}' to '${destination}'.`)
-      } catch (error) {
-        sake.throwError(`Error copying '${file}' from '${sourceFilePath}' to '${destinationFilePath}': ${error.message ?? 'unknown error.'}`)
-        done(error)
-      }
-    })
+const bundleScriptsTask = (done) => {
+  const bundle = sake?.config?.bundle
+  processBundle('scripts', bundle?.scripts, done)
+}
+bundleScriptsTask.displayName = 'bundle:scripts'
 
-    done()
+const bundleStylesTask = (done) => {
+  const bundle = sake?.config?.bundle
+  processBundle('styles', bundle?.styles, done)
+}
+bundleStylesTask.displayName = 'bundle:styles'
+
+const bundleTask = (done) => {
+  let tasks = [bundleScriptsTask, bundleStylesTask]
+
+  if (sake?.config?.bundle) {
+    // if there are items to bundle, make sure the dependencies are installed, or bail on error
+    log.info('Installing external dependencies...')
+
+    let npmInstall = shell.exec('npm install')
+
+    if (npmInstall.code !== 0) {
+      sake.throwError(`Error during npm install: ${npmInstall.stderr ?? 'unknown error.'}`)
+      done(npmInstall.stderr)
+    }
   }
 
-  gulp.task('bundle:scripts', (done) => {
-    const bundle = sake?.config?.bundle
-    const scripts = bundle?.scripts
-    processBundle('scripts', scripts, done)
-  })
+  gulp.parallel(tasks)(done)
+}
+bundleTask.displayName = 'bundle'
 
-  gulp.task('bundle:styles', (done) => {
-    const bundle = sake?.config?.bundle
-    const styles = bundle?.styles
-    processBundle('styles', styles, done)
-  })
+export {
+  bundleScriptsTask,
+  bundleStylesTask,
+  bundleTask
 }

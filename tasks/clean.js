@@ -1,58 +1,90 @@
-const path = require('path')
-const del = require('del')
+import path from 'node:path';
+import del from 'del';
+import sake from '../lib/sake.js'
 
-module.exports = (gulp, plugins, sake) => {
-  let defaultOptions = { read: false, allowEmpty: true }
+/**
+ * Clean dev directory from map files
+ */
+const cleanDevTask = (done) => {
+  return del([
+    `${sake.config.paths.src}/${sake.config.paths.assets}/**/*.map`
+  ])
+}
+cleanDevTask.displayName = 'clean:dev'
 
-  // clean dev dir from map files
-  gulp.task('clean:dev', () => {
-    return del([
-      `${sake.config.paths.src}/${sake.config.paths.assets}/**/*.map`
-    ])
+/**
+ * Clean composer packages
+ */
+const cleanComposerTask = (done) => {
+  return del([
+    `${sake.config.paths.vendor}`
+  ])
+}
+cleanComposerTask.displayName = 'clean:composer'
+
+/**
+ * Clean/empty the build directory
+ */
+const cleanBuildTask = (done) => {
+  return del([
+    `${sake.config.paths.build}/${sake.config.plugin.id}`,
+    `${sake.config.paths.build}/${sake.config.plugin.id}.*.zip`
+  ])
+}
+cleanBuildTask.displayName = 'clean:build'
+
+/**
+ * Clean the WooCommerce repo directory
+ * This will automatically exclude any dotfiles, such as the .git directory
+ */
+const cleanWcRepoTask = (done) => {
+  return del([
+    sake.getProductionRepoPath() + '**/*'
+  ])
+}
+cleanWcRepoTask.displayName = 'clean:wc_repo'
+
+/**
+ * Delete prerelease
+ */
+const cleanPrereleaseTask = (done) => {
+  return del([
+    sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
+    sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
+  ])
+}
+cleanPrereleaseTask.displayName = 'clean:prerelease'
+
+/**
+ * Clear WP repo trunk
+ */
+const cleanWpTrunkTask = (done) => {
+  return del([
+    path.join(sake.getProductionRepoPath(), 'trunk')
+  ], {
+    force: true // required to allow deleting outside of current working directory
   })
+}
+cleanWpTrunkTask.displayName = 'clean:wp_trunk'
 
-  // clean composer packages
-  gulp.task('clean:composer', () => {
-    return del([
-      `${sake.config.paths.vendor}`
-    ])
+/**
+ * Clear WP repo assets
+ */
+const cleanWpAssetsTask = (done) => {
+  return del([
+    path.join(sake.getProductionRepoPath(), 'assets')
+  ], {
+    force: true // required to allow deleting outside of current working directory
   })
+}
+cleanWpAssetsTask.displayName = 'clean:wp_assets'
 
-  // clean (empty) build dir
-  gulp.task('clean:build', () => {
-    return del([
-      `${sake.config.paths.build}/${sake.config.plugin.id}`,
-      `${sake.config.paths.build}/${sake.config.plugin.id}.*.zip`
-    ])
-  })
-
-  // clean WooCommerce repo dir
-  gulp.task('clean:wc_repo', () => {
-    // this will automatically exclude any dotfiles, such as the .git directory
-    return del([
-      sake.getProductionRepoPath() + '**/*'
-    ])
-  })
-
-  // delete prerelease
-  gulp.task('clean:prerelease', () => {
-    return del([
-      sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
-      sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
-    ])
-  })
-
-  // clear wp repo trunk
-  gulp.task('clean:wp_trunk', () => {
-    return del([
-      path.join(sake.getProductionRepoPath(), 'trunk')
-    ])
-  })
-
-  // clear wp repo trunk
-  gulp.task('clean:wp_assets', () => {
-    return del([
-      path.join(sake.getProductionRepoPath(), 'assets')
-    ])
-  })
+export {
+  cleanDevTask,
+  cleanComposerTask,
+  cleanBuildTask,
+  cleanWcRepoTask,
+  cleanPrereleaseTask,
+  cleanWpTrunkTask,
+  cleanWpAssetsTask
 }

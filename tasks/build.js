@@ -1,16 +1,29 @@
-const _ = require('lodash')
+import _ from 'lodash';
+import gulp from 'gulp'
+import sake from '../lib/sake.js'
+import { cleanBuildTask, cleanComposerTask } from './clean.js'
+import { shellComposerInstallTask, shellComposerStatusTask } from './shell.js'
+import { compile } from './compile.js'
+import { copyBuildTask } from './copy.js'
+import { bundleTask } from './bundle.js'
 
-module.exports = (gulp, plugins, sake) => {
-  // main task for building the plugin:
-  // - cleans the build directory
-  // - compiles the plugin assets (linting where necessary)
-  // - bundles any external dependencies to the plugin assets
-  // - copies plugin files to the build directory
-  let tasks = ['clean:build', 'shell:composer_status', 'clean:composer', 'shell:composer_install', 'compile', 'bundle', 'copy:build']
+/**
+ * The main task for building the plugin:
+ *  - Cleans the build directory
+ *  - Compiles the plugin assets (linting where necessary)
+ *  - Bundles any external dependencies to the plugin assets
+ *  - Copies plugin files to the build directory
+ */
 
-  if (sake.options['skip-composer']) {
-    tasks = _.without(tasks, 'shell:composer_status', 'clean:composer', 'shell:composer_install')
-  }
+let tasks = [cleanBuildTask, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask, compile, bundleTask, copyBuildTask]
 
-  gulp.task('build', gulp.series(tasks))
+if (sake.options['skip-composer']) {
+  tasks = _.without(tasks, shellComposerStatusTask, cleanComposerTask, shellComposerInstallTask)
+}
+
+const buildTask = gulp.series(tasks)
+buildTask.displayName = 'build'
+
+export {
+  buildTask
 }

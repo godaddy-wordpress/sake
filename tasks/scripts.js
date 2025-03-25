@@ -1,18 +1,37 @@
-module.exports = (gulp, plugins, sake) => {
-  // main task for (optionally) linting and compiling scripts
-  gulp.task('scripts', (done) => {
-    let tasks = ['lint:scripts', 'compile:scripts']
+import gulp from 'gulp'
+import { lintCoffeeTask, lintJsTask, lintScriptsTask } from './lint.js'
+import { compileBlocksTask, compileCoffeeTask, compileJsTask, compileScripts } from './compile.js'
+import sake from '../lib/sake.js'
 
-    // don't lint styles if they have already been linted, unless we're watching
-    if (!sake.isWatching && gulp.lastRun('lint:scripts')) {
-      tasks.shift()
-    }
+/**
+ * The main task
+ */
+const scriptsTask = (done) => {
+  let tasks = [lintScriptsTask, compileScripts]
 
-    gulp.series(tasks)(done)
-  })
+  // don't lint styles if they have already been linted, unless we're watching
+  if (! sake.isWatching && gulp.lastRun(lintScriptsTask)) {
+    tasks.shift()
+  }
 
-  // type-specific script tasks - lints and then compiles
-  gulp.task('scripts:coffee', gulp.series('lint:coffee', 'compile:coffee'))
-  gulp.task('scripts:js', gulp.series('lint:js', 'compile:js'))
-  gulp.task('scripts:blocks', gulp.series('compile:blocks'))
+  gulp.series(tasks)(done)
+}
+scriptsTask.displayName = 'scripts'
+
+/** type-specific script tasks - lints and then compiles */
+
+const scriptsCoffee = gulp.series(lintCoffeeTask, compileCoffeeTask)
+scriptsCoffee.displayName = 'scripts:coffee'
+
+const scriptsJs = gulp.series(lintJsTask, compileJsTask)
+scriptsJs.displayName = 'scripts:js'
+
+const scriptsBlocks = gulp.series(compileBlocksTask)
+scriptsBlocks.displayName = 'compile:blocks'
+
+export {
+  scriptsTask,
+  scriptsCoffee,
+  scriptsJs,
+  scriptsBlocks
 }
