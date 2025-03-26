@@ -47,7 +47,7 @@ let validatedEnvVariables = false
 function validateEnvVariables () {
   if (validatedEnvVariables) return
 
-  let variables = ['GITHUB_API_KEY']
+  let variables = ['GITHUB_API_KEY', 'TO_TEST_VALIDATION_ERRORS']
 
   if (sake.config.deploy.type === 'wc') {
     variables = variables.concat(['WC_USERNAME', 'WC_APPLICATION_PASSWORD'])
