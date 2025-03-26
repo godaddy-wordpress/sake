@@ -33,7 +33,12 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
-import { hasGitRelease, isNonInteractive } from '../helpers/arguments.js'
+import {
+  hasGitRelease,
+  isDryRunDeploy,
+  isNonInteractive,
+  withoutCodeChanges
+} from '../helpers/arguments.js'
 
 let validatedEnvVariables = false
 
@@ -61,7 +66,9 @@ function validateEnvVariables () {
 const deployTask = (done) => {
   validateEnvVariables()
 
-  if (!sake.isDeployable()) {
+  // we only validate if a release hasn't been provided to us
+  // if we are provided a release then we have to assume version numbers, etc. have already been adjusted
+  if (! hasGitRelease() && !sake.isDeployable()) {
     sake.throwError('Plugin is not deployable: \n * ' + sake.getChangelogErrors().join('\n * '))
   }
 
@@ -77,8 +84,13 @@ const deployTask = (done) => {
     // ensure version is bumped
     bumpTask,
     // fetch the latest WP/WC versions & bump the "tested up to" values
-    fetchLatestWpWcVersionsTask,
-    bumpMinReqsTask,
+    function (cb) {
+      if (withoutCodeChanges()) {
+        return cb()
+      }
+
+      return gulp.series(fetchLatestWpWcVersionsTask, bumpMinReqsTask)
+    },
     // prompt for the version to deploy as
     function (cb) {
       if (! isNonInteractive()) {
@@ -96,11 +108,11 @@ const deployTask = (done) => {
     },
     // replace version number & date
     function (cb) {
-      if (! hasGitRelease()) {
-        return replaceVersionTask()
-      } else {
+      if (withoutCodeChanges()) {
         return cb()
       }
+
+      return replaceVersionTask()
     },
     // delete prerelease, if any
     cleanPrereleaseTask,
@@ -117,24 +129,38 @@ const deployTask = (done) => {
     },
     // git commit & push
     function (cb) {
-      if (! hasGitRelease()) {
-        return shellGitPushUpdateTask()
-      } else {
+      if (withoutCodeChanges() || isDryRunDeploy()) {
         return cb()
       }
+
+      return shellGitPushUpdateTask()
     },
     // create the zip, which will be attached to the releases
     zipTask,
     // create the release if it doesn't already exist, and attach the zip
-    deployCreateReleasesTask,
+    function (cb) {
+      if (! isDryRunDeploy()) {
+        return deployCreateReleasesTask()
+      } else {
+        return cb()
+      }
+    },
   ]
 
-  if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
-    tasks.push(promptWcUploadTask)
-  }
+  if (isDryRunDeploy()) {
+    tasks.push(function(cb) {
+      log.info('Dry run deployment successful')
 
-  if (sake.config.deploy.type === 'wp') {
-    tasks.push(deployToWpRepoTask)
+      return cb()
+    })
+  } else {
+    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+      tasks.push(promptWcUploadTask)
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      tasks.push(deployToWpRepoTask)
+    }
   }
 
   // finally, create a docs issue, if necessary

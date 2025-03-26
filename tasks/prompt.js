@@ -128,7 +128,7 @@ promptWcUploadTask.displayName = 'prompt:wc_upload'
  */
 const promptTestedReleaseZipTask = (done) => {
   if (isNonInteractive()) {
-    done()
+    return done()
   }
 
   inquirer.prompt([{
