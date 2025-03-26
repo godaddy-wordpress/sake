@@ -68,7 +68,7 @@ const deployTask = (done) => {
 
   // we only validate if a release hasn't been provided to us
   // if we are provided a release then we have to assume version numbers, etc. have already been adjusted
-  if (! hasGitRelease() && !sake.isDeployable()) {
+  if (! hasGitRelease() && ! withoutCodeChanges() && !sake.isDeployable()) {
     sake.throwError('Plugin is not deployable: \n * ' + sake.getChangelogErrors().join('\n * '))
   }
 
