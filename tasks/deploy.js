@@ -139,11 +139,11 @@ const deployTask = (done) => {
     zipTask,
     // create the release if it doesn't already exist, and attach the zip
     function (cb) {
-      if (! isDryRunDeploy()) {
-        return deployCreateReleasesTask()
-      } else {
+      if (withoutCodeChanges() || isDryRunDeploy()) {
         return cb()
       }
+
+      return deployCreateReleasesTask()
     },
   ]
 
