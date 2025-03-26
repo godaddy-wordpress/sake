@@ -47,10 +47,10 @@ let validatedEnvVariables = false
 function validateEnvVariables () {
   if (validatedEnvVariables) return
 
-  let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
+  let variables = ['GITHUB_API_KEY']
 
   if (sake.config.deploy.type === 'wc') {
-    variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+    variables = variables.concat(['WC_USERNAME', 'WC_APPLICATION_PASSWORD'])
   }
 
   if (sake.config.deploy.type === 'wp') {
@@ -138,13 +138,7 @@ const deployTask = (done) => {
     // create the zip, which will be attached to the releases
     zipTask,
     // create the release if it doesn't already exist, and attach the zip
-    function (cb) {
-      if (withoutCodeChanges() || isDryRunDeploy()) {
-        return cb()
-      }
-
-      return deployCreateReleasesTask()
-    },
+    deployCreateReleasesTask
   ]
 
   if (isDryRunDeploy()) {
@@ -318,10 +312,14 @@ const deployCreateReleasesTask = (done) => {
     }
   ]
 
-  if (isNonInteractive()) {
+  if (hasGitRelease()) {
     tasks.push(gitHubUploadZipToReleaseTask)
-  } else {
+  } else if (! isDryRunDeploy()) {
     tasks.push(gitHubCreateReleaseTask)
+  } else {
+    // if it wasn't a dry run we would have created a release
+    log.info('Dry run - skipping creation of release')
+    return done()
   }
 
   return gulp.series(tasks)(done)
