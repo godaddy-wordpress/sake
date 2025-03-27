@@ -25,6 +25,16 @@ export const gitReleaseUploadUrl = () => {
 }
 
 /**
+ * Gets the name of the GitHub "release tag" to deploy.
+ * @returns {string|null}
+ */
+export const gitReleaseTag = () => {
+  const argv = minimist(process.argv.slice(2))
+
+  return argv['release-tag'] || null;
+}
+
+/**
  * Whether this is a dry run deployment. If true, the deploy will not actually happen.
  * @returns {boolean}
  */

@@ -10,7 +10,7 @@ import log from 'fancy-log'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import minimist from 'minimist';
-import { gitReleaseUploadUrl, isNonInteractive } from '../helpers/arguments.js'
+import { gitReleaseTag, gitReleaseUploadUrl, isNonInteractive } from '../helpers/arguments.js'
 
 let githubInstances = {}
 
@@ -201,7 +201,7 @@ const gitHubCreateReleaseTask = (done) => {
   let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
 
   let version = sake.getPluginVersion()
-  const [zipName, zipPath] = getZipNameAndPath()
+  const {zipName, zipPath} = getZipNameAndPath()
 
   let tasks = []
 
@@ -240,35 +240,67 @@ const gitHubCreateReleaseTask = (done) => {
 gitHubCreateReleaseTask.displayName = 'github:create_release'
 
 const gitHubUploadZipToReleaseTask = (done) => {
-  const releaseUrl = gitReleaseUploadUrl()
-
-  if (! releaseUrl) {
-    sake.throwError('No release provided')
+  if (! gitReleaseTag()) {
+    sake.throwError('No --release-tag provided.')
   }
 
-  const [zipName, zipPath] = getZipNameAndPath()
+  // why do we have to do this? lol
+  sake.options.owner = sake.config.deploy.dev.owner
+  sake.options.repo = sake.config.deploy.dev.name
 
-  log(`Uploading zip ${zipName} to release ${releaseUrl}`)
+  getGitHubReleaseFromTagName(gitReleaseTag())
+    .then(response => {
+      const releaseUploadUrl = response.data.upload_url
 
-  let tasks = []
+      const {zipName, zipPath} = getZipNameAndPath()
 
-  // prepare a zip if it doesn't already exist
-  if (! fs.existsSync(zipPath)) {
-    tasks.push(sake.options.deploy ? 'compress' : 'zip')
-  }
+      log(`Uploading zip ${zipName} to release ${releaseUploadUrl}`)
 
-  tasks.push(function (cb) {
-    uploadZipToRelease(zipPath, zipName, releaseUrl).then(() => {
-        log('Plugin zip uploaded')
-        cb()
-      }).catch((err) => {
-      sake.throwError('Uploading release ZIP failed: ' + err.toString())
+      let tasks = []
+
+      // prepare a zip if it doesn't already exist
+      if (! fs.existsSync(zipPath)) {
+        tasks.push(sake.options.deploy ? 'compress' : 'zip')
+      }
+
+      tasks.push(function (cb) {
+        uploadZipToRelease(zipPath, zipName, releaseUploadUrl).then(() => {
+          log('Plugin zip uploaded')
+          cb()
+        }).catch((err) => {
+          sake.throwError('Uploading release ZIP failed: ' + err.toString())
+        })
+      })
+
+      gulp.series(tasks)(done)
     })
-  })
-
-  gulp.series(tasks)(done)
+    .catch((err) => {
+      sake.throwError('Failed to upload zip to release: '.err.toString())
+    })
 }
 gitHubUploadZipToReleaseTask.displayName = 'github:upload_zip_to_release'
+
+/**
+ *
+ * @param {string} tagName
+ * @returns {Promise}
+ */
+function getGitHubReleaseFromTagName(tagName)
+{
+  let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
+  const owner = sake.options.owner
+  const repo = sake.options.repo || sake.config.plugin.id
+
+  if (! owner || ! repo) {
+    sake.throwError(chalk.yellow('The owner or the slug of the repo for ' + sake.getPluginName() + ' are missing.'))
+  }
+
+  return github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+    owner: owner,
+    repo: repo,
+    tag: tagName
+  })
+}
 
 function getZipNameAndPath()
 {
@@ -276,7 +308,10 @@ function getZipNameAndPath()
   let zipName = `${sake.config.plugin.id}.${version}.zip`
   let zipPath = path.join(process.cwd(), sake.config.paths.build, zipName)
 
-  return [zipName, zipPath]
+  return {
+    zipName: zipName,
+    zipPath: zipPath
+  }
 }
 
 function uploadZipToRelease(zipPath, zipName, releaseUrl)

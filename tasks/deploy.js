@@ -11,7 +11,7 @@ import replace from 'gulp-replace'
 import replaceTask from 'gulp-replace-task'
 import { promptDeployTask, promptTestedReleaseZipTask, promptWcUploadTask } from './prompt.js'
 import { bumpMinReqsTask, bumpTask } from './bump.js'
-import { cleanPrereleaseTask, cleanWcRepoTask, cleanWpAssetsTask, cleanWpTrunkTask } from './clean.js'
+import { cleanBuildTask, cleanPrereleaseTask, cleanWcRepoTask, cleanWpAssetsTask, cleanWpTrunkTask } from './clean.js'
 import { buildTask } from './build.js'
 import {
   gitHubCreateDocsIssueTask,
@@ -32,8 +32,9 @@ import {
 import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
-import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
+import { copyBuildTask, copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
 import {
+  gitReleaseTag,
   hasGitRelease,
   isDryRunDeploy,
   isNonInteractive,
@@ -59,6 +60,53 @@ function validateEnvVariables () {
 
   sake.validateEnvironmentVariables(variables)
 }
+
+/**
+ * Deploys the plugin, using a specific Git release
+ * This differs from {@see deployTask()} in that this task does NOT do any code changes to your working copy.
+ * It simply bundles up your code as-is, zips it, uploads it to the release you provided, and deploys it.
+ * It's expected that the plugin is already "fully built" at the time you run this.
+ */
+const deployFromReleaseTask = (done) => {
+  validateEnvVariables()
+
+  if (! gitReleaseTag()) {
+    sake.throwError('Missing required GitHub release tag')
+  }
+
+  // indicate that we are deploying
+  sake.options.deploy = true
+
+  let tasks = [
+    // clean the build directory
+    cleanBuildTask,
+    // copy plugin files to the build directory
+    copyBuildTask,
+    // create the zip, which will be attached to the releases
+    zipTask,
+    // upload the zip to the release,
+    gitHubUploadZipToReleaseTask
+  ]
+
+  if (isDryRunDeploy()) {
+    tasks.push(function(cb) {
+      log.info('Dry run deployment successful')
+
+      return cb()
+    })
+  } else {
+    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+      tasks.push(promptWcUploadTask)
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      tasks.push(deployToWpRepoTask)
+    }
+  }
+
+  return gulp.series(tasks)(done)
+}
+deployFromReleaseTask.displayName = 'deploy:git-release'
 
 /**
  * Deploy the plugin
@@ -491,6 +539,7 @@ const fetchLatestWpWcVersionsTask = (done) => {
 fetchLatestWpWcVersionsTask.displayName = 'fetch_latest_wp_wc_versions'
 
 export {
+  deployFromReleaseTask,
   deployTask,
   deployPreflightTask,
   deployValidateFrameworkVersionTask,
