@@ -2,6 +2,7 @@ import gulp from 'gulp'
 import { lintCoffeeTask, lintJsTask, lintScriptsTask } from './lint.js'
 import { compileBlocksTask, compileCoffeeTask, compileJsTask, compileScripts } from './compile.js'
 import sake from '../lib/sake.js'
+import { skipLinting } from '../helpers/arguments.js'
 
 /**
  * The main task
@@ -9,8 +10,8 @@ import sake from '../lib/sake.js'
 const scriptsTask = (done) => {
   let tasks = [lintScriptsTask, compileScripts]
 
-  // don't lint styles if they have already been linted, unless we're watching
-  if (! sake.isWatching && gulp.lastRun(lintScriptsTask)) {
+  // don't lint scripts if they have already been linted, unless we're watching
+  if ((! sake.isWatching && gulp.lastRun(lintScriptsTask)) || skipLinting()) {
     tasks.shift()
   }
 

@@ -43,3 +43,7 @@ export function withoutCodeChanges()
 {
   return process.argv.includes('--without-code-changes');
 }
+
+export const skipLinting = () => {
+  return process.argv.includes('--skip-linting');
+}
