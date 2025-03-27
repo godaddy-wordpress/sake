@@ -132,13 +132,7 @@ const deployTask = (done) => {
     // ensure version is bumped
     bumpTask,
     // fetch the latest WP/WC versions & bump the "tested up to" values
-    function (cb) {
-      if (withoutCodeChanges()) {
-        return cb()
-      }
-
-      return gulp.series(fetchLatestWpWcVersionsTask, bumpMinReqsTask)
-    },
+    fetchAndBumpLatestWpWcVersions,
     // prompt for the version to deploy as
     function (cb) {
       if (! isNonInteractive()) {
@@ -538,6 +532,9 @@ const fetchLatestWpWcVersionsTask = (done) => {
 }
 fetchLatestWpWcVersionsTask.displayName = 'fetch_latest_wp_wc_versions'
 
+const fetchAndBumpLatestWpWcVersions = gulp.series(fetchLatestWpWcVersionsTask, bumpMinReqsTask)
+fetchAndBumpLatestWpWcVersions.displayName = 'fetch_and_bump_latest_wp_wc_versions'
+
 export {
   deployFromReleaseTask,
   deployTask,
@@ -553,5 +550,6 @@ export {
   updateWcRepoTask,
   deployToWpRepoTask,
   copyToWpRepoTask,
-  fetchLatestWpWcVersionsTask
+  fetchLatestWpWcVersionsTask,
+  fetchAndBumpLatestWpWcVersions
 }
