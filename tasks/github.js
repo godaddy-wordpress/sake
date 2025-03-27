@@ -10,7 +10,7 @@ import log from 'fancy-log'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import minimist from 'minimist';
-import { isNonInteractive } from '../helpers/arguments.js'
+import { gitReleaseUploadUrl, isNonInteractive } from '../helpers/arguments.js'
 
 let githubInstances = {}
 
@@ -240,8 +240,7 @@ const gitHubCreateReleaseTask = (done) => {
 gitHubCreateReleaseTask.displayName = 'github:create_release'
 
 const gitHubUploadZipToReleaseTask = (done) => {
-  const argv = minimist(process.argv.slice(2))
-  const releaseUrl = argv.release || null;
+  const releaseUrl = gitReleaseUploadUrl()
 
   if (! releaseUrl) {
     sake.throwError('No release provided')

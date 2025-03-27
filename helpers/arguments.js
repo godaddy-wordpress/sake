@@ -15,10 +15,13 @@ export function isNonInteractive()
  */
 export function hasGitRelease()
 {
-  const argv = minimist(process.argv.slice(2))
-  const releaseUrl = argv.release || null;
+  return !! gitReleaseUploadUrl;
+}
 
-  return !! releaseUrl;
+export const gitReleaseUploadUrl = () => {
+  const argv = minimist(process.argv.slice(2))
+
+  return argv['release-upload-url'] || null;
 }
 
 /**
