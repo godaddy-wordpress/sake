@@ -37,7 +37,7 @@ import {
   gitReleaseTag,
   hasGitRelease,
   isDryRunDeploy,
-  isNonInteractive,
+  isNonInteractive, newPluginVersion,
   withoutCodeChanges
 } from '../helpers/arguments.js'
 
@@ -260,13 +260,15 @@ searchWtUpdateKeyTask.displayName = 'search:wt_update_key'
  * Internal task for replacing the version and date when deploying
  */
 const replaceVersionTask = (done) => {
-  if (!sake.getVersionBump()) {
+  const bumpVersion = newPluginVersion() || sake.getVersionBump()
+
+  if (!bumpVersion) {
     sake.throwError('No version replacement specified')
   }
 
   const versions = sake.getPrereleaseVersions(sake.getPluginVersion())
   const versionReplacements = versions.map(version => {
-    return { match: version, replacement: () => sake.getVersionBump() }
+    return { match: version, replacement: () => bumpVersion }
   })
 
   const filterChangelog = filter('**/{readme.md,readme.txt,changelog.txt}', { restore: true })
