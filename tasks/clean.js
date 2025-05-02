@@ -1,6 +1,7 @@
 import path from 'node:path';
 import del from 'del';
 import sake from '../lib/sake.js'
+import log from 'fancy-log';
 
 /**
  * Clean dev directory from map files
@@ -48,6 +49,11 @@ cleanWcRepoTask.displayName = 'clean:wc_repo'
  * Delete prerelease
  */
 const cleanPrereleaseTask = (done) => {
+  if (sake.getPrereleasesPath() === null) {
+    log.info('No pre-release path defined -- skipping clean')
+    return done()
+  }
+
   return del([
     sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
     sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
