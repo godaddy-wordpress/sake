@@ -44,7 +44,7 @@ function validateEnvVariables () {
   let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
 
   if (sake.config.deploy.type === 'wc') {
-    variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+    variables = variables.concat(['WC_USERNAME', 'WC_APPLICATION_PASSWORD'])
   }
 
   if (sake.config.deploy.type === 'wp') {
