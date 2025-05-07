@@ -33,6 +33,7 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
+import { isDryRunDeploy } from '../helpers/arguments.js';
 
 let validatedEnvVariables = false
 
@@ -110,12 +111,20 @@ const deployTask = (done) => {
     deployCreateReleasesTask,
   ]
 
-  if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
-    tasks.push(promptWcUploadTask)
-  }
+  if (isDryRunDeploy()) {
+    tasks.push(function(cb) {
+      log.info('Dry run deployment successful')
 
-  if (sake.config.deploy.type === 'wp') {
-    tasks.push(deployToWpRepoTask)
+      return cb()
+    })
+  } else {
+    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+      tasks.push(promptWcUploadTask)
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      tasks.push(deployToWpRepoTask)
+    }
   }
 
   // finally, create a docs issue, if necessary
