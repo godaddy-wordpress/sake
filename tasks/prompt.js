@@ -6,6 +6,7 @@ import _ from 'lodash'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import { wcDeployTask } from './wc.js'
+import { isNonInteractive } from '../helpers/arguments.js'
 
 function filterIncrement (value) {
   if (value[1] === 'custom') {
@@ -102,13 +103,21 @@ promptDeployTask.displayName = 'prompt:deploy'
  * Internal task for prompting whether to upload the plugin to WooCommerce
  */
 const promptWcUploadTask = (done) => {
+  const runWcDeployTask = () => gulp.series(wcDeployTask)(done);
+  
+  // Skip the prompt if in non-interactive mode
+  if (isNonInteractive()) {
+    log.info('Running in non-interactive mode, automatically uploading to WooCommerce.com')
+    return runWcDeployTask();
+  }
+
   inquirer.prompt([{
     type: 'confirm',
     name: 'upload_to_wc',
     message: 'Upload plugin to WooCommerce.com?'
   }]).then((answers) => {
     if (answers.upload_to_wc) {
-      gulp.series(wcDeployTask)(done)
+      runWcDeployTask();
     } else {
       log.error(chalk.red('Skipped uploading to WooCommerce.com'))
       done()
@@ -121,6 +130,12 @@ promptWcUploadTask.displayName = 'prompt:wc_upload'
  * Internal task for prompting whether the release has been tested
  */
 const promptTestedReleaseZipTask = (done) => {
+  // Skip the prompt if in non-interactive mode
+  if (isNonInteractive()) {
+    log.info('Running in non-interactive mode, skipping release zip testing confirmation')
+    return done()
+  }
+  
   inquirer.prompt([{
     type: 'confirm',
     name: 'tested_release_zip',
