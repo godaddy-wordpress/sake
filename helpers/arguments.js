@@ -13,8 +13,7 @@ export function isNonInteractive()
  * Whether this is a dry run deployment. If true, the deploy to WooCommerce will not actually happen.
  * @returns {boolean}
  */
-export function isDryRunDeploy()
-{
+export const isDryRunDeploy = () =>{
   return process.argv.includes('--dry-run');
 }
 
