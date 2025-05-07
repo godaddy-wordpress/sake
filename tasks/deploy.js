@@ -33,7 +33,7 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
-import { isDryRunDeploy } from '../helpers/arguments.js';
+import { isDryRunDeploy, isNonInteractive } from '../helpers/arguments.js';
 
 let validatedEnvVariables = false
 
@@ -127,8 +127,12 @@ const deployTask = (done) => {
     }
   }
 
-  // finally, create a docs issue, if necessary
-  tasks.push(gitHubCreateDocsIssueTask)
+  // finally, create a docs issue, if necessary, but only in interactive mode
+  if (!isNonInteractive()) {
+    tasks.push(gitHubCreateDocsIssueTask)
+  } else {
+    log.info('Running in non-interactive mode, skipping docs issue creation')
+  }
 
   return gulp.series(tasks)(done)
 }
