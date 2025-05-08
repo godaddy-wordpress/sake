@@ -46,13 +46,17 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('clean:wp_trunk', () => {
     return del([
       path.join(sake.getProductionRepoPath(), 'trunk')
-    ])
+    ], {
+      force: true // required to allow deleting outside of current working directory
+    })
   })
 
   // clear wp repo trunk
   gulp.task('clean:wp_assets', () => {
     return del([
       path.join(sake.getProductionRepoPath(), 'assets')
-    ])
+    ], {
+      force: true // required to allow deleting outside of current working directory
+    })
   })
 }
