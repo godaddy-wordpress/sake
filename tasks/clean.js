@@ -1,5 +1,6 @@
 const path = require('path')
 const del = require('del')
+const gitignore = require('gulp-gitignore')
 
 module.exports = (gulp, plugins, sake) => {
   let defaultOptions = { read: false, allowEmpty: true }
@@ -16,6 +17,10 @@ module.exports = (gulp, plugins, sake) => {
     return del([
       `${sake.config.paths.vendor}`
     ])
+  })
+
+  gulp.task('clean:gitignore', () => {
+    return del(gitignore())
   })
 
   // clean (empty) build dir
