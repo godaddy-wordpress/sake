@@ -26,4 +26,8 @@ export const newPluginVersion = () => {
     const argv = minimist(process.argv.slice(2))
   
     return argv['new-version'] || null;
-  }
+}
+
+export const skipLinting = () => {
+  return process.argv.includes('--skip-linting');
+}
