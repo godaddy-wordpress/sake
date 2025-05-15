@@ -152,7 +152,9 @@ module.exports = (gulp, plugins, sake) => {
       })
     }
 
-    return gulp.src(paths, { base: sake.config.paths.src, allowEmpty: true })
+    // encoding: false is required because otherwise images will become corrupted
+    // @link https://github.com/gulpjs/gulp/issues/2790
+    return gulp.src(paths, { base: sake.config.paths.src, allowEmpty: true, encoding: false })
       .pipe(filter)
       .pipe(plugins.replace(/\/\*# sourceMappingURL=.*?\*\/$/mg, '')) // remove source mapping references - TODO: consider skipping sourcemaps in compilers instead when running build/deploy tasks
       .pipe(plugins.replace('\n', '')) // remove an extra line added by libsass/node-sass
