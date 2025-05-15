@@ -6,7 +6,7 @@ import _ from 'lodash'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import { wcDeployTask } from './wc.js'
-import { isNonInteractive } from '../helpers/arguments.js'
+import { isNonInteractive, newPluginVersion } from '../helpers/arguments.js'
 
 function filterIncrement (value) {
   if (value[1] === 'custom') {
@@ -40,6 +40,12 @@ function getDefault () {
  * Internal task for prompting the deploy action
  */
 const promptDeployTask = (done) => {
+  if (newPluginVersion()) {
+    log.info(`Using new version from arguments: ${newPluginVersion()}`)
+    sake.options = _.merge(sake.options, {version: newPluginVersion()})
+    return done()
+  }
+
   let currentVersion = sake.getPluginVersion()
 
   inquirer.prompt([
