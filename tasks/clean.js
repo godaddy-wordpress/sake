@@ -31,7 +31,9 @@ module.exports = (gulp, plugins, sake) => {
     // this will automatically exclude any dotfiles, such as the .git directory
     return del([
       sake.getProductionRepoPath() + '**/*'
-    ])
+    ], {
+      force: true // required to allow deleting outside of current working directory
+    })
   })
 
   // delete prerelease
@@ -39,7 +41,9 @@ module.exports = (gulp, plugins, sake) => {
     return del([
       sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
       sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
-    ])
+    ], {
+      force: true // required to allow deleting outside of current working directory
+    })
   })
 
   // clear wp repo trunk
