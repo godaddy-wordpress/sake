@@ -1,17 +1,27 @@
-module.exports = (gulp, plugins, sake) => {
-  gulp.task('compress', () => {
-    let zipDest = sake.options.zipDest || sake.config.paths.build
-    let zipFileName = sake.config.plugin.id + '.' + sake.getPluginVersion() + '.zip'
+import sake from '../lib/sake.js'
+import gulp from 'gulp'
+import zip from 'gulp-zip'
+import { buildTask } from './build.js'
 
-    sake.config.paths.zipDest = sake.resolvePath(zipDest)
+const zipTask = (done) => {
+  let zipDest = sake.options.zipDest || sake.config.paths.build
+  let zipFileName = sake.config.plugin.id + '.' + sake.getPluginVersion() + '.zip'
 
-    return gulp.src([
-      `${sake.config.paths.build}/${sake.config.plugin.id}/**`,
-      `!${sake.config.paths.build}/${sake.config.plugin.id}/**/*.zip`
-    ], { nodir: true, base: sake.config.paths.build, encoding: false }) // exclude empty directories, include plugin dir in zip, no encoding because it breaks images
-      .pipe(plugins.zip(zipFileName))
-      .pipe(gulp.dest(sake.config.paths.zipDest))
-  })
+  sake.config.paths.zipDest = sake.resolvePath(zipDest)
 
-  gulp.task('zip', gulp.series('build', 'compress'))
+  return gulp.src([
+    `${sake.config.paths.build}/${sake.config.plugin.id}/**`,
+    `!${sake.config.paths.build}/${sake.config.plugin.id}/**/*.zip`
+  ], { nodir: true, base: sake.config.paths.build, encoding: false }) // exclude empty directories, include plugin dir in zip, no encoding because it breaks images
+    .pipe(zip(zipFileName))
+    .pipe(gulp.dest(sake.config.paths.zipDest))
+}
+zipTask.displayName = 'compress'
+
+const buildAndZip = gulp.series(buildTask, zipTask)
+buildAndZip.displayName = 'zip'
+
+export {
+  zipTask,
+  buildAndZip
 }

@@ -1,13 +1,20 @@
-module.exports = (gulp, plugins, sake) => {
-  // main task for (optionally) linting and compiling styles
-  gulp.task('styles', (done) => {
-    let tasks = ['lint:styles', 'compile:styles']
+import gulp from 'gulp'
+import sake from '../lib/sake.js'
+import { lintStylesTask } from './lint.js'
+import { compileStyles } from './compile.js'
 
-    // don't lint styles if they have already been linted, unless we're watching
-    if (!sake.isWatching && gulp.lastRun('lint:styles')) {
-      tasks.shift()
-    }
+const stylesTask = (done) => {
+  let tasks = [lintStylesTask, compileStyles]
 
-    gulp.series(tasks)(done)
-  })
+  // don't lint styles if they have already been linted, unless we're watching
+  if (!sake.isWatching && gulp.lastRun(lintStylesTask)) {
+    tasks.shift()
+  }
+
+  gulp.series(tasks)(done)
+}
+stylesTask.displayName = 'styles'
+
+export {
+  stylesTask
 }
