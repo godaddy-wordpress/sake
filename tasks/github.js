@@ -41,7 +41,6 @@ const gitHubGetReleaseIssueTask = (done) => {
     labels: labels.join(',')
   }).then((result) => {
     if (! result.data.length) {
-      log.info('No labels found')
       done()
     } else {
       inquirer.prompt([{
