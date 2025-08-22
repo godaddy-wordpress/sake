@@ -12,7 +12,7 @@ const zipTask = (done) => {
   return gulp.src([
     `${sake.config.paths.build}/${sake.config.plugin.id}/**`,
     `!${sake.config.paths.build}/${sake.config.plugin.id}/**/*.zip`
-  ], { nodir: true, base: sake.config.paths.build }) // exclude empty directories, include plugin dir in zip
+  ], { nodir: true, base: sake.config.paths.build, encoding: false }) // exclude empty directories, include plugin dir in zip, no encoding because it breaks images
     .pipe(zip(zipFileName))
     .pipe(gulp.dest(sake.config.paths.zipDest))
 }
