@@ -34,9 +34,10 @@ module.exports = (gulp, plugins, sake) => {
       return Promise.resolve()
     }
 
+
     return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
       // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
-      .pipe(plugins.sourcemaps.init())
+      .pipe(plugins.if(!sake.isBuildTask(), plugins.sourcemaps.init()))
       // compile coffee files to JS
       .pipe(plugins.coffee({ bare: false }))
       // transpile & minify, write sourcemaps
@@ -51,9 +52,10 @@ module.exports = (gulp, plugins, sake) => {
       return Promise.resolve()
     }
 
+
     return gulp.src(sake.config.paths.assetPaths.javascriptSources)
       // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
-      .pipe(plugins.sourcemaps.init())
+      .pipe(plugins.if(!sake.isBuildTask(), plugins.sourcemaps.init()))
       // transpile & minify, write sourcemaps
       .pipe(pipes.compileJs())
       .pipe(gulp.dest(sake.config.paths.assetPaths.js))
@@ -72,7 +74,7 @@ module.exports = (gulp, plugins, sake) => {
       return Promise.resolve()
     } else {
       return gulp.src(sake.config.paths.assetPaths.blockSources)
-        .pipe(plugins.sourcemaps.init())
+        .pipe(plugins.if(!sake.isBuildTask(), plugins.sourcemaps.init()))
         .pipe(webpack({
           mode: 'production',
           entry: `${blockPath}/${blockSrc[0]}`,
@@ -121,18 +123,17 @@ module.exports = (gulp, plugins, sake) => {
       cssPlugins.push(require('cssnano')({ zindex: false }))
     }
 
+
     return gulp.src([
       `${sake.config.paths.assetPaths.css}/**/*.scss`,
       `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
     ])
-      .pipe(plugins.sourcemaps.init())
+      .pipe(plugins.if(!sake.isBuildTask(), plugins.sourcemaps.init()))
       .pipe(sass({ outputStyle: 'expanded' }))
       .pipe(plugins.postcss(cssPlugins))
       .pipe(plugins.rename({ suffix: '.min' }))
-      // ensure admin/ and frontend/ are removed from the source paths
-      // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-      .pipe(plugins.sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
-      .pipe(plugins.sourcemaps.write('.', { includeContent: false }))
+      .pipe(plugins.if(!sake.isBuildTask(), plugins.sourcemaps.mapSources((sourcePath) => '../' + sourcePath)))
+      .pipe(plugins.if(!sake.isBuildTask(), plugins.sourcemaps.write('.', { includeContent: false })))
       .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
       .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream({match: '**/*.css'})))
   })
