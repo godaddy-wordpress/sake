@@ -84,7 +84,7 @@ const wcValidateTask = (done) => {
 wcValidateTask.displayName = 'wc:validate'
 
 /**
- * Internal task the handles the zip file upload
+ * Internal task that handles the zip file upload
  */
 const wcUploadTask = (done) => {
   let version = sake.getPluginVersion()
