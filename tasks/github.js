@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import async from 'async'
 import chalk from 'chalk'
-import codename from 'codename' // @TODO check this? old was: const codename = require('codename')()
+import codename from 'codename'
 import dateFormat from 'dateformat'
 import log from 'fancy-log'
 import sake from '../lib/sake.js'
@@ -303,7 +303,7 @@ const createMilestones = (milestones, done) => {
   let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
 
   async.eachLimit(milestones, 5, function (milestone, cb) {
-    let description = codename.generate(['unique', 'alliterative', 'random'], ['adjectives', 'animals']).join(' ')
+    let description = codename().generate(['unique', 'alliterative', 'random'], ['adjectives', 'animals']).join(' ')
     let formattedDate = dateFormat(milestone.date, 'yyyy-mm-dd')
 
     github.issues.createMilestone({
