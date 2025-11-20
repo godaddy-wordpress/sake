@@ -9,7 +9,11 @@ module.exports = (gulp, plugins, sake) => {
   // compile plugin assets
   gulp.task('compile', (done) => {
     // default compile tasks
-    let tasks = ['lint:php', 'scripts', 'styles', 'imagemin']
+    let tasks = ['scripts', 'styles', 'imagemin']
+
+    if (! process.argv.includes('--skip-linting')) {
+      tasks.push('lint:php')
+    }
 
     // unless exclusively told not to, generate the POT file as well
     if (!sake.options.skip_pot) {
