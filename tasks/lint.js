@@ -6,6 +6,10 @@ module.exports = (gulp, plugins, sake) => {
   gulp.task('lint', gulp.parallel('lint:php', 'lint:scripts', 'lint:styles'))
 
   gulp.task('lint:php', (done) => {
+    if (process.argv.includes('--skip-linting')) {
+      return Promise.resolve()
+    }
+
     let paths = [
       `${sake.config.paths.src}/**/*.php`,
       `!${sake.config.paths.vendor}/**/*.php`,
@@ -39,6 +43,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint coffee
   gulp.task('lint:coffee', (done) => {
+    if (process.argv.includes('--skip-linting')) {
+      return Promise.resolve()
+    }
+
     if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
       return Promise.resolve()
     }
@@ -55,6 +63,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint plain JS
   gulp.task('lint:js', () => {
+    if (process.argv.includes('--skip-linting')) {
+      return Promise.resolve()
+    }
+
     if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
       return Promise.resolve()
     }
@@ -77,6 +89,10 @@ module.exports = (gulp, plugins, sake) => {
 
   // lint SCSS
   gulp.task('lint:scss', (done) => {
+    if (process.argv.includes('--skip-linting')) {
+      return Promise.resolve()
+    }
+
     if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
       return Promise.resolve()
     }
