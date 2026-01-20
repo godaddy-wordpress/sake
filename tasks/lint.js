@@ -12,6 +12,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const lintPhpTask = (done) => {
+  if (process.argv.includes('--skip-linting')) {
+    return Promise.resolve()
+  }
+
   let paths = [
     `${sake.config.paths.src}/**/*.php`,
     `!${sake.config.paths.vendor}/**/*.php`,
@@ -42,6 +46,10 @@ const lintPhpTask = (done) => {
 lintPhpTask.displayName = 'lint:php'
 
 const lintCoffeeTask = (done) => {
+  if (process.argv.includes('--skip-linting')) {
+    return Promise.resolve()
+  }
+
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -58,6 +66,10 @@ const lintCoffeeTask = (done) => {
 lintCoffeeTask.displayName = 'lint:coffee'
 
 const lintJsTask = (done) => {
+  if (process.argv.includes('--skip-linting')) {
+    return Promise.resolve()
+  }
+
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -77,6 +89,10 @@ const lintJsTask = (done) => {
 lintJsTask.displayName = 'lint:js'
 
 const lintScssTask = (done) => {
+  if (process.argv.includes('--skip-linting')) {
+    return Promise.resolve()
+  }
+
   if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
     return Promise.resolve()
   }
