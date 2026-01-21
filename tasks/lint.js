@@ -8,6 +8,7 @@ import coffeelint from 'gulp-coffeelint'
 import eslint from 'gulp-eslint'
 import postcss from 'gulp-postcss'
 import stylelint from 'stylelint'
+import scssSyntax from 'postcss-scss'
 import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,7 +107,7 @@ const lintScssTask = (done) => {
         configFile: stylelintConfigFile,
         failAfterError: true
       })
-    ]))
+    ], { syntax: scssSyntax }))
     // explicitly setting end and error event handlers will give us cleaner error logging
     .on('end', done)
     .on('error', done)
