@@ -27,5 +27,9 @@ const args = [
   '--cwd', process.cwd()
 ]))
 
-// fire up gulp
-spawn('node', args, { cwd: process.cwd(), stdio: 'inherit' })
+const child = spawn('node', args, { cwd: process.cwd(), stdio: 'inherit' })
+
+// we need the exit code of the child process to propagate up to the main process
+child.on('exit', function(code) {
+  process.exitCode = code
+})
