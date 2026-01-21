@@ -6,7 +6,8 @@ import sake from '../lib/sake.js'
 import phplint from 'gulp-phplint'
 import coffeelint from 'gulp-coffeelint'
 import eslint from 'gulp-eslint'
-import sassLint from 'gulp-sass-lint'
+import postcss from 'gulp-postcss'
+import stylelint from 'stylelint'
 import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -97,9 +98,15 @@ const lintScssTask = (done) => {
     return Promise.resolve()
   }
 
+  let stylelintConfigFile = sake.options['stylelint-configFile'] ? path.join(process.cwd(), sake.options['stylelint-configFile']) : path.join(__dirname, '../lib/lintfiles/.stylelintrc.json')
+
   return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
-    .pipe(sassLint())
-    .pipe(sassLint.failOnError()) // fail task on errors
+    .pipe(postcss([
+      stylelint({
+        configFile: stylelintConfigFile,
+        failAfterError: true
+      })
+    ]))
     // explicitly setting end and error event handlers will give us cleaner error logging
     .on('end', done)
     .on('error', done)

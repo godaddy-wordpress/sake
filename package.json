@@ -57,7 +57,6 @@
     "gulp-replace": "^0.6.1",
     "gulp-replace-task": "^2.0.1",
     "gulp-sass": "^5.1.0",
-    "gulp-sass-lint": "^1.4.0",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
     "gulp-wp-pot": "^2.3.2",
@@ -75,6 +74,9 @@
     "semver": "^7.7.1",
     "shelljs": "^0.8.5",
     "strip-ansi": "^7.1.0",
+    "stylelint": "^17.0.0",
+    "stylelint-config-standard-scss": "^17.0.0",
+    "stylelint-scss": "^7.0.0",
     "underscore.string": "^3.3.4",
     "undertaker-forward-reference": "^1.0.2",
     "webpack-stream": "^7.0.0"
