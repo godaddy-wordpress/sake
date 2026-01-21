@@ -9,6 +9,8 @@ import dateFormat from 'dateformat'
 import log from 'fancy-log'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
+import minimist from 'minimist';
+import { gitReleaseTag, gitReleaseUploadUrl, isNonInteractive } from '../helpers/arguments.js'
 
 let githubInstances = {}
 
@@ -130,6 +132,10 @@ gitHubGetWcIssuesTask.displayName = 'github:get_wc_issues'
  * Creates a docs issue for the plugin
  */
 const gitHubCreateDocsIssueTask = (done) => {
+  if (isNonInteractive()) {
+    return done()
+  }
+
   if (! sake.config.deploy.docs) {
     log.warn(chalk.yellow('No docs repo configured for ' + sake.getPluginName() + ', skipping'))
     return done()
@@ -194,8 +200,8 @@ const gitHubCreateReleaseTask = (done) => {
   let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
 
   let version = sake.getPluginVersion()
-  let zipName = `${sake.config.plugin.id}.${version}.zip`
-  let zipPath = path.join(process.cwd(), sake.config.paths.build, zipName)
+  const {zipName, zipPath} = getZipNameAndPath()
+
   let tasks = []
 
   // prepare a zip if it doesn't already exist
@@ -217,17 +223,9 @@ const gitHubCreateReleaseTask = (done) => {
 
       sake.options.release_url = result.data.html_url
 
-      github.repos.uploadReleaseAsset({
-        url: result.data.upload_url,
-        name: zipName,
-        data: fs.readFileSync(zipPath),
-        headers: {
-          'content-type': 'application/zip',
-          'content-length': fs.statSync(zipPath).size
-        }
-      }).then(() => {
-        log('Plugin zip uploaded')
-        cb()
+      uploadZipToRelease(zipPath, zipName, result.data.upload_url).then(() => {
+          log('Plugin zip uploaded')
+          cb()
       }).catch((err) => {
         sake.throwError('Uploading release ZIP failed: ' + err.toString())
       })
@@ -239,6 +237,96 @@ const gitHubCreateReleaseTask = (done) => {
   gulp.series(tasks)(done)
 }
 gitHubCreateReleaseTask.displayName = 'github:create_release'
+
+const gitHubUploadZipToReleaseTask = (done) => {
+  if (! gitReleaseTag()) {
+    sake.throwError('No --release-tag provided.')
+  }
+
+  // why do we have to do this? lol
+  sake.options.owner = sake.config.deploy.dev.owner
+  sake.options.repo = sake.config.deploy.dev.name
+
+  getGitHubReleaseFromTagName(gitReleaseTag())
+    .then(response => {
+      const releaseUploadUrl = response.data.upload_url
+
+      const {zipName, zipPath} = getZipNameAndPath()
+
+      log(`Uploading zip ${zipName} to release ${releaseUploadUrl}`)
+
+      let tasks = []
+
+      // prepare a zip if it doesn't already exist
+      if (! fs.existsSync(zipPath)) {
+        tasks.push(sake.options.deploy ? 'compress' : 'zip')
+      }
+
+      tasks.push(function (cb) {
+        uploadZipToRelease(zipPath, zipName, releaseUploadUrl).then(() => {
+          log('Plugin zip uploaded')
+          cb()
+        }).catch((err) => {
+          sake.throwError('Uploading release ZIP failed: ' + err.toString())
+        })
+      })
+
+      gulp.series(tasks)(done)
+    })
+    .catch((err) => {
+      sake.throwError('Failed to upload zip to release: '.err.toString())
+    })
+}
+gitHubUploadZipToReleaseTask.displayName = 'github:upload_zip_to_release'
+
+/**
+ *
+ * @param {string} tagName
+ * @returns {Promise}
+ */
+function getGitHubReleaseFromTagName(tagName)
+{
+  let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
+  const owner = sake.options.owner
+  const repo = sake.options.repo || sake.config.plugin.id
+
+  if (! owner || ! repo) {
+    sake.throwError(chalk.yellow('The owner or the slug of the repo for ' + sake.getPluginName() + ' are missing.'))
+  }
+
+  return github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+    owner: owner,
+    repo: repo,
+    tag: tagName
+  })
+}
+
+function getZipNameAndPath()
+{
+  let version = sake.getPluginVersion()
+  let zipName = `${sake.config.plugin.id}.${version}.zip`
+  let zipPath = path.join(process.cwd(), sake.config.paths.build, zipName)
+
+  return {
+    zipName: zipName,
+    zipPath: zipPath
+  }
+}
+
+function uploadZipToRelease(zipPath, zipName, releaseUrl)
+{
+  let github = getGithub(sake.options.owner === sake.config.deploy.production.owner ? 'production' : 'dev')
+
+  return github.repos.uploadReleaseAsset({
+    url: releaseUrl,
+    name: zipName,
+    data: fs.readFileSync(zipPath),
+    headers: {
+      'content-type': 'application/zip',
+      'content-length': fs.statSync(zipPath).size
+    }
+  })
+}
 
 /**
  * Create release milestones for each Tuesday
@@ -336,6 +424,7 @@ export {
   gitHubGetWcIssuesTask,
   gitHubCreateDocsIssueTask,
   gitHubCreateReleaseTask,
+  gitHubUploadZipToReleaseTask,
   gitHubCreateReleaseMilestonesTask,
   gitHubCreateMonthMilestonesTask
 }

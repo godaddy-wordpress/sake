@@ -18,6 +18,7 @@ import { lintPhpTask } from './lint.js'
 import { minifyImagesTask } from './imagemin.js'
 import { makepotTask } from './makepot.js'
 import { stylesTask } from './styles.js'
+import { skipLinting } from '../helpers/arguments.js'
 const sass = gulpSaas(dartSaas);
 
 /************************** Scripts */
@@ -152,7 +153,12 @@ compileStyles.displayName = 'compile:styles'
 // Compile all plugin assets
 const compile = (done) => {
   // default compile tasks
-  let tasks = [lintPhpTask, 'scripts', stylesTask, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
+  let tasks = ['scripts', stylesTask, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
+
+  // lint PHP unless told not to
+  if (! skipLinting()) {
+    tasks.push(lintPhpTask)
+  }
 
   // unless exclusively told not to, generate the POT file as well
   if (!sake.options.skip_pot) {

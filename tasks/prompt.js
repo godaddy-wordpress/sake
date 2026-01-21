@@ -6,6 +6,7 @@ import _ from 'lodash'
 import sake from '../lib/sake.js'
 import gulp from 'gulp'
 import { wcDeployTask } from './wc.js'
+import { isNonInteractive } from '../helpers/arguments.js'
 
 function filterIncrement (value) {
   if (value[1] === 'custom') {
@@ -102,13 +103,18 @@ promptDeployTask.displayName = 'prompt:deploy'
  * Internal task for prompting whether to upload the plugin to WooCommerce
  */
 const promptWcUploadTask = (done) => {
+  const uploadSeries = gulp.series(wcDeployTask)
+  if (isNonInteractive()) {
+    return uploadSeries(done)
+  }
+
   inquirer.prompt([{
     type: 'confirm',
     name: 'upload_to_wc',
     message: 'Upload plugin to WooCommerce.com?'
   }]).then((answers) => {
     if (answers.upload_to_wc) {
-      gulp.series(wcDeployTask)(done)
+      uploadSeries(done)
     } else {
       log.error(chalk.red('Skipped uploading to WooCommerce.com'))
       done()
@@ -121,6 +127,10 @@ promptWcUploadTask.displayName = 'prompt:wc_upload'
  * Internal task for prompting whether the release has been tested
  */
 const promptTestedReleaseZipTask = (done) => {
+  if (isNonInteractive()) {
+    return done()
+  }
+
   inquirer.prompt([{
     type: 'confirm',
     name: 'tested_release_zip',
