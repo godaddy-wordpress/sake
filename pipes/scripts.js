@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url);
 export function scriptPipes() {
   const pipes = {}
 
-  // transpile, minify and write sourcemaps
+  // transpile, minify, and conditionally write sourcemaps
   // 1. Because CoffeeScript 2 will compile to ES6, we need to use babel to transpile it to ES2015,
   // note that this will also enable us to use ES6 in our plain JS.
   // 2. When not using CoffeeScript, regular JavaScript files that may contain ES6 code will also be transpiled to ES2015 automatically.
@@ -24,10 +24,16 @@ export function scriptPipes() {
       return gulpif(sake.options.minify, uglify())
     })
     .pipe(rename, { suffix: '.min' })
-    // ensure admin/ and frontend/ are removed from the source paths
-    // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-    .pipe(sourcemaps.mapSources, (sourcePath) => '../' + sourcePath)
-    .pipe(sourcemaps.write, '.', { includeContent: false })
+    .pipe(() => {
+      // Only generate sourcemaps if not building
+      // ensure admin/ and frontend/ are removed from the source paths
+      // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
+      return gulpif(! sake.isBuildTask(), sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
+    })
+    .pipe(() => {
+      // Only write sourcemaps if not building
+      return gulpif(! sake.isBuildTask(), sourcemaps.write('.', { includeContent: false }))
+    })
 
   return pipes
 }
