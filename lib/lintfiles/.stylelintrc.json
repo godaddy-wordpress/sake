@@ -21,7 +21,6 @@
     "length-zero-no-unit": null,
     "media-feature-range-notation": null,
     "rule-empty-line-before": null,
-    "selector-pseudo-element-colon-notation": null,
     "shorthand-property-no-redundant-values": null
   }
 }
