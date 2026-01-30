@@ -40,7 +40,9 @@ cleanBuildTask.displayName = 'clean:build'
 const cleanWcRepoTask = (done) => {
   return del([
     sake.getProductionRepoPath() + '**/*'
-  ])
+  ], {
+    force: true // required to allow deleting outside of current working directory
+  })
 }
 cleanWcRepoTask.displayName = 'clean:wc_repo'
 
@@ -51,7 +53,9 @@ const cleanPrereleaseTask = (done) => {
   return del([
     sake.getPrereleasesPath() + sake.config.plugin.id + '*.zip',
     sake.getPrereleasesPath() + sake.config.plugin.id + '*.txt'
-  ])
+  ], {
+    force: true // required to allow deleting outside of current working directory
+  })
 }
 cleanPrereleaseTask.displayName = 'clean:prerelease'
 

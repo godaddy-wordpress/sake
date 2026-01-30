@@ -32,7 +32,7 @@ const compileCoffeeTask = (done) => {
   }
 
   return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
-    .pipe(sourcemaps.init())
+    .pipe(gulpif(! sake.isBuildTask(), sourcemaps.init()))
     // compile coffee files to JS
     .pipe(coffee({ bare: false }))
     // transpile & minify, write sourcemaps
@@ -52,7 +52,7 @@ const compileJsTask = (done) => {
 
   return gulp.src(sake.config.paths.assetPaths.javascriptSources)
     // plugins.if(() => sake.isWatching, plugins.newer({dest: sake.config.paths.assetPaths.js + '/**', ext: 'min.js'})),
-    .pipe(sourcemaps.init())
+    .pipe(gulpif(! sake.isBuildTask(), sourcemaps.init()))
     // transpile & minify, write sourcemaps
     .pipe(scriptPipes().compileJs())
     .pipe(gulp.dest(sake.config.paths.assetPaths.js))
@@ -74,7 +74,7 @@ const compileBlocksTask = (done) => {
     return Promise.resolve()
   } else {
     return gulp.src(sake.config.paths.assetPaths.blockSources)
-      .pipe(sourcemaps.init())
+      .pipe(gulpif(! sake.isBuildTask(), sourcemaps.init()))
       .pipe(webpack({
         mode: 'production',
         entry: `${blockPath}/${blockSrc[0]}`,
@@ -127,14 +127,12 @@ const compileScssTask = (done) => {
     `${sake.config.paths.assetPaths.css}/**/*.scss`,
     `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
   ])
-    .pipe(sourcemaps.init())
+    .pipe(gulpif(! sake.isBuildTask(), sourcemaps.init()))
     .pipe(sass({ outputStyle: 'expanded' }))
     .pipe(postcss(cssPlugins))
     .pipe(rename({ suffix: '.min' }))
-    // ensure admin/ and frontend/ are removed from the source paths
-    // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-    .pipe(sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
-    .pipe(sourcemaps.write('.', { includeContent: false }))
+    .pipe(gulpif(! sake.isBuildTask(), sourcemaps.mapSources((sourcePath) => '../' + sourcePath)))
+    .pipe(gulpif(! sake.isBuildTask(), sourcemaps.write('.', { includeContent: false })))
     .pipe(gulp.dest(`${sake.config.paths.src}/${sake.config.paths.css}`))
     .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream({match: '**/*.css'})))
 }

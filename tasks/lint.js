@@ -8,10 +8,15 @@ import coffeelint from 'gulp-coffeelint'
 import eslint from 'gulp-eslint'
 import sassLint from 'gulp-sass-lint'
 import { fileURLToPath } from 'node:url'
+import { skipLinting } from '../helpers/arguments.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const lintPhpTask = (done) => {
+  if (skipLinting) {
+    return Promise.resolve()
+  }
+
   let paths = [
     `${sake.config.paths.src}/**/*.php`,
     `!${sake.config.paths.vendor}/**/*.php`,
@@ -42,6 +47,10 @@ const lintPhpTask = (done) => {
 lintPhpTask.displayName = 'lint:php'
 
 const lintCoffeeTask = (done) => {
+  if (skipLinting) {
+    return Promise.resolve()
+  }
+
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -58,6 +67,10 @@ const lintCoffeeTask = (done) => {
 lintCoffeeTask.displayName = 'lint:coffee'
 
 const lintJsTask = (done) => {
+  if (skipLinting) {
+    return Promise.resolve()
+  }
+
   if (! fs.existsSync(sake.config.paths.assetPaths.js)) {
     return Promise.resolve()
   }
@@ -77,6 +90,10 @@ const lintJsTask = (done) => {
 lintJsTask.displayName = 'lint:js'
 
 const lintScssTask = (done) => {
+  if (skipLinting) {
+    return Promise.resolve()
+  }
+
   if (! fs.existsSync(sake.config.paths.assetPaths.css)) {
     return Promise.resolve()
   }

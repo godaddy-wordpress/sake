@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 /**
  * Converts CoffeeScripts to ES6 JavaScript without minification or further handling.
- * This command should only be run once when converting an existing plugin CoffeeScript codebase to plain SE6.
+ * This command should only be run once when converting an existing plugin CoffeeScript codebase to plain ES6.
  */
 const decaffeinateTask = (done) => {
   // use WordPress standards - overrideable by individual plugins that provide a .eslintrc file
