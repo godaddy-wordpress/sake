@@ -1,17 +1,25 @@
-const fs = require('fs')
-const log = require('fancy-log')
+import fs from 'node:fs';
+import log from 'fancy-log';
+import imagemin from 'gulp-imagemin'
+import * as gulp from 'gulp'
+import gulpif from 'gulp-if'
+import sake from '../lib/sake.js'
+import browserSync from 'browser-sync'
 
-module.exports = (gulp, plugins, sake) => {
-  // optimize images
-  gulp.task('imagemin', () => {
-    if (! fs.existsSync(sake.config.paths.assetPaths.images)) {
-      log.info(`The directory ${sake.config.paths.assetPaths.images} does not exist.`)
-      return Promise.resolve()
-    }
+const minifyImagesTask = (done) => {
+  if (! fs.existsSync(sake.config.paths.assetPaths.images)) {
+    log.info(`The directory ${sake.config.paths.assetPaths.images} does not exist.`)
+    return Promise.resolve()
+  }
 
-    return gulp.src(`${sake.config.paths.assetPaths.images}/**.*{png,jpg,gif,svg}`)
-      .pipe(plugins.imagemin())
-      .pipe(gulp.dest(sake.config.paths.assetPaths.images))
-      .pipe(plugins.if(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, plugins.browserSync.stream()))
-  })
+  return gulp.src(`${sake.config.paths.assetPaths.images}/**.*{png,jpg,gif,svg}`)
+    .pipe(imagemin())
+    .pipe(gulp.dest(sake.config.paths.assetPaths.images))
+    .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream()))
+}
+
+minifyImagesTask.displayName = 'imagemin'
+
+export {
+  minifyImagesTask
 }

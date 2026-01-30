@@ -1,31 +1,38 @@
-const lazypipe = require('lazypipe')
+import lazypipe from 'lazypipe';
+import babel from 'gulp-babel'
+import gulpif from 'gulp-if'
+import uglify from 'gulp-uglify'
+import rename from 'gulp-rename'
+import sourcemaps from 'gulp-sourcemaps'
+import sake from '../lib/sake.js'
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
-module.exports = (plugins, sake) => {
+export function scriptPipes() {
   const pipes = {}
 
-  // transpile, minify and conditionally write sourcemaps
+  // transpile, minify, and conditionally write sourcemaps
   // 1. Because CoffeeScript 2 will compile to ES6, we need to use babel to transpile it to ES2015,
   // note that this will also enable us to use ES6 in our plain JS.
   // 2. When not using CoffeeScript, regular JavaScript files that may contain ES6 code will also be transpiled to ES2015 automatically.
   // 3. We need to tell Babel to find the preset from this project, not from the current working directory,
   // see https://github.com/babel/babel-loader/issues/299#issuecomment-259713477.
-  
   pipes.compileJs = lazypipe()
-    .pipe(plugins.babel, { presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve) })
+    .pipe(babel, { presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve) })
     .pipe(() => {
       // see https://github.com/OverZealous/lazypipe#using-with-more-complex-function-arguments-such-as-gulp-if
-      return plugins.if(sake.options.minify, plugins.uglify())
+      return gulpif(sake.options.minify, uglify())
     })
-    .pipe(plugins.rename, { suffix: '.min' })
+    .pipe(rename, { suffix: '.min' })
     .pipe(() => {
       // Only generate sourcemaps if not building
       // ensure admin/ and frontend/ are removed from the source paths
       // see https://www.npmjs.com/package/gulp-sourcemaps#alter-sources-property-on-sourcemaps
-      return plugins.if(!sake.isBuildTask(), plugins.sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
+      return gulpif(! sake.isBuildTask(), sourcemaps.mapSources((sourcePath) => '../' + sourcePath))
     })
     .pipe(() => {
       // Only write sourcemaps if not building
-      return plugins.if(!sake.isBuildTask(), plugins.sourcemaps.write('.', { includeContent: false }))
+      return gulpif(! sake.isBuildTask(), sourcemaps.write('.', { includeContent: false }))
     })
 
   return pipes
