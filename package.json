@@ -64,7 +64,7 @@
     "gulp-zip": "^4.2.0",
     "inquirer": "^8.0.0",
     "lazypipe": "^1.0.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "minimist": "^1.2.8",
     "node-notifier": "^9.0.1",
     "parse-git-config": "^2.0.3",
