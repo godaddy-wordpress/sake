@@ -40,7 +40,7 @@
     "dottie": "^2.0.6",
     "eslint": "^6.2.2",
     "fancy-log": "^2.0.0",
-    "form-data": "^4.0.1",
+    "form-data": "^4.0.4",
     "gulp": "^5.0.0",
     "gulp-babel": "^8.0.0",
     "gulp-coffee": "^3.0.2",
