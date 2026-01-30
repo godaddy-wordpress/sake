@@ -99,7 +99,7 @@ const lintScssTask = (done) => {
     return Promise.resolve()
   }
 
-  let stylelintConfigFile = sake.options['stylelint-configFile'] ? path.join(process.cwd(), sake.options['stylelint-configFile']) : path.join(__dirname, '../lib/lintfiles/.stylelintrc.json')
+  let stylelintConfigFile = sake.config.tasks.lint.stylelintConfigFile ? path.join(process.cwd(), sake.config.tasks.lint.stylelintConfigFile) : path.join(__dirname, '../lib/lintfiles/.stylelintrc.json')
 
   return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
     .pipe(postcss([
