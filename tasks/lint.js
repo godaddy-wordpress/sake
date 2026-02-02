@@ -1,6 +1,7 @@
 import path from 'node:path'
 import dottie from 'dottie'
 import fs from 'node:fs'
+import log from 'fancy-log'
 import * as gulp from 'gulp'
 import sake from '../lib/sake.js'
 import phplint from 'gulp-phplint'
@@ -9,6 +10,7 @@ import eslint from 'gulp-eslint'
 import postcss from 'gulp-postcss'
 import stylelint from 'stylelint'
 import scssSyntax from 'postcss-scss'
+import gulpif from 'gulp-if'
 import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -101,13 +103,19 @@ const lintScssTask = (done) => {
 
   let stylelintConfigFile = sake.config.tasks.lint.stylelintConfigFile ? path.join(process.cwd(), sake.config.tasks.lint.stylelintConfigFile) : path.join(__dirname, '../lib/lintfiles/.stylelintrc.json')
 
+  const shouldFix = process.argv.includes('--fix')
+
+  log.info('Fixing lint errors...');
+
   return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
     .pipe(postcss([
       stylelint({
         configFile: stylelintConfigFile,
-        failAfterError: true
+        failAfterError: ! shouldFix,
+        fix: shouldFix
       })
     ], { syntax: scssSyntax }))
+    .pipe(gulpif(shouldFix, gulp.dest(sake.config.paths.assetPaths.css)))
     // explicitly setting end and error event handlers will give us cleaner error logging
     .on('end', done)
     .on('error', done)
