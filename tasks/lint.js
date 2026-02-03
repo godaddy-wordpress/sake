@@ -105,7 +105,9 @@ const lintScssTask = (done) => {
 
   const shouldFix = process.argv.includes('--fix')
 
-  log.info('Fixing lint errors...');
+  if (shouldFix) {
+    log.info('Fixing lint errors...');
+  }
 
   return gulp.src(`${sake.config.paths.assetPaths.css}/**/*.scss`)
     .pipe(postcss([
