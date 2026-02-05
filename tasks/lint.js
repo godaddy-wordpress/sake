@@ -22,9 +22,10 @@ const __dirname = path.dirname(__filename);
  * @param {Object} options - Linting options
  * @param {boolean} options.fix - Whether to auto-fix issues
  * @param {boolean} options.failOnErrors - Whether to throw on errors (default: false)
- * @param {string} options.configFile - Path to ESLint config file (optional, uses default if not provided)
+ * @param {string} options.configFile - Path to ESLint config file (optional, uses sake config or default)
  * @param {string} options.taskName - Name for logging (default: 'ESLint')
  * @returns {Promise<Object>} - Results summary with error/warning counts
+ * @note Uses sake.config.tasks.lint.eslint.excludeFiles to ignore specified file patterns
  */
 async function runESLint(filePatternsOrPaths, options = {}) {
   const {
@@ -36,8 +37,8 @@ async function runESLint(filePatternsOrPaths, options = {}) {
 
   // Resolve ESLint config file - use WordPress standards, overrideable by individual plugins
   const esLintFile = configFile ||
-    (sake.config.tasks.lint.eslintConfigFile ?
-      path.join(process.cwd(), sake.config.tasks.lint.eslintConfigFile) :
+    (sake.config.tasks.lint.eslint.configFile ?
+      path.join(process.cwd(), sake.config.tasks.lint.eslint.configFile) :
       path.join(__dirname, '../lib/lintfiles/.eslintrc.js'));
 
   const eslint = new ESLint({
@@ -54,7 +55,18 @@ async function runESLint(filePatternsOrPaths, options = {}) {
     } else {
       // Glob patterns, resolve with globby
       const { globby } = await import('globby');
-      filesToLint = await globby(Array.isArray(filePatternsOrPaths) ? filePatternsOrPaths : [filePatternsOrPaths]);
+
+      // Convert to array and add exclude patterns as negative globs
+      let patterns = Array.isArray(filePatternsOrPaths) ? filePatternsOrPaths : [filePatternsOrPaths];
+
+      // Add exclude patterns as negative globs (prefixed with !)
+      if (sake.config.tasks.lint.eslint.excludeFiles && Array.isArray(sake.config.tasks.lint.eslint.excludeFiles)) {
+        const excludePatterns = sake.config.tasks.lint.eslint.excludeFiles.map(pattern => `!${pattern}`);
+        patterns = patterns.concat(excludePatterns);
+        log.info(`Adding ${excludePatterns.length} exclude pattern(s): ${excludePatterns.join(', ')}`);
+      }
+
+      filesToLint = await globby(patterns);
     }
   } else {
     filesToLint = filePatternsOrPaths;
