@@ -12,6 +12,7 @@ import stylelint from 'stylelint'
 import scssSyntax from 'postcss-scss'
 import gulpif from 'gulp-if'
 import { fileURLToPath } from 'node:url'
+import { shouldFix, shouldSkipLinting, shouldFailOnLintErrors, shouldShowFiles } from '../helpers/arguments.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -92,7 +93,7 @@ async function runESLint(filePatternsOrPaths, options = {}) {
   }
 
   // Check for flag to just show file names
-  if (process.argv.includes('--show-files')) {
+  if (shouldShowFiles()) {
     log.info('Files with linting issues:');
     results.forEach(result => {
       if (result.errorCount > 0 || result.warningCount > 0) {
@@ -125,7 +126,7 @@ async function runESLint(filePatternsOrPaths, options = {}) {
 }
 
 const lintPhpTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (shouldSkipLinting()) {
     return Promise.resolve()
   }
 
@@ -159,7 +160,7 @@ const lintPhpTask = (done) => {
 lintPhpTask.displayName = 'lint:php'
 
 const lintCoffeeTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (shouldSkipLinting()) {
     return Promise.resolve()
   }
 
@@ -179,7 +180,7 @@ const lintCoffeeTask = (done) => {
 lintCoffeeTask.displayName = 'lint:coffee'
 
 const lintJsTask = async () => {
-  if (process.argv.includes('--skip-linting')) {
+  if (shouldSkipLinting()) {
     return Promise.resolve()
   }
 
@@ -188,13 +189,13 @@ const lintJsTask = async () => {
   }
 
   // Check for flags
-  const shouldFix = process.argv.includes('--fix')
-  const shouldFailOnErrors = process.argv.includes('--lint-errors-fail')
+  const fixFlag = shouldFix()
+  const failOnErrors = shouldFailOnLintErrors()
 
   try {
     await runESLint(sake.config.paths.assetPaths.javascriptSources, {
-      fix: shouldFix,
-      failOnErrors: shouldFailOnErrors,
+      fix: fixFlag,
+      failOnErrors: failOnErrors,
       taskName: 'JavaScript linting'
     })
   } catch (error) {
@@ -204,7 +205,7 @@ const lintJsTask = async () => {
 lintJsTask.displayName = 'lint:js'
 
 const lintScssTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (shouldSkipLinting()) {
     return Promise.resolve()
   }
 
@@ -214,9 +215,9 @@ const lintScssTask = (done) => {
 
   let stylelintConfigFile = sake.config.tasks.lint.stylelintConfigFile ? path.join(process.cwd(), sake.config.tasks.lint.stylelintConfigFile) : path.join(__dirname, '../lib/lintfiles/.stylelintrc.json')
 
-  const shouldFix = process.argv.includes('--fix')
+  const fixFlag = shouldFix()
 
-  if (shouldFix) {
+  if (fixFlag) {
     log.info('Fixing lint errors...');
   }
 
@@ -224,11 +225,11 @@ const lintScssTask = (done) => {
     .pipe(postcss([
       stylelint({
         configFile: stylelintConfigFile,
-        failAfterError: ! shouldFix,
-        fix: shouldFix
+        failAfterError: ! fixFlag,
+        fix: fixFlag
       })
     ], { syntax: scssSyntax }))
-    .pipe(gulpif(shouldFix, gulp.dest(sake.config.paths.assetPaths.css)))
+    .pipe(gulpif(fixFlag, gulp.dest(sake.config.paths.assetPaths.css)))
     // explicitly setting end and error event handlers will give us cleaner error logging
     .on('end', done)
     .on('error', done)
