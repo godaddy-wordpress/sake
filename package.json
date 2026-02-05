@@ -40,6 +40,7 @@
     "dotenv": "^16.4.7",
     "dottie": "^2.0.6",
     "eslint": "^9.39.2",
+    "eslint-plugin-jsdoc": "^62.5.2",
     "fancy-log": "^2.0.0",
     "form-data": "^4.0.4",
     "gulp": "^5.0.0",
