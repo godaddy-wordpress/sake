@@ -87,16 +87,18 @@ async function runESLint(filePatternsOrPaths, options = {}) {
 
     // Apply fixes to disk - ESLint constructor fix:true only fixes in memory!
     if (filesWithFixes.length > 0) {
+      // Count total fixable issues before applying fixes
+      const totalFixableErrors = results.reduce((sum, result) => sum + result.fixableErrorCount, 0);
+      const totalFixableWarnings = results.reduce((sum, result) => sum + result.fixableWarningCount, 0);
+      const totalFixable = totalFixableErrors + totalFixableWarnings;
+
       await ESLint.outputFixes(results);
-      log.info(`✓ Auto-fix applied to ${filesWithFixes.length} file(s)`);
+      log.info(`✓ Auto-fix applied to ${filesWithFixes.length} file(s) (${totalFixable} issue(s) fixed)`);
 
-      // Count remaining fixable issues (what couldn't be auto-fixed)
-      const remainingFixableErrors = results.reduce((sum, result) => sum + result.fixableErrorCount, 0);
-      const remainingFixableWarnings = results.reduce((sum, result) => sum + result.fixableWarningCount, 0);
-      const remainingFixable = remainingFixableErrors + remainingFixableWarnings;
-
-      if (remainingFixable > 0) {
-        log.info(`ℹ ${remainingFixable} issue(s) could not be auto-fixed and require manual fixes`);
+      // Check if there were unfixable issues originally
+      const totalIssues = results.reduce((sum, result) => sum + result.errorCount + result.warningCount, 0);
+      if (totalIssues > totalFixable) {
+        log.info('ℹ Some issues could not be auto-fixed and require manual fixes');
       }
     } else {
       log.info('ℹ No auto-fixable issues found - all errors require manual fixes');
