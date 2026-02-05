@@ -85,7 +85,6 @@ async function runESLint(filePatternsOrPaths, options = {}) {
     // Count files that had fixes applied (have 'output' property)
     const filesWithFixes = results.filter(result => result.output !== undefined);
 
-
     // Apply fixes to disk - ESLint constructor fix:true only fixes in memory!
     if (filesWithFixes.length > 0) {
       await ESLint.outputFixes(results);
