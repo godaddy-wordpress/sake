@@ -127,7 +127,7 @@ const compileScssTask = (done) => {
     `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
   ])
     .pipe(gulpif(! sake.isBuildTask(), sourcemaps.init()))
-    .pipe(sass({ outputStyle: 'expanded' }))
+    .pipe(sass({ style: 'expanded' }))
     .pipe(postcss(cssPlugins))
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulpif(! sake.isBuildTask(), sourcemaps.mapSources((sourcePath) => '../' + sourcePath)))
