@@ -17,7 +17,7 @@ const __dirname = path.dirname(__filename);
 const decaffeinateTask = (done) => {
   log.info('Starting decaffeination process...')
 
-  // Step 1: Compile CoffeeScript to JavaScript (return the stream like the original)
+  // Step 1: Compile CoffeeScript to JavaScript
   return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
     .pipe(coffee({ bare: true }))
     .pipe(gulp.dest(sake.config.paths.assetPaths.js))
