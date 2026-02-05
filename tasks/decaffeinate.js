@@ -14,46 +14,60 @@ const __dirname = path.dirname(__filename);
  * Converts CoffeeScripts to ES6 JavaScript without minification or further handling.
  * This command should only be run once when converting an existing plugin CoffeeScript codebase to plain ES6.
  */
-const decaffeinateTask = (done) => {
+const decaffeinateTask = async () => {
   log.info('Starting decaffeination process...')
 
+  // First, get the list of CoffeeScript files to convert
+  const { globby } = await import('globby')
+  const coffeeFiles = await globby([`${sake.config.paths.assetPaths.js}/**/*.coffee`])
+
+  if (coffeeFiles.length === 0) {
+    log.info('No CoffeeScript files found to convert')
+    return
+  }
+
+  log.info(`Found ${coffeeFiles.length} CoffeeScript file(s) to convert`)
+
+  // Convert .coffee paths to .js paths for linting later
+  const convertedJsFiles = coffeeFiles.map(file => file.replace(/\.coffee$/, '.js'))
+
   // Step 1: Compile CoffeeScript to JavaScript
-  return gulp.src(`${sake.config.paths.assetPaths.js}/**/*.coffee`)
-    .pipe(coffee({ bare: true }))
-    .pipe(gulp.dest(sake.config.paths.assetPaths.js))
-    .pipe(gulpif(() => sake.isWatching && sake.config.tasks.watch.useBrowserSync, browserSync.stream.apply({ match: '**/*.js' })))
-    .on('end', async () => {
-      log.info('CoffeeScript compilation completed')
+  await new Promise((resolve, reject) => {
+    gulp.src(coffeeFiles, { base: sake.config.paths.assetPaths.js })
+      .pipe(coffee({ bare: true }))
+      .pipe(gulp.dest(sake.config.paths.assetPaths.js))
+      .on('end', resolve)
+      .on('error', reject)
+  })
 
-      // Step 2: Lint and fix the generated JavaScript files
-      try {
-        log.info('Step 2: Linting and fixing generated JavaScript...')
-        const { runESLint } = await import('./lint.js')
+  log.info('CoffeeScript compilation completed')
 
-        const results = await runESLint(`${sake.config.paths.assetPaths.js}/**/*.js`, {
-          fix: true,
-          failOnErrors: false,
-          taskName: 'Decaffeination linting'
-        })
+  // Step 2: Lint and fix only the converted JavaScript files
+  try {
+    log.info(`Step 2: Linting and fixing ${convertedJsFiles.length} converted JavaScript file(s)...`)
+    const { runESLint } = await import('./lint.js')
 
-        // Provide friendly completion message
-        if (results.errorCount === 0) {
-          if (results.warningCount > 0) {
-            log.info(`✓ Decaffeination completed successfully with ${results.warningCount} warning(s).`)
-          } else {
-            log.info('✓ Decaffeination completed successfully with no linting issues.')
-          }
-        }
-
-        log.info('Decaffeination process completed successfully!')
-        done()  // Signal completion
-
-      } catch (error) {
-        log.error('ESLint step failed:', error)
-        done(error)  // Signal error
-      }
+    const results = await runESLint(convertedJsFiles, {
+      fix: true,
+      failOnErrors: false,
+      taskName: 'Decaffeination linting'
     })
-    .on('error', done)  // Pass any stream errors to done callback
+
+    // Provide friendly completion message
+    if (results.errorCount === 0) {
+      if (results.warningCount > 0) {
+        log.info(`✓ Decaffeination completed successfully with ${results.warningCount} warning(s).`)
+      } else {
+        log.info('✓ Decaffeination completed successfully with no linting issues.')
+      }
+    }
+
+    log.info('Decaffeination process completed successfully!')
+
+  } catch (error) {
+    log.error('ESLint step failed:', error)
+    throw error
+  }
 }
 decaffeinateTask.displayName = 'decaffeinate'
 
