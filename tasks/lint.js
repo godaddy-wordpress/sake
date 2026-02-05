@@ -61,7 +61,7 @@ async function runESLint(filePatternsOrPaths, options = {}) {
 
   // If no files match the patterns, skip linting
   if (filesToLint.length === 0) {
-    console.log(`No JavaScript files found to lint for ${taskName}`);
+    log.info(`No JavaScript files found to lint for ${taskName}`);
     return { errorCount: 0, warningCount: 0, fixableCount: 0 };
   }
 
@@ -76,7 +76,7 @@ async function runESLint(filePatternsOrPaths, options = {}) {
     // Apply fixes to disk - ESLint constructor fix:true only fixes in memory!
     if (filesWithFixes.length > 0) {
       await ESLint.outputFixes(results);
-      console.log(`✓ Auto-fix applied to ${filesWithFixes.length} file(s)`);
+      log.info(`✓ Auto-fix applied to ${filesWithFixes.length} file(s)`);
 
       // Count remaining fixable issues (what couldn't be auto-fixed)
       const remainingFixableErrors = results.reduce((sum, result) => sum + result.fixableErrorCount, 0);
@@ -84,19 +84,19 @@ async function runESLint(filePatternsOrPaths, options = {}) {
       const remainingFixable = remainingFixableErrors + remainingFixableWarnings;
 
       if (remainingFixable > 0) {
-        console.log(`ℹ ${remainingFixable} issue(s) could not be auto-fixed and require manual fixes`);
+        log.info(`ℹ ${remainingFixable} issue(s) could not be auto-fixed and require manual fixes`);
       }
     } else {
-      console.log('ℹ No auto-fixable issues found - all errors require manual fixes');
+      log.info('ℹ No auto-fixable issues found - all errors require manual fixes');
     }
   }
 
   // Check for flag to just show file names
   if (process.argv.includes('--show-files')) {
-    console.log('Files with linting issues:');
+    log.info('Files with linting issues:');
     results.forEach(result => {
       if (result.errorCount > 0 || result.warningCount > 0) {
-        console.log(`  ${result.filePath} (${result.errorCount} errors, ${result.warningCount} warnings)`);
+        log.info(`  ${result.filePath} (${result.errorCount} errors, ${result.warningCount} warnings)`);
       }
     });
   } else {
@@ -105,7 +105,7 @@ async function runESLint(filePatternsOrPaths, options = {}) {
     const resultText = formatter.format(results);
 
     if (resultText) {
-      console.log(resultText);
+      log.info(resultText);
     }
   }
 
@@ -118,7 +118,7 @@ async function runESLint(filePatternsOrPaths, options = {}) {
   if (errorCount > 0 && failOnErrors) {
     throw new Error(`${taskName} found ${errorCount} error(s) and ${warningCount} warning(s). Build halted due to failOnErrors setting.`);
   } else if (errorCount > 0) {
-    console.log(`ℹ ${taskName} found ${errorCount} error(s) and ${warningCount} warning(s), but continuing build. Use --lint-errors-fail to halt on errors.`);
+    log.info(`ℹ ${taskName} found ${errorCount} error(s) and ${warningCount} warning(s), but continuing build. Use --lint-errors-fail to halt on errors.`);
   }
 
   return { errorCount, warningCount, fixableCount };
