@@ -35,8 +35,8 @@ async function runESLint(filePatternsOrPaths, options = {}) {
 
   // Resolve ESLint config file - use WordPress standards, overrideable by individual plugins
   const esLintFile = configFile ||
-    (sake.options['eslint-configFile'] ?
-      path.join(process.cwd(), sake.options['eslint-configFile']) :
+    (sake.config.tasks.lint.eslintConfigFile ?
+      path.join(process.cwd(), sake.config.tasks.lint.eslintConfigFile) :
       path.join(__dirname, '../lib/lintfiles/.eslintrc.js'));
 
   const eslint = new ESLint({
