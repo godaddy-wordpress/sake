@@ -192,15 +192,11 @@ const lintJsTask = async () => {
   const fixFlag = shouldFix()
   const failOnErrors = shouldFailOnLintErrors()
 
-  try {
-    await runESLint(sake.config.paths.assetPaths.javascriptSources, {
-      fix: fixFlag,
-      failOnErrors: failOnErrors,
-      taskName: 'JavaScript linting'
-    })
-  } catch (error) {
-    throw error
-  }
+  await runESLint(sake.config.paths.assetPaths.javascriptSources, {
+    fix: fixFlag,
+    failOnErrors: failOnErrors,
+    taskName: 'JavaScript linting'
+  })
 }
 lintJsTask.displayName = 'lint:js'
 
