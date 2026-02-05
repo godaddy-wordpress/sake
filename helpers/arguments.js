@@ -28,11 +28,11 @@ const shouldSkipLinting = () => {
 }
 
 /**
- * Check if the --lint-errors-fail flag is present
+ * Check if the --fail-on-lint-errors flag is present
  * @returns {boolean}
  */
 const shouldFailOnLintErrors = () => {
-  return hasArg('--lint-errors-fail')
+  return hasArg('--fail-on-lint-errors')
 }
 
 /**
