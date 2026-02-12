@@ -12,11 +12,12 @@ import stylelint from 'stylelint'
 import scssSyntax from 'postcss-scss'
 import gulpif from 'gulp-if'
 import { fileURLToPath } from 'node:url'
+import { skipLinting } from '../helpers/arguments.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const lintPhpTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (skipLinting) {
     return Promise.resolve()
   }
 
@@ -50,7 +51,7 @@ const lintPhpTask = (done) => {
 lintPhpTask.displayName = 'lint:php'
 
 const lintCoffeeTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (skipLinting) {
     return Promise.resolve()
   }
 
@@ -70,7 +71,7 @@ const lintCoffeeTask = (done) => {
 lintCoffeeTask.displayName = 'lint:coffee'
 
 const lintJsTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (skipLinting) {
     return Promise.resolve()
   }
 
@@ -93,7 +94,7 @@ const lintJsTask = (done) => {
 lintJsTask.displayName = 'lint:js'
 
 const lintScssTask = (done) => {
-  if (process.argv.includes('--skip-linting')) {
+  if (skipLinting) {
     return Promise.resolve()
   }
 

@@ -33,6 +33,7 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
+import { isDryRunDeploy, isNonInteractive } from '../helpers/arguments.js';
 
 let validatedEnvVariables = false
 
@@ -44,7 +45,7 @@ function validateEnvVariables () {
   let variables = ['GITHUB_API_KEY', 'GITHUB_USERNAME', 'SAKE_PRE_RELEASE_PATH']
 
   if (sake.config.deploy.type === 'wc') {
-    variables = variables.concat(['WC_CONSUMER_KEY', 'WC_CONSUMER_SECRET'])
+    variables = variables.concat(['WC_USERNAME', 'WC_APPLICATION_PASSWORD'])
   }
 
   if (sake.config.deploy.type === 'wp') {
@@ -110,16 +111,28 @@ const deployTask = (done) => {
     deployCreateReleasesTask,
   ]
 
-  if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
-    tasks.push(promptWcUploadTask)
+  if (isDryRunDeploy()) {
+    tasks.push(function(cb) {
+      log.info('Dry run deployment successful')
+
+      return cb()
+    })
+  } else {
+    if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+      tasks.push(promptWcUploadTask)
+    }
+
+    if (sake.config.deploy.type === 'wp') {
+      tasks.push(deployToWpRepoTask)
+    }
   }
 
-  if (sake.config.deploy.type === 'wp') {
-    tasks.push(deployToWpRepoTask)
+  // finally, create a docs issue, if necessary, but only in interactive mode
+  if (!isNonInteractive()) {
+    tasks.push(gitHubCreateDocsIssueTask)
+  } else {
+    log.info('Running in non-interactive mode, skipping docs issue creation')
   }
-
-  // finally, create a docs issue, if necessary
-  tasks.push(gitHubCreateDocsIssueTask)
 
   return gulp.series(tasks)(done)
 }
