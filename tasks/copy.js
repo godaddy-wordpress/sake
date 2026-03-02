@@ -204,7 +204,8 @@ copyWpTrunkTask.displayName = 'copy:wp_trunk'
  * Copy files from build to WP assets folder
  */
 const copyWpAssetsTask = (done) => {
-  return gulp.src(`${sake.config.paths.wpAssets}/**/*`).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'assets')))
+  return gulp.src(`${sake.config.paths.wpAssets}/**/*`, { encoding: false })
+    .pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'assets')))
 }
 copyWpAssetsTask.displayName = 'copy:wp_assets'
 
