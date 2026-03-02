@@ -290,6 +290,8 @@ const shellSvnCommitAssetsTask = (done) => {
   let command = [
     'cd ' + path.join(sake.getProductionRepoPath(), 'assets'),
     'svn status | ' + awk + " '/^[?]/{print $2}' | xargs " + noRunIfEmpty + 'svn add',
+    'svn propset svn:mime-type image/png *.png 2>/dev/null || true',
+    'svn propset svn:mime-type image/jpeg *.jpg 2>/dev/null || true',
     'svn status | ' + awk + " '/^[!]/{print $2}' | xargs " + noRunIfEmpty + 'svn delete',
     'svn commit --force-interactive --username="' + sake.config.deploy.production.user + '" -m "' + commitMsg + '"'
   ].join(' && ')
