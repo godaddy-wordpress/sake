@@ -132,7 +132,11 @@ async function runESLint(filePatternsOrPaths, options = {}) {
   if (errorCount > 0 && failOnErrors) {
     throw new Error(`${taskName} found ${errorCount} error(s) and ${warningCount} warning(s). Build halted due to failOnErrors setting.`);
   } else if (errorCount > 0) {
-    log.info(`ℹ ${taskName} found ${errorCount} error(s) and ${warningCount} warning(s), but continuing build. Use --fail-on-lint-errors to halt on errors.`);
+    if (sake.isBuildTask()) {
+      log.info(`ℹ ${taskName} found ${errorCount} error(s) and ${warningCount} warning(s), but continuing build. Use --fail-on-lint-errors to halt on errors.`);
+    } else {
+      log.info(`ℹ ${taskName} found ${errorCount} error(s) and ${warningCount} warning(s)`);
+    }
   }
 
   return { errorCount, warningCount, fixableCount };
