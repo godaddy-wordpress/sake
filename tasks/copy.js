@@ -58,6 +58,7 @@ const copyBuildTask = (done) => {
     `!${sake.config.paths.src}/**/test.sh`,
     `!${sake.config.paths.src}/**/readme.md`,
     `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
+    `!${sake.config.paths.src}/**/phpstan.neon`,
 
     // skip tartufo files
     `!${sake.config.paths.src}/**/tool.tartufo`,
