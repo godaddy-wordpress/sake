@@ -57,6 +57,7 @@ const copyBuildTask = (done) => {
     `!${sake.config.paths.src}/**/*.iml`, // IDE configuration
     `!${sake.config.paths.src}/**/test.sh`,
     `!${sake.config.paths.src}/**/readme.md`,
+    `!${sake.config.paths.src}/**/README`, // extensionless README symlinks (e.g. singpolyma/openpgp-php)
     `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
 
     // skip tartufo files
