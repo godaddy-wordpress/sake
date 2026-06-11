@@ -175,10 +175,12 @@ const copyPrereleaseTask = (done) => {
 
   const filter = gulpFilter([`**/${filename}.txt`], { restore: true })
 
+  // encoding: false is required so the zip isn't corrupted by utf-8 round-tripping
+  // @link https://github.com/gulpjs/gulp/issues/2790
   return gulp.src([
     `${sake.config.paths.build}/${sake.config.plugin.id}*.zip`,
     `${sake.config.paths.build}/${sake.config.plugin.id}/${filename}.txt`
-  ]).pipe(filter)
+  ], { encoding: false }).pipe(filter)
     .pipe(rename({ prefix: sake.config.plugin.id + '_' }))
     .pipe(filter.restore)
     .pipe(gulp.dest(sake.getPrereleasesPath()))

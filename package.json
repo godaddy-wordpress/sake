@@ -8,10 +8,10 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/skyverge/sake.git"
+    "url": "https://github.com/godaddy-wordpress/sake.git"
   },
   "bugs": {
-    "url": "https://github.com/skyverge/sake/issues?state=open"
+    "url": "https://github.com/godaddy-wordpress/sake/issues?state=open"
   },
   "engines": {
     "node": ">=18"
