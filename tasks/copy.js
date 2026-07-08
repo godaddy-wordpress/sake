@@ -80,6 +80,7 @@ const copyBuildTask = (done) => {
     `!${sake.config.paths.src}/**/postcss.config.js`,
 
     // skip AI files
+    `!${sake.config.paths.src}/**/AGENTS.md`,
     `!${sake.config.paths.src}/**/CLAUDE.md`,
     `!${sake.config.paths.src}/**/.agents{,/**}`,
   ]
