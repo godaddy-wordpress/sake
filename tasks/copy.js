@@ -59,6 +59,7 @@ const copyBuildTask = (done) => {
     `!${sake.config.paths.src}/**/readme.md`,
     `!${sake.config.paths.src}/**/README`, // extensionless README symlinks (e.g. singpolyma/openpgp-php)
     `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
+    `!${sake.config.paths.src}/**/phpstan.neon`,
 
     // skip tartufo files
     `!${sake.config.paths.src}/**/tool.tartufo`,
@@ -78,6 +79,11 @@ const copyBuildTask = (done) => {
     // skip build config files
     `!${sake.config.paths.src}/**/sake.config.js`,
     `!${sake.config.paths.src}/**/postcss.config.js`,
+
+    // skip AI files
+    `!${sake.config.paths.src}/**/AGENTS.md`,
+    `!${sake.config.paths.src}/**/CLAUDE.md`,
+    `!${sake.config.paths.src}/**/.agents{,/**}`,
   ]
 
   if (sake.config.framework) {
