@@ -110,7 +110,7 @@ const deployTask = (done) => {
     deployCreateReleasesTask,
   ]
 
-  if (sake.config.deploy.wooId && sake.config.deploy.type === 'wc') {
+  if (sake.config.deploy.type === 'wc') {
     tasks.push(promptWcUploadTask)
   }
 
