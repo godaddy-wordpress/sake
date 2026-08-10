@@ -11,7 +11,8 @@ const wcRoot = 'https://woocommerce.com/wp-json/wc/submission/runner/v1'
 
 let apiOptions = {
   username: process.env.WC_USERNAME,
-  password: process.env.WC_APPLICATION_PASSWORD
+  password: process.env.WC_APPLICATION_PASSWORD,
+  product_id: sake.config.deploy.wooId
 }
 
 let getApiURL = (endpoint) => {
