@@ -136,10 +136,6 @@ const deployPreflightTask = (done) => {
     lintStylesTask
   ]
 
-  if (sake.config.deploy.type === 'wc') {
-    tasks.unshift(searchWtUpdateKeyTask)
-  }
-
   gulp.parallel(tasks)(done)
 }
 deployPreflightTask.displayName = 'deploy:preflight'
