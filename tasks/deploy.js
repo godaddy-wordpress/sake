@@ -136,7 +136,8 @@ const deployPreflightTask = (done) => {
     lintStylesTask
   ]
 
-  if (sake.config.deploy.type === 'wc') {
+  if (sake.config.deploy.type === 'wc' && !sake.config.deploy.wooId) {
+    log.warn(chalk.yellow('Woo Product ID not defined in sake.config.js, searching in the main plugin file.'))
     tasks.unshift(searchWtUpdateKeyTask)
   }
 
@@ -162,6 +163,10 @@ const searchWtUpdateKeyTask = (done) => {
 
     // matches " * Woo: ProductId:ProductKey" in the main plugin file PHPDoc
     const phpDocMatch = data.match(/\s*\*\s*Woo:\s*\d*:(.+)/ig)
+
+    if (phpDocMatch) {
+      log.warn(chalk.yellow('Woo Product ID found via Woo header in main plugin file. Recommended to define it in sake.config.js instead.'))
+    }
     // matches legacy woothemes_queue_update() usage in the main plugin file
     const phpFuncMatch = data.match(/woothemes_queue_update\s*\(\s*plugin_basename\s*\(\s*__FILE__\s*\)\s*,\s*'(.+)'\s*,\s*'(\d+)'\s*\);/ig)
 
