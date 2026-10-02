@@ -18,7 +18,7 @@ import { lintPhpTask } from './lint.js'
 import { minifyImagesTask } from './imagemin.js'
 import { makepotTask } from './makepot.js'
 import { stylesTask } from './styles.js'
-import { skipLinting } from '../helpers/arguments.js';
+import { shouldSkipLinting } from '../helpers/arguments.js';
 const sass = gulpSaas(dartSaas);
 
 /************************** Scripts */
@@ -128,7 +128,7 @@ const compileScssTask = (done) => {
     `!${sake.config.paths.assetPaths.css}/**/mixins.scss` // don't compile any mixins by themselves
   ])
     .pipe(gulpif(! sake.isBuildTask(), sourcemaps.init()))
-    .pipe(sass({ outputStyle: 'expanded' }))
+    .pipe(sass({ style: 'expanded' }))
     .pipe(postcss(cssPlugins))
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulpif(! sake.isBuildTask(), sourcemaps.mapSources((sourcePath) => '../' + sourcePath)))
@@ -154,7 +154,7 @@ const compile = (done) => {
   let tasks = ['scripts', stylesTask, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
 
   // lint PHP unless told not to
-  if (! skipLinting) {
+  if (! shouldSkipLinting) {
     tasks.push(lintPhpTask)
   }
 

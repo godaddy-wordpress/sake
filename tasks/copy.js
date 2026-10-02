@@ -57,7 +57,9 @@ const copyBuildTask = (done) => {
     `!${sake.config.paths.src}/**/*.iml`, // IDE configuration
     `!${sake.config.paths.src}/**/test.sh`,
     `!${sake.config.paths.src}/**/readme.md`,
+    `!${sake.config.paths.src}/**/README`, // extensionless README symlinks (e.g. singpolyma/openpgp-php)
     `!${sake.config.paths.src}/**/.{*}`, // any file starting with a dot
+    `!${sake.config.paths.src}/**/phpstan.neon`,
 
     // skip tartufo files
     `!${sake.config.paths.src}/**/tool.tartufo`,
@@ -77,6 +79,11 @@ const copyBuildTask = (done) => {
     // skip build config files
     `!${sake.config.paths.src}/**/sake.config.js`,
     `!${sake.config.paths.src}/**/postcss.config.js`,
+
+    // skip AI files
+    `!${sake.config.paths.src}/**/AGENTS.md`,
+    `!${sake.config.paths.src}/**/CLAUDE.md`,
+    `!${sake.config.paths.src}/**/.agents{,/**}`,
   ]
 
   if (sake.config.framework) {
@@ -174,10 +181,12 @@ const copyPrereleaseTask = (done) => {
 
   const filter = gulpFilter([`**/${filename}.txt`], { restore: true })
 
+  // encoding: false is required so the zip isn't corrupted by utf-8 round-tripping
+  // @link https://github.com/gulpjs/gulp/issues/2790
   return gulp.src([
     `${sake.config.paths.build}/${sake.config.plugin.id}*.zip`,
     `${sake.config.paths.build}/${sake.config.plugin.id}/${filename}.txt`
-  ]).pipe(filter)
+  ], { encoding: false }).pipe(filter)
     .pipe(rename({ prefix: sake.config.plugin.id + '_' }))
     .pipe(filter.restore)
     .pipe(gulp.dest(sake.getPrereleasesPath()))
@@ -204,7 +213,10 @@ copyWpTrunkTask.displayName = 'copy:wp_trunk'
  * Copy files from build to WP assets folder
  */
 const copyWpAssetsTask = (done) => {
-  return gulp.src(`${sake.config.paths.wpAssets}/**/*`).pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'assets')))
+  // NOTE: `encoding: false` is required to copy binary assets (e.g. images) without corruption.
+  // @link https://github.com/gulpjs/gulp/issues/2790
+  return gulp.src(`${sake.config.paths.wpAssets}/**/*`, { encoding: false })
+    .pipe(gulp.dest(path.join(sake.getProductionRepoPath(), 'assets')))
 }
 copyWpAssetsTask.displayName = 'copy:wp_assets'
 
