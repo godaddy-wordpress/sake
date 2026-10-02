@@ -154,7 +154,7 @@ const compile = (done) => {
   let tasks = ['scripts', stylesTask, minifyImagesTask] // NOTE: do not import the `scripts` constant here, otherwise it creates a circular dependency
 
   // lint PHP unless told not to
-  if (! shouldSkipLinting) {
+  if (! shouldSkipLinting()) {
     tasks.push(lintPhpTask)
   }
 
