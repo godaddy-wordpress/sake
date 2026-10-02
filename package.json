@@ -94,6 +94,9 @@
     },
     "gulp-phplint": {
       "gulp-notify": "5.0.0"
+    },
+    "imagemin": {
+      "file-type": "21.3.2"
     }
   }
 }
