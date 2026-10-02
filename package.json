@@ -20,7 +20,7 @@
     "sake": "bin/sake.js"
   },
   "dependencies": {
-    "@babel/core": "^7.5.5",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
     "@eslint/js": "^9.39.2",
