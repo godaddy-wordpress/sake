@@ -3,8 +3,9 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import shell from 'shelljs'
 import sake from '../../lib/sake.js'
-import { processBundle, bundleScriptsTask, bundleStylesTask } from '../../tasks/bundle.js'
+import { processBundle, bundleScriptsTask, bundleStylesTask, bundleTask } from '../../tasks/bundle.js'
 
 let scratchDir
 let savedCwd
@@ -131,4 +132,61 @@ test('bundleStylesTask delegates to processBundle with sake.config.bundle.styles
 
   assert.deepEqual(doneCalls, [undefined])
   assert.equal(fs.readFileSync(path.join(scratchDir, 'assets/css/vendor', 'dist.css'), 'utf8'), 'styles content')
+})
+
+// bundleTask's `gulp.parallel(tasks)(done)` call completes asynchronously (at least one
+// tick later), unlike processBundle's done calls elsewhere in this file - so these wait a
+// beat and collect every call made within that window, rather than asserting synchronously
+// right after calling the task.
+const collectDoneCalls = (task) => new Promise((resolve) => {
+  const doneCalls = []
+  task((err) => doneCalls.push(err))
+  setTimeout(() => resolve(doneCalls), 50)
+})
+
+test('bundleTask skips npm install entirely when sake.config.bundle is not set', async (t) => {
+  let execCalled = false
+  t.mock.method(shell, 'exec', () => { execCalled = true; return { code: 0 } })
+
+  const doneCalls = await collectDoneCalls(bundleTask)
+
+  assert.equal(execCalled, false)
+  assert.deepEqual(doneCalls, [undefined])
+})
+
+test('bundleTask runs npm install first when sake.config.bundle is set', async (t) => {
+  sake.config.bundle = { scripts: [] }
+
+  let capturedCommand
+  t.mock.method(shell, 'exec', (command) => {
+    capturedCommand = command
+    return { code: 0 }
+  })
+
+  const doneCalls = await collectDoneCalls(bundleTask)
+
+  assert.equal(capturedCommand, 'npm install')
+  assert.deepEqual(doneCalls, [undefined])
+})
+
+test('bundleTask reports a failed npm install via throwError, then calls done a second time regardless', async (t) => {
+  // bug: tasks/bundle.js:76-80 - when `npm install` fails, this branch calls
+  // `sake.throwError(...)` (which throws synchronously in real usage, so in practice this
+  // is unreachable) immediately followed by `done(npmInstall.stderr)`, with no `return`
+  // afterward. Execution falls through to the unconditional `gulp.parallel(tasks)(done)`
+  // below, which calls `done` a second time (with no error, once bundleScriptsTask/
+  // bundleStylesTask complete) regardless of the earlier npm install failure. Only
+  // observable with throwError mocked out, same as elsewhere in this codebase - confirmed
+  // here that `done` fires twice (`npmInstall.stderr`, then `undefined`).
+  sake.config.bundle = { scripts: [] }
+
+  t.mock.method(shell, 'exec', () => ({ code: 1, stdout: '', stderr: 'npm boom' }))
+
+  const thrownMessages = []
+  t.mock.method(sake, 'throwError', (message) => { thrownMessages.push(message) })
+
+  const doneCalls = await collectDoneCalls(bundleTask)
+
+  assert.deepEqual(thrownMessages, ['Error during npm install: npm boom'])
+  assert.deepEqual(doneCalls, ['npm boom', undefined])
 })
