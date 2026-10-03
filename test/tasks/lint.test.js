@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import log from 'fancy-log'
 import sake from '../../lib/sake.js'
 import { runESLint, lintCoffeeTask, lintScssTask } from '../../tasks/lint.js'
 
@@ -15,7 +16,13 @@ test('runESLint reports no errors or warnings for a clean file', async () => {
   assert.deepEqual(result, { errorCount: 0, warningCount: 0, fixableCount: 0 })
 })
 
-test('runESLint reports the exact error/warning counts for a broken file', async () => {
+test('runESLint reports the exact error/warning counts for a broken file', async (t) => {
+  // suppress runESLint's own stylish-formatted log output for this deliberately-broken
+  // fixture - GitHub Actions auto-annotates ESLint's default output format wherever it
+  // appears in a job's log, so without this a CI run on this test flags the intentionally
+  // broken fixture file as if it were a real lint issue in the repo
+  t.mock.method(log, 'info', () => {})
+
   const result = await runESLint([brokenFile], { taskName: 'broken-check' })
 
   // one missing-semicolon error, one eqeqeq warning, both auto-fixable
@@ -34,7 +41,10 @@ test('runESLint returns zero counts when no files match the given pattern', asyn
   assert.deepEqual(result, { errorCount: 0, warningCount: 0, fixableCount: 0 })
 })
 
-test('runESLint throws when failOnErrors is set and errors are found', async () => {
+test('runESLint throws when failOnErrors is set and errors are found', async (t) => {
+  // see the comment on the previous test for why this is suppressed
+  t.mock.method(log, 'info', () => {})
+
   await assert.rejects(
     () => runESLint([brokenFile], { taskName: 'fail-on-errors-check', failOnErrors: true }),
     /fail-on-errors-check found 1 error\(s\) and 1 warning\(s\)/
