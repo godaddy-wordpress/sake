@@ -240,6 +240,41 @@ const gitHubCreateReleaseTask = (done) => {
 }
 gitHubCreateReleaseTask.displayName = 'github:create_release'
 
+// get all tuesdays of a year
+const getTuesdays = (y) => {
+  // ensure year is an integer
+  y = parseInt(y, 10)
+
+  let d = new Date(y, 0, 1)
+  let tuesdays = []
+
+  // get the first Tuesday in January
+  d.setDate(d.getDate() + (9 - d.getDay()) % 7)
+
+  while (y === d.getFullYear()) {
+    let date = new Date(d.getTime())
+    tuesdays.push({ date: date, name: `Deploy on ${dateFormat(date, 'mm/dd')}` })
+    d.setDate(d.getDate() + 7)
+  }
+
+  return tuesdays
+}
+
+// get all months in a year
+const getMonthlyMilestones = (y) => {
+  // ensure year is an integer
+  y = parseInt(y, 10)
+
+  let months = []
+
+  for (let i = 0; i < 12; i++) {
+    let d = new Date(y, i + 1, 0)
+    months.push({ date: d, name: dateFormat(d, 'mmmm yyyy') })
+  }
+
+  return months
+}
+
 /**
  * Create release milestones for each Tuesday
  */
@@ -248,26 +283,6 @@ const gitHubCreateReleaseMilestonesTask = (done) => {
   let tuesdays = getTuesdays(year)
 
   createMilestones(tuesdays, done)
-
-  // helper function to get all tuesdays of a year
-  function getTuesdays (y) {
-    // ensure year is an integer
-    y = parseInt(y, 10)
-
-    let d = new Date(y, 0, 1)
-    let tuesdays = []
-
-    // get the first Tuesday in January
-    d.setDate(d.getDate() + (9 - d.getDay()) % 7)
-
-    while (y === d.getFullYear()) {
-      let date = new Date(d.getTime())
-      tuesdays.push({ date: date, name: `Deploy on ${dateFormat(date, 'mm/dd')}` })
-      d.setDate(d.getDate() + 7)
-    }
-
-    return tuesdays
-  }
 }
 gitHubCreateReleaseMilestonesTask.displayName = 'github:create_release_milestones'
 
@@ -278,21 +293,6 @@ const gitHubCreateMonthMilestonesTask = (done) => {
   let year = sake.options.year || new Date().getFullYear()
 
   createMilestones(getMonthlyMilestones(year), done)
-
-  // helper to get all months in a year
-  function getMonthlyMilestones (y) {
-    // ensure year is an integer
-    y = parseInt(y, 10)
-
-    let months = []
-
-    for (let i = 0; i < 12; i++) {
-      let d = new Date(y, i + 1, 0)
-      months.push({ date: d, name: dateFormat(d, 'mmmm yyyy') })
-    }
-
-    return months
-  }
 }
 gitHubCreateMonthMilestonesTask.displayName = 'github:create_month_milestones'
 
@@ -337,5 +337,8 @@ export {
   gitHubCreateDocsIssueTask,
   gitHubCreateReleaseTask,
   gitHubCreateReleaseMilestonesTask,
-  gitHubCreateMonthMilestonesTask
+  gitHubCreateMonthMilestonesTask,
+  getTuesdays,
+  getMonthlyMilestones,
+  getGithub
 }

@@ -138,5 +138,7 @@ promptTestedReleaseZipTask.displayName = 'prompt:tested_release_zip'
 export {
   promptDeployTask,
   promptWcUploadTask,
-  promptTestedReleaseZipTask
+  promptTestedReleaseZipTask,
+  filterIncrement,
+  getDefault
 }

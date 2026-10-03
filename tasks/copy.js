@@ -6,11 +6,12 @@ import rename from 'gulp-rename'
 import gulpFilter from 'gulp-filter'
 
 /**
- * Copy files from source to build
+ * Builds the list of gulp.src glob patterns (including exclusions) used by
+ * copyBuildTask, based on the current sake config. Extracted so the
+ * (fairly involved) path-construction logic can be tested directly,
+ * independent of actually running the copy itself.
  */
-const copyBuildTask = (done) => {
-  const filter = gulpFilter(['**/*.min.css', '**/*.min.js'], { restore: true })
-
+const buildCopyBuildPaths = () => {
   let paths = [
     `${sake.config.paths.src}/**/*`,
 
@@ -164,9 +165,18 @@ const copyBuildTask = (done) => {
     })
   }
 
+  return paths
+}
+
+/**
+ * Copy files from source to build
+ */
+const copyBuildTask = (done) => {
+  const filter = gulpFilter(['**/*.min.css', '**/*.min.js'], { restore: true })
+
   // encoding: false is required because otherwise images will become corrupted
   // @link https://github.com/gulpjs/gulp/issues/2790
-  return gulp.src(paths, { base: sake.config.paths.src, allowEmpty: true, encoding: false })
+  return gulp.src(buildCopyBuildPaths(), { base: sake.config.paths.src, allowEmpty: true, encoding: false })
     .pipe(filter)
     .pipe(filter.restore)
     .pipe(gulp.dest(`${sake.config.paths.build}/${sake.config.plugin.id}`))
@@ -234,5 +244,6 @@ export {
   copyWcRepoTask,
   copyWpTrunkTask,
   copyWpAssetsTask,
-  copyWpTagTask
+  copyWpTagTask,
+  buildCopyBuildPaths
 }
