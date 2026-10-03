@@ -339,5 +339,6 @@ export {
   gitHubCreateReleaseMilestonesTask,
   gitHubCreateMonthMilestonesTask,
   getTuesdays,
-  getMonthlyMilestones
+  getMonthlyMilestones,
+  getGithub
 }
