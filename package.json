@@ -17,8 +17,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "SAKE_TEST_MODE=1 node --test test/",
-    "test:watch": "SAKE_TEST_MODE=1 node --test --watch test/"
+    "test": "SAKE_TEST_MODE=1 node --test 'test/**/*.test.js'",
+    "test:watch": "SAKE_TEST_MODE=1 node --test --watch 'test/**/*.test.js'"
   },
   "bin": {
     "sake": "bin/sake.js"
