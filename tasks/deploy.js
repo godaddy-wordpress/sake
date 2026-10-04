@@ -33,7 +33,7 @@ import { zipTask } from './zip.js'
 import { validateReadmeHeadersTask } from './validate.js'
 import { lintScriptsTask, lintStylesTask } from './lint.js'
 import { copyWcRepoTask, copyWpAssetsTask, copyWpTagTask, copyWpTrunkTask } from './copy.js'
-import { isDryRunDeploy, isNonInteractive } from '../helpers/arguments.js';
+import { isDryRunDeploy, isNonInteractive, newPluginVersion } from '../helpers/arguments.js';
 
 let validatedEnvVariables = false
 
@@ -197,6 +197,12 @@ searchWtUpdateKeyTask.displayName = 'search:wt_update_key'
  * Internal task for replacing the version and date when deploying
  */
 const replaceVersionTask = (done) => {
+  // allow this task to be invoked standalone (e.g. from CI) via --new-version,
+  // without going through the full `deploy` series' promptDeployTask step
+  if (!sake.getVersionBump() && newPluginVersion()) {
+    sake.options.version = newPluginVersion()
+  }
+
   if (!sake.getVersionBump()) {
     sake.throwError('No version replacement specified')
   }

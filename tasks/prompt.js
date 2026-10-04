@@ -109,12 +109,12 @@ promptDeployTask.displayName = 'prompt:deploy'
  * Internal task for prompting whether to upload the plugin to WooCommerce
  */
 const promptWcUploadTask = (done) => {
-  const runWcDeployTask = () => gulp.series(wcDeployTask)(done);
-  
+  const runWcDeployTask = () => gulp.series(wcDeployTask)(done)
+
   // Skip the prompt if in non-interactive mode
   if (isNonInteractive()) {
     log.info('Running in non-interactive mode, automatically uploading to WooCommerce.com')
-    return runWcDeployTask();
+    return runWcDeployTask()
   }
 
   inquirer.prompt([{
@@ -123,7 +123,7 @@ const promptWcUploadTask = (done) => {
     message: 'Upload plugin to WooCommerce.com?'
   }]).then((answers) => {
     if (answers.upload_to_wc) {
-      runWcDeployTask();
+      runWcDeployTask()
     } else {
       log.error(chalk.red('Skipped uploading to WooCommerce.com'))
       done()
@@ -141,7 +141,7 @@ const promptTestedReleaseZipTask = (done) => {
     log.info('Running in non-interactive mode, skipping release zip testing confirmation')
     return done()
   }
-  
+
   inquirer.prompt([{
     type: 'confirm',
     name: 'tested_release_zip',
