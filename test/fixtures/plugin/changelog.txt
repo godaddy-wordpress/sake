@@ -1,0 +1,5 @@
+*** Sake Test Fixture Plugin Changelog ***
+
+2024.01.01 - version 1.0.0
+* Fix - Initial fixture release for sake's test suite
+
