@@ -97,6 +97,10 @@
     },
     "imagemin": {
       "file-type": "21.3.2"
-    }
+    },
+    "optimist": {
+      "minimist": "1.2.8"
+    },
+    "uuid": "14.0.0"
   }
 }
