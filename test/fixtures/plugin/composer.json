@@ -1,6 +1,6 @@
 {
   "name": "skyverge/sake-test-fixture",
   "require": {
-    "skyverge/wc-plugin-framework": "5.14.0"
+    "skyverge/wc-plugin-framework": "6.0.0"
   }
 }
