@@ -95,9 +95,9 @@
     "gulp-phplint": {
       "gulp-notify": "5.0.0"
     },
-    "uuid": "14.0.0",
     "optimist": {
       "minimist": "1.2.8"
-    }
+    },
+    "uuid": "14.0.0"
   }
 }
