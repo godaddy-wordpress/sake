@@ -87,5 +87,6 @@ bundleTask.displayName = 'bundle'
 export {
   bundleScriptsTask,
   bundleStylesTask,
-  bundleTask
+  bundleTask,
+  processBundle
 }

@@ -152,5 +152,6 @@ wcDeployTask.displayName = 'wc:deploy'
 export {
   wcValidateTask,
   wcUploadTask,
-  wcDeployTask
+  wcDeployTask,
+  formatError
 }
