@@ -107,6 +107,7 @@
     "optimist": {
       "minimist": "1.2.8"
     },
+    "semver-regex": "3.1.4",
     "tmp": "0.2.7",
     "uuid": "14.0.0"
   }
