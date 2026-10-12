@@ -17,6 +17,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "postinstall": "patch-package && node scripts/ensure-imagemin-binaries.js",
     "test": "SAKE_TEST_MODE=1 node --test 'test/**/*.test.js'",
     "test:watch": "SAKE_TEST_MODE=1 node --test --watch 'test/**/*.test.js'"
   },
@@ -90,6 +91,7 @@
   },
   "devDependencies": {
     "gulp-debug": "^3.2.0",
+    "patch-package": "^8.0.1",
     "standard": "^17.1.2"
   },
   "overrides": {
@@ -98,6 +100,7 @@
     },
     "cross-spawn": "6.0.6",
     "fast-xml-parser": "5.11.2",
+    "got": "11.8.5",
     "gulp-phplint": {
       "gulp-notify": "5.0.0"
     },
