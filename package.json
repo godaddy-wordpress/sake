@@ -101,6 +101,7 @@
     "gulp-phplint": {
       "gulp-notify": "5.0.0"
     },
+    "http-cache-semantics": "4.3.0",
     "imagemin": {
       "file-type": "21.3.2"
     },
