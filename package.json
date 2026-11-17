@@ -82,7 +82,7 @@
     "shelljs": "^0.8.5",
     "strip-ansi": "^7.1.0",
     "stylelint": "^17.1.0",
-    "stylelint-config-standard-scss": "^17.0.0",
+    "stylelint-config-standard-scss": "^18.0.0",
     "stylelint-scss": "^7.0.0",
     "underscore.string": "^3.3.4",
     "undertaker-forward-reference": "^1.0.2",
