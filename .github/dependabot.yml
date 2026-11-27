@@ -4,3 +4,19 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      eslint:
+        patterns:
+          - "*eslint*"
+      babel:
+        patterns:
+          - "*babel*"
+      postcss:
+        patterns:
+          - "*postcss*"
+          - "autoprefixer"
+          - "cssnano"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-patch"
